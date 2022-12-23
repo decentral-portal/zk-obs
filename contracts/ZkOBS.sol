@@ -13,6 +13,7 @@ import "hardhat/console.sol";
 /// @author zkManic
 contract ZkOBS is Ownable {
     event Register(address indexed sender, uint32 accountId, bytes20 l2Addr);
+    event Deposit(address indexed sender, uint32 accountId, uint16 tokenId, uint128 amount);
     event NewL1Request(
         address indexed sender,
         uint64 requestId,
@@ -23,12 +24,18 @@ contract ZkOBS is Ownable {
     mapping(address => uint32) public accountIdOf;
     mapping(uint64 => L1Request) public l1RequestQueue;
     uint32 public accountNum = 100;
+    uint16 public tokenNum;
     uint64 public firstL1RequestId;
     uint64 public pendingL1RequestNum;
 
     struct L1Request {
         bytes32 hashedPubData;
         Operations.OpType opType;
+    }
+
+    function addToken(address tokenAddr) external onlyOwner {
+        tokenIdOf[tokenAddr] = tokenNum;
+        ++tokenNum;
     }
 
     function deposit(bytes20 l2Addr, address tokenAddr, uint128 amount) external {
@@ -48,6 +55,34 @@ contract ZkOBS is Ownable {
         _deposit(msg.sender, tokenId, depositAmount);
     }
 
+    function checkRegisterL1Request(Operations.Register memory register, uint64 requestId)
+        public
+        view
+        returns (bool isExisted)
+    {
+        L1Request memory req = l1RequestQueue[requestId];
+        require(req.opType == Operations.OpType.REGISTER, "OpType not matched");
+        require(
+            Operations.checkRegisterInL1RequestQueue(register, req.hashedPubData),
+            "Register request not existed in L1 request queue"
+        );
+        return true;
+    }
+
+    function checkDepositL1Request(Operations.Deposit memory deposit, uint64 requestId)
+        public
+        view
+        returns (bool isExisted)
+    {
+         L1Request memory req = l1RequestQueue[requestId];
+        require(req.opType == Operations.OpType.DEPOSIT, "OpType not matched");
+        require(
+            Operations.checkDepositInL1RequestQueue(deposit, req.hashedPubData),
+            "Deposit request not existed in priority queue"
+        );
+        return true;
+    }
+
     function _register(address sender, bytes20 l2Addr) internal {
         uint32 accountId = accountNum;
         ++accountNum;
@@ -59,7 +94,13 @@ contract ZkOBS is Ownable {
 
     }
 
-    function _deposit(address sender, uint16 tokenId, uint128 amount) internal {}
+    function _deposit(address sender, uint16 tokenId, uint128 amount) internal {
+        uint32 accountId = accountIdOf[sender];
+        Operations.Deposit memory op = Operations.Deposit({ accountId: accountId, tokenId: tokenId, amount: amount });
+        bytes memory pubData = Operations.writeDepositPubData(op);
+        _addL1Request(sender, Operations.OpType.DEPOSIT, pubData);
+        emit Deposit(sender, accountId, tokenId, amount);
+    }
 
     function _addL1Request(address sender, Operations.OpType opType, bytes memory pubData) internal {
         uint64 nextL1RequestId = firstL1RequestId + pendingL1RequestNum;
