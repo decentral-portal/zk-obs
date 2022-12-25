@@ -29,7 +29,7 @@ function ReqIdxArg(i){
 }
 
 function ReqTypeCount(){
-    return 13;
+    return 12;
 }
 function ReqTypeNumUnknow(){
     return 0;
@@ -40,35 +40,32 @@ function ReqTypeNumRegister(){
 function ReqTypeNumDeposit(){
     return 2;
 }
-function ReqTypeNumTransfer(){
+function ReqTypeNumWithdraw(){
     return 3;
 }
-function ReqTypeNumWithdraw(){
+function ReqTypeNumSecondLimitOrder(){
     return 4;
 }
-function ReqTypeNumSecondLimitOrder(){
+function ReqTypeNumSecondLimitStart(){
     return 5;
 }
-function ReqTypeNumSecondLimitStart(){
+function ReqTypeNumSecondLimitExchange(){
     return 6;
 }
-function ReqTypeNumSecondLimitExchange(){
+function ReqTypeNumSecondLimitEnd(){
     return 7;
 }
-function ReqTypeNumSecondLimitEnd(){
+function ReqTypeNumSecondMarketOrder(){
     return 8;
 }
-function ReqTypeNumSecondMarketOrder(){
+function ReqTypeNumSecondMarketExchange(){
     return 9;
 }
-function ReqTypeNumSecondMarketExchange(){
+function ReqTypeNumSecondMarketEnd(){
     return 10;
 }
-function ReqTypeNumSecondMarketEnd(){
-    return 11;
-}
 function ReqTypeNumCancel(){
-    return 12;
+    return 11;
 }
 
 /* NullifierLeaf */
