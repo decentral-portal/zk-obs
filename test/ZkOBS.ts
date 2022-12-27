@@ -17,12 +17,18 @@ export async function deploy() {
   const zkUSDC: ERC20FreeMint = await ERC20FreeMint.connect(operator).deploy('ZK USDC', 'ZkUSDC', decimals);
   await zkUSDC.deployed();
 
+  const WETH = await ethers.getContractFactory('WETH9');
+  WETH.connect(operator);
+  const wETH = await WETH.deploy();
+  await wETH.deployed();
+
   const genesisStateRoot =
     '0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470';
   const ZkOBS = await ethers.getContractFactory('ZkOBS');
 
-  const zkOBS: ZkOBS = await ZkOBS.connect(operator).deploy();
+  const zkOBS: ZkOBS = await ZkOBS.connect(operator).deploy(wETH.address, genesisStateRoot);
   await zkOBS.deployed();
+  
 //   const verifierFactory = await ethers.getContractFactory('Verifier');
 //   verifierFactory.connect(operator);
 //   const verifier = await verifierFactory.deploy();
@@ -73,7 +79,7 @@ describe('Unit test of zkOBS', function () {
         await zkUSDC.connect(user).approve(zkOBS.address, amount);
         await zkOBS
           .connect(user)
-          .deposit(l2Addr, zkUSDC.address, amount);
+          .register(l2Addr, zkUSDC.address, amount);
   
         // check user balance
         const newBalance:BigNumber = await zkUSDC.balanceOf(zkOBS.address);
@@ -125,7 +131,7 @@ describe('Unit test of zkOBS', function () {
         await zkUSDC.connect(user).approve(zkOBS.address, amount);
         await zkOBS
           .connect(user)
-          .deposit(l2Addr, zkUSDC.address, amount);
+          .deposit(zkUSDC.address, amount);
   
         // check user balance
         const newBalance:BigNumber = await zkUSDC.balanceOf(zkOBS.address);

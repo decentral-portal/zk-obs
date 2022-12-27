@@ -20,9 +20,23 @@ contract ZkOBS is Ownable {
         Operations.OpType opType,
         bytes pubData
     );
+
+    struct StoredBlock {
+        uint32 blockNumber;
+        bytes32 stateRoot;
+        uint64 l1RequestNum;
+        bytes32 pendingRollupTxHash;
+        bytes32 commitment;
+        uint256 timestamp;
+    }
+
+    bytes32 internal constant EMPTY_STRING_KECCAK = 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470;
+    address public immutable wETHAddr;
+
     mapping(address => uint16) public tokenIdOf;
     mapping(address => uint32) public accountIdOf;
     mapping(uint64 => L1Request) public l1RequestQueue;
+    mapping(uint32 => bytes32) public storedBlockHashes;
     uint32 public accountNum = 100;
     uint16 public tokenNum;
     uint64 public firstL1RequestId;
@@ -33,12 +47,25 @@ contract ZkOBS is Ownable {
         Operations.OpType opType;
     }
 
+    constructor(address wETHAddr_, bytes32 genesisStateRoot) {
+        wETHAddr = wETHAddr_;
+        StoredBlock memory storedBlock = StoredBlock({
+            blockNumber: 0,
+            stateRoot: genesisStateRoot,
+            l1RequestNum: 0,
+            pendingRollupTxHash: EMPTY_STRING_KECCAK,
+            commitment: bytes32(0),
+            timestamp: 0
+        });
+        storedBlockHashes[0] = keccak256(abi.encode(storedBlock));
+    }
+
     function addToken(address tokenAddr) external onlyOwner {
         tokenIdOf[tokenAddr] = tokenNum;
         ++tokenNum;
     }
 
-    function deposit(bytes20 l2Addr, address tokenAddr, uint128 amount) external {
+    function register(bytes20 l2Addr, address tokenAddr, uint128 amount) external {
         uint16 tokenId = tokenIdOf[tokenAddr];
         IERC20 token = IERC20(tokenAddr);
         uint256 balanceBefore = token.balanceOf(address(this));
@@ -51,6 +78,21 @@ contract ZkOBS is Ownable {
         if (accountIdOf[msg.sender] == 0) {
             _register(msg.sender, l2Addr);
         }
+        // deposit
+        _deposit(msg.sender, tokenId, depositAmount);
+    }
+
+    function deposit(address tokenAddr, uint128 amount) external {
+        if(accountIdOf[msg.sender] == 0) {
+            revert("Account not registered");
+        }
+        uint16 tokenId = tokenIdOf[tokenAddr];
+        IERC20 token = IERC20(tokenAddr);
+        uint256 balanceBefore = token.balanceOf(address(this));
+        token.transferFrom(msg.sender, address(this), amount);
+        uint256 balanceAfter = token.balanceOf(address(this));
+        uint128 depositAmount = SafeCast.toUint128(balanceAfter - balanceBefore);
+        require(depositAmount == amount, "Deposit amount inconsistent");
         // deposit
         _deposit(msg.sender, tokenId, depositAmount);
     }
@@ -113,5 +155,3 @@ contract ZkOBS is Ownable {
         emit NewL1Request(sender, nextL1RequestId, opType, pubData);
     }
 }
-
-    

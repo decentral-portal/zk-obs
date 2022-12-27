@@ -1,23 +1,41 @@
-import { ethers } from "hardhat";
+import { ethers, upgrades } from 'hardhat';
+import { ERC20FreeMint, ZkOBS } from '../typechain-types';
 
 async function main() {
-  const currentTimestampInSeconds = Math.round(Date.now() / 1000);
-  const ONE_YEAR_IN_SECS = 365 * 24 * 60 * 60;
-  const unlockTime = currentTimestampInSeconds + ONE_YEAR_IN_SECS;
+  let initialData: any;
+  const [operator] = await ethers.getSigners();
 
-  const lockedAmount = ethers.utils.parseEther("1");
+  console.log(
+    'Deploying contracts with the account:',
+    await operator.getAddress(),
+  );
 
-  const Lock = await ethers.getContractFactory("Lock");
-  const lock = await Lock.deploy(unlockTime, { value: lockedAmount });
+  console.log('Account balance:', (await operator.getBalance()).toString());
 
-  await lock.deployed();
+  const WETH = await ethers.getContractFactory('WETH9');
+  WETH.connect(operator);
+  const wETH = await WETH.deploy();
+  await wETH.deployed();
 
-  console.log(`Lock with 1 ETH and unlock timestamp ${unlockTime} deployed to ${lock.address}`);
+  console.log('WETH address:', wETH.address);
+  
+  const ERC20FreeMint = await ethers.getContractFactory('ERC20FreeMint');
+  const usdcDecimals = '6';
+  const tsUSDC: ERC20FreeMint = await ERC20FreeMint.deploy('Zk-USDC', 'ZkUSDC', usdcDecimals);
+  await tsUSDC.deployed();
+  console.log('zkUSDC address:', tsUSDC.address);
+
+  const genesisStateRoot =
+    '0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470';
+  const ZkOBSFactory = await ethers.getContractFactory('ZkOBS');
+
+  const zkOBS: ZkOBS = await ZkOBSFactory.connect(operator).deploy(wETH.address, genesisStateRoot);
+  await zkOBS.deployed();
+  console.log('ZkOBS address:', zkOBS.address);
 }
 
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
 main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });
+

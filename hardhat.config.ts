@@ -4,7 +4,7 @@ import '@nomicfoundation/hardhat-toolbox';
 import '@nomiclabs/hardhat-ethers';
 import '@nomiclabs/hardhat-etherscan';
 import '@openzeppelin/hardhat-upgrades';
-import '@tenderly/hardhat-tenderly';
+// import '@tenderly/hardhat-tenderly';
 import '@typechain/hardhat';
 import 'hardhat-contract-sizer';
 import 'hardhat-docgen';
@@ -86,8 +86,7 @@ const config: HardhatUserConfig = {
     },
     goerli: {
       url: process.env.GOERLI_RPC_URL || '',
-      accounts:
-        process.env.GOERLI_KEY !== undefined ? [process.env.GOERLI_KEY] : [],
+      accounts:   [`0x${process.env.GOERLI_KEY}`],
     },
   },
   etherscan: {
