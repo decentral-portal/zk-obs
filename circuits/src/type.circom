@@ -129,10 +129,28 @@ function LenOfResponse(){
 }
 
 /* Bits */
-function BitsAmount(){
+function BitsReqType(){
     return 128;
 }
+function BitsL2Addr(){
+    return 128;
+}
+function BitsTokenAddr(){
+    return 128;
+}
+function BitsAmount(){
+    return 126;
+}
+function BitsNonce(){
+    return 32;
+}
+function BitsTsAddr(){
+    return 160;
+}
 function BitsTime(){
+    return 64;
+}
+function BitsPrice(){
     return 64;
 }
 function BitsInterest(){

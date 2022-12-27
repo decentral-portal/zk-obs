@@ -47,3 +47,10 @@ typechain-types
 cache
 artifacts
 
+# Circom
+/circuits/*.r1cs
+/circuits/circuit_js
+/circuits/*.sym
+/circuits/*.wtns
+/circuits/*.sh
+

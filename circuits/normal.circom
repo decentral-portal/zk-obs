@@ -12,6 +12,12 @@ include "./src/indexer.circom";
 include "./src/request.circom";
 include "./src/fp.circom";
 
+template AllocReqData(){
+    signal input reqData[LenOfRequest()];
+    var bits[LenOfRequest()] = [BitsReqType(), BitsL2Addr(), BitsTokenAddr(), BitsAmount(), BitsNonce(), BitsL2Addr(), BitsTsAddr(), BitsPrice(), BitsTokenAddr(), 32, 99];// 32 be bits_order_leaf_id; 99 be bits_epoch
+    for(var i = 0; i < LenOfRequest(); i++)
+        _ <== Num2Bits(bits[i])(i);
+}
 template Chunkify(){
     signal input reqData[LenOfRequest()];
     signal input resData[LenOfResponse()];
@@ -113,6 +119,9 @@ template DoRequest(){
     signal temp2[ReqTypeCount()][LenOfResponse()];
 
     slt === 1;
+
+    /* alloc reqData */
+    AllocReqData()(reqData);
 
     /* verify sig */
     EdDSAPoseidonVerifier()(
