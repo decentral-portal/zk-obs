@@ -578,7 +578,7 @@ template DoReqSecondLimitOrder(){
     channelIn === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
     signal leafId;
-    (_, leafId) <== IntDivide(25)(digest, (1 << 24)); //!! nullifier tree height;
+    (_, leafId) <== IntDivide(25)(digest, (1 << NullifierTreeHeight())); 
     signal epoch <== Mux(2)([epochFlow[0][0],epochFlow[1][0]], nullifierTreeId);
 
     /* enabled be a boolean */
@@ -747,7 +747,7 @@ template DoReqSecondLimitExchange(){
     var makerSellAmt = r_oriOrderLeaf[0][ReqIdxAmount()];
     var supBuyAmtMaker = r_oriOrderLeaf[0][ReqIdxArg(3)];
     var takerSellAmt = channelIn[ReqIdxAmount()];
-    (supBuyAmtTaker, _) <== IntDivide(BitsAmount())(takerSellAmt * makerSellAmt, supBuyAmtMaker);//!! bits_amount * 2 > 253
+    (supBuyAmtTaker, _) <== IntDivide(BitsAmount())(takerSellAmt * makerSellAmt, supBuyAmtMaker);
 
     signal temp[2] <== [channelIn[ReqIdxAmount()] * r_oriOrderLeaf[0][ReqIdxAmount()], channelIn[ReqIdxArg(3)] * r_oriOrderLeaf[0][ReqIdxArg(3)]];
     signal isMatched <== GreaterEqThan(BitsAmount())([temp[1] * enabled, temp[0] * enabled]);
@@ -1014,7 +1014,7 @@ template DoReqSecondMarketExchange(){
     var makerSellAmt = r_oriOrderLeaf[0][ReqIdxAmount()];
     var supBuyAmtMaker = r_oriOrderLeaf[0][ReqIdxArg(3)];
     var takerSellAmt = channelIn[ReqIdxAmount()];
-    (supBuyAmtTaker, _) <== IntDivide(BitsAmount())(takerSellAmt * makerSellAmt, supBuyAmtMaker);//!! bits_amount * 2 > 253
+    (supBuyAmtTaker, _) <== IntDivide(BitsAmount())(takerSellAmt * makerSellAmt, supBuyAmtMaker);
 
     signal matchedBuyAmt, matchedSellAmt;
 

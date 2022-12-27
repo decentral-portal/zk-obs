@@ -203,7 +203,7 @@ template CalcCommitment(){
         b2n_commitment.in[i] <== sha256.out[255 - i];
     commitment <== b2n_commitment.out;
 }
-template Normal(order_tree_height, acc_tree_height, token_tree_height, nullifier_tree_height){
+template Normal(){
     signal input orderRootFlow[NumOfReqs() + 1];
     signal input accountRootFlow[NumOfReqs() + 1];
     signal input nullifierRootFlow[2][NumOfReqs() + 1];
@@ -221,25 +221,25 @@ template Normal(order_tree_height, acc_tree_height, token_tree_height, nullifier
     signal input r_oriAccountLeaf[NumOfReqs()][MaxAccUnitsPerReq()][LenOfAL()];
     signal input r_newAccountLeaf[NumOfReqs()][MaxAccUnitsPerReq()][LenOfAL()];
     signal input r_accountRootFlow[NumOfReqs()][MaxAccUnitsPerReq()][2];
-    signal input r_accountMkPrf[NumOfReqs()][MaxAccUnitsPerReq()][acc_tree_height];
+    signal input r_accountMkPrf[NumOfReqs()][MaxAccUnitsPerReq()][AccTreeHeight()];
 
     signal input r_tokenLeafId[NumOfReqs()][MaxTokenUnitsPerReq()];
     signal input r_oriTokenLeaf[NumOfReqs()][MaxTokenUnitsPerReq()][LenOfTL()];
     signal input r_newTokenLeaf[NumOfReqs()][MaxTokenUnitsPerReq()][LenOfTL()];
     signal input r_tokenRootFlow[NumOfReqs()][MaxTokenUnitsPerReq()][2];
-    signal input r_tokenMkPrf[NumOfReqs()][MaxTokenUnitsPerReq()][token_tree_height];
+    signal input r_tokenMkPrf[NumOfReqs()][MaxTokenUnitsPerReq()][TokenTreeHeight()];
 
     signal input r_orderLeafId[NumOfReqs()][MaxOrderUnitsPerReq()];
     signal input r_oriOrderLeaf[NumOfReqs()][MaxOrderUnitsPerReq()][LenOfOL()];
     signal input r_newOrderLeaf[NumOfReqs()][MaxOrderUnitsPerReq()][LenOfOL()];
     signal input r_orderRootFlow[NumOfReqs()][MaxOrderUnitsPerReq()][2];
-    signal input r_orderMkPrf[NumOfReqs()][MaxOrderUnitsPerReq()][order_tree_height];
+    signal input r_orderMkPrf[NumOfReqs()][MaxOrderUnitsPerReq()][OrderTreeHeight()];
 
     signal input r_nullifierLeafId[NumOfReqs()][MaxNullifierUnitsPerReq()];
     signal input r_oriNullifierLeaf[NumOfReqs()][MaxNullifierUnitsPerReq()][LenOfNL()];
     signal input r_newNullifierLeaf[NumOfReqs()][MaxNullifierUnitsPerReq()][LenOfNL()];
     signal input r_nullifierRootFlow[NumOfReqs()][MaxNullifierUnitsPerReq()][2];
-    signal input r_nullifierMkPrf[NumOfReqs()][MaxNullifierUnitsPerReq()][nullifier_tree_height];
+    signal input r_nullifierMkPrf[NumOfReqs()][MaxNullifierUnitsPerReq()][NullifierTreeHeight()];
 
     signal input isCriticalChunk[NumOfChunks()];
     signal input r_chunks[NumOfReqs()][MaxChunksPerReq()];
@@ -298,13 +298,16 @@ template Normal(order_tree_height, acc_tree_height, token_tree_height, nullifier
     
     for(var i = 0; i < NumOfReqs(); i++)
         for(var j = 0; j < MaxOrderUnitsPerReq(); j++)
-            UpdateMKT(LenOfOL(), order_tree_height)(r_orderRootFlow[i][j][0], r_oriOrderLeaf[i][j], r_orderRootFlow[i][j][1], r_newOrderLeaf[i][j], r_orderLeafId[i][j], r_orderMkPrf[i][j]);
+            UpdateMKT(LenOfOL(), OrderTreeHeight())(r_orderRootFlow[i][j][0], r_oriOrderLeaf[i][j], r_orderRootFlow[i][j][1], r_newOrderLeaf[i][j], r_orderLeafId[i][j], r_orderMkPrf[i][j]);
     for(var i = 0; i < NumOfReqs(); i++)
         for(var j = 0; j < MaxAccUnitsPerReq(); j++)
-            UpdateMKT(LenOfAL(), acc_tree_height)(r_accountRootFlow[i][j][0], r_oriAccountLeaf[i][j], r_accountRootFlow[i][j][1], r_newAccountLeaf[i][j], r_accountLeafId[i][j], r_accountMkPrf[i][j]);
+            UpdateMKT(LenOfAL(), AccTreeHeight())(r_accountRootFlow[i][j][0], r_oriAccountLeaf[i][j], r_accountRootFlow[i][j][1], r_newAccountLeaf[i][j], r_accountLeafId[i][j], r_accountMkPrf[i][j]);
     for(var i = 0; i < NumOfReqs(); i++)
         for(var j = 0; j < MaxTokenUnitsPerReq(); j++)
-            UpdateMKT(LenOfTL(), token_tree_height)(r_tokenRootFlow[i][j][0], r_oriTokenLeaf[i][j], r_tokenRootFlow[i][j][1], r_newTokenLeaf[i][j], r_tokenLeafId[i][j], r_tokenMkPrf[i][j]);
+            UpdateMKT(LenOfTL(), TokenTreeHeight())(r_tokenRootFlow[i][j][0], r_oriTokenLeaf[i][j], r_tokenRootFlow[i][j][1], r_newTokenLeaf[i][j], r_tokenLeafId[i][j], r_tokenMkPrf[i][j]);
+    for(var i = 0; i < NumOfReqs(); i++)
+        for(var j = 0; j < MaxNullifierUnitsPerReq(); j++)
+            UpdateMKT(LenOfNL(), NullifierTreeHeight())(r_nullifierRootFlow[i][j][0], r_oriNullifierLeaf[i][j], r_nullifierRootFlow[i][j][1], r_newNullifierLeaf[i][j], r_nullifierLeafId[i][j], r_nullifierMkPrf[i][j]);
     
     
     //verify the remaining chunks are default

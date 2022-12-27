@@ -38,3 +38,16 @@ function NumOfChunks(){
 function NumOfOuts(){
     return (NumOfChunks() + 5) \ 6;
 }
+
+function OrderTreeHeight(){
+    return 3;
+}
+function AccTreeHeight(){
+    return 3;
+}
+function TokenTreeHeight(){
+    return 2;
+}
+function NullifierTreeHeight(){
+    return 2;
+}
