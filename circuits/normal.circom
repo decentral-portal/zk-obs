@@ -24,7 +24,7 @@ template Chunkify(){
     signal input r_chunks[MaxChunksPerReq()];
 
     signal Temp[4];
-    Temp[0] <== Mux(2)([reqData[ReqIdxL2AddrSigner()], reqData[ReqIdxArg(0)]], Mux(8)([1, 1, 1, 0, 1, 0, 0, 1],reqData[ReqIdxReqType()]));
+    Temp[0] <== Mux(3)([reqData[ReqIdxL2AddrSigner()], reqData[ReqIdxArg(0)], resData[0]], Mux(ReqTypeCount())([1, 1, 1, 0, 0, 2, 2, 2, 0, 2, 2, 2],reqData[ReqIdxReqType()]));
     Temp[1] <== Fix2Float()(reqData[ReqIdxAmount()]);
     Temp[2] <== Fix2Float()(resData[0]);
     Temp[3] <== Fix2Float()(resData[1]);
@@ -42,11 +42,12 @@ template Chunkify(){
         Temp[2] * (1 << (8 * 11)) + 
         reqData[ReqIdxArg(3)] * (1 << (8 * 9)) +
         Temp[3] * (1 << (8 * 4));
+    signal B_4 <== resData[1] * (1 << (8 * 13));
 
-    signal B <== Mux(5)([B_0, B_1, B_2, B_3, 0], Mux(8)([3, 0, 0, 2, 0, 1, 1, 1], reqData[ReqIdxReqType()]));
+    signal B <== Mux(6)([B_0, B_1, B_2, B_3, B_4, 0], Mux(ReqTypeCount())([5, 0, 0, 0, 1, 5, 4, 5, 1, 4, 5, 5], reqData[ReqIdxReqType()]));
 
     signal C_0 <== reqData[ReqIdxArg(1)];
-    signal C <== Mux(2)([C_0, 0], Mux(8)([1, 0, 1, 1, 1, 1, 1, 1], reqData[ReqIdxReqType()]));
+    signal C <== Mux(2)([C_0, 0], Mux(ReqTypeCount())([1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], reqData[ReqIdxReqType()]));
 
     signal n2B_AB[8 * 23] <== Num2Bits(8 * 23)(A * (1 << (8 * 16)) + B);
     signal n2B_C[8 * 20] <== Num2Bits(8 * 20)(C);
@@ -109,7 +110,7 @@ template DoRequest(){
     signal output channelOut[LenOfChannel()];
     signal resData[LenOfResponse()];
 
-    signal isPuesdoReq <== Mux(8)([1, 1, 1, 0, 0, 0, 0, 1],reqData[ReqIdxReqType()]);//to-do: extract as a func
+    signal isPuesdoReq <== Mux(ReqTypeCount())([1, 1, 1, 0, 0, 1, 1, 1, 0, 1, 1, 1],reqData[ReqIdxReqType()]);//to-do: extract as a func
 
     signal slt <== LessThan(4)([reqData[ReqIdxReqType()], ReqTypeCount()]);
 
@@ -281,15 +282,14 @@ template Normal(order_tree_height, acc_tree_height, token_tree_height, nullifier
         /* interface btwn do_req n mk_units  */
             //to-do: replace "MaxXxxxUnitsPerReq()" with log_2(MaxXxxxUnitsPerReq()).
             //to-do: optimaize the complexity of interface.
-        chunkCount[i]       <== Mux(8)([0, 9, 5, 5, 5, 3, 3, 3], reqData[i][ReqIdxReqType()]);//to-do: extract as a func
+        chunkCount[i]       <== Mux(ReqTypeCount())([0, 4, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1], reqData[i][ReqIdxReqType()]);//to-do: extract as a func
         if(i < NumOfReqs())
             chunkCounter[i + 1] <== chunkCounter[i] + chunkCount[i];
         for(var j = 0; j < MaxChunksPerReq(); j++){
             chunkMasks[i][j] <== LessThan(MaxChunksPerReq())([j, chunkCount[i]]);
             Indexer(NumOfChunks())(chunkMasks[i][j], r_chunks[i][j], chunkCounter[i] + j, o_chunks);
             if(j == 0)
-                Indexer(NumOfChunks())(chunkMasks[i][j], Mux(8)([0, 1, 1, 0, 1, 0, 0, 0], reqData[i][ReqIdxReqType()]), chunkCounter[i] + j
-                , isCriticalChunk);
+                Indexer(NumOfChunks())(chunkMasks[i][j], Mux(ReqTypeCount())([0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0], reqData[i][ReqIdxReqType()]), chunkCounter[i] + j, isCriticalChunk);
             else
                 Indexer(NumOfChunks())(chunkMasks[i][j], 0, chunkCounter[i] + j, isCriticalChunk);
         }

@@ -819,7 +819,7 @@ template DoReqSecondLimitExchange(){
         channelOut[i] <== 0;
 
     /* response */
-    resData <== [r_oriOrderLeaf[0][LenOfRequest()], supBuyAmtMaker];
+    resData <== [txId - r_oriOrderLeaf[0][LenOfRequest()], supBuyAmtMaker];
 }
 template DoReqSecondLimitEnd(){
     signal input enabled;
@@ -1083,7 +1083,7 @@ template DoReqSecondMarketExchange(){
         channelOut[i] <== 0;
 
     /* response */
-    resData <== [r_oriOrderLeaf[0][LenOfRequest()], supBuyAmtMaker];
+    resData <== [txId - r_oriOrderLeaf[0][LenOfRequest()], supBuyAmtMaker];
 }
 template DoReqSecondMarketEnd(){
     signal input enabled;
