@@ -74,14 +74,10 @@ template DoRequest(){
 
     signal input orderRootFlow[2];
     signal input accountRootFlow[2];
-    signal input nullifierRootFlow[2][2];
-    signal input epochFlow[2][2];
 
     signal input reqData[LenOfRequest()];
     signal input tsPubKey[2];
     signal input txId;
-    signal input nullifierTreeId;
-    signal input nullifierElemId;
     signal input sigR[2];
     signal input sigS;
 
@@ -99,11 +95,6 @@ template DoRequest(){
     signal input r_oriTokenLeaf[MaxTokenUnitsPerReq()][LenOfTL()];
     signal input r_newTokenLeaf[MaxTokenUnitsPerReq()][LenOfTL()];
     signal input r_tokenRootFlow[MaxTokenUnitsPerReq()][2];
-
-    signal input r_nullifierLeafId[MaxNullifierUnitsPerReq()];
-    signal input r_oriNullifierLeaf[MaxNullifierUnitsPerReq()][LenOfNL()];
-    signal input r_newNullifierLeaf[MaxNullifierUnitsPerReq()][LenOfNL()];
-    signal input r_nullifierRootFlow[MaxNullifierUnitsPerReq()][2];
     
     signal input r_chunks[MaxChunksPerReq()];
 
@@ -132,22 +123,19 @@ template DoRequest(){
     );
     reqData[ReqIdxL2AddrSigner()] === (0 - reqData[ReqIdxL2AddrSigner()]) * isPuesdoReq + reqData[ReqIdxL2AddrSigner()];
 
-    /*  */
-    nullifierTreeId * (1 - nullifierTreeId) === 0;
-
     /* dispatch */
-    (temp[0] , temp2[0] ) <== DoReqUnknow               ()(IsEqual()([reqData[ReqIdxReqType()], ReqTypeNumUnknow()              ]), channelIn, orderRootFlow, accountRootFlow, nullifierRootFlow, epochFlow, reqData, tsPubKey, txId, nullifierTreeId, nullifierElemId, r_orderLeafId, r_oriOrderLeaf, r_newOrderLeaf, r_orderRootFlow, r_accountLeafId, r_oriAccountLeaf, r_newAccountLeaf, r_accountRootFlow, r_tokenLeafId, r_oriTokenLeaf, r_newTokenLeaf, r_tokenRootFlow, r_nullifierLeafId, r_oriNullifierLeaf, r_newNullifierLeaf, r_nullifierRootFlow, digest);
-    (temp[1] , temp2[1] ) <== DoReqRegister             ()(IsEqual()([reqData[ReqIdxReqType()], ReqTypeNumRegister()            ]), channelIn, orderRootFlow, accountRootFlow, nullifierRootFlow, epochFlow, reqData, tsPubKey, txId, nullifierTreeId, nullifierElemId, r_orderLeafId, r_oriOrderLeaf, r_newOrderLeaf, r_orderRootFlow, r_accountLeafId, r_oriAccountLeaf, r_newAccountLeaf, r_accountRootFlow, r_tokenLeafId, r_oriTokenLeaf, r_newTokenLeaf, r_tokenRootFlow, r_nullifierLeafId, r_oriNullifierLeaf, r_newNullifierLeaf, r_nullifierRootFlow, digest);
-    (temp[2] , temp2[2] ) <== DoReqDeposit              ()(IsEqual()([reqData[ReqIdxReqType()], ReqTypeNumDeposit()             ]), channelIn, orderRootFlow, accountRootFlow, nullifierRootFlow, epochFlow, reqData, tsPubKey, txId, nullifierTreeId, nullifierElemId, r_orderLeafId, r_oriOrderLeaf, r_newOrderLeaf, r_orderRootFlow, r_accountLeafId, r_oriAccountLeaf, r_newAccountLeaf, r_accountRootFlow, r_tokenLeafId, r_oriTokenLeaf, r_newTokenLeaf, r_tokenRootFlow, r_nullifierLeafId, r_oriNullifierLeaf, r_newNullifierLeaf, r_nullifierRootFlow, digest);
-    (temp[3] , temp2[3] ) <== DoReqWithdraw             ()(IsEqual()([reqData[ReqIdxReqType()], ReqTypeNumWithdraw()            ]), channelIn, orderRootFlow, accountRootFlow, nullifierRootFlow, epochFlow, reqData, tsPubKey, txId, nullifierTreeId, nullifierElemId, r_orderLeafId, r_oriOrderLeaf, r_newOrderLeaf, r_orderRootFlow, r_accountLeafId, r_oriAccountLeaf, r_newAccountLeaf, r_accountRootFlow, r_tokenLeafId, r_oriTokenLeaf, r_newTokenLeaf, r_tokenRootFlow, r_nullifierLeafId, r_oriNullifierLeaf, r_newNullifierLeaf, r_nullifierRootFlow, digest);
-    (temp[4] , temp2[4] ) <== DoReqSecondLimitOrder     ()(IsEqual()([reqData[ReqIdxReqType()], ReqTypeNumSecondLimitOrder()    ]), channelIn, orderRootFlow, accountRootFlow, nullifierRootFlow, epochFlow, reqData, tsPubKey, txId, nullifierTreeId, nullifierElemId, r_orderLeafId, r_oriOrderLeaf, r_newOrderLeaf, r_orderRootFlow, r_accountLeafId, r_oriAccountLeaf, r_newAccountLeaf, r_accountRootFlow, r_tokenLeafId, r_oriTokenLeaf, r_newTokenLeaf, r_tokenRootFlow, r_nullifierLeafId, r_oriNullifierLeaf, r_newNullifierLeaf, r_nullifierRootFlow, digest);
-    (temp[5] , temp2[5] ) <== DoReqSecondLimitStart     ()(IsEqual()([reqData[ReqIdxReqType()], ReqTypeNumSecondLimitStart()    ]), channelIn, orderRootFlow, accountRootFlow, nullifierRootFlow, epochFlow, reqData, tsPubKey, txId, nullifierTreeId, nullifierElemId, r_orderLeafId, r_oriOrderLeaf, r_newOrderLeaf, r_orderRootFlow, r_accountLeafId, r_oriAccountLeaf, r_newAccountLeaf, r_accountRootFlow, r_tokenLeafId, r_oriTokenLeaf, r_newTokenLeaf, r_tokenRootFlow, r_nullifierLeafId, r_oriNullifierLeaf, r_newNullifierLeaf, r_nullifierRootFlow, digest);
-    (temp[6] , temp2[6] ) <== DoReqSecondLimitExchange  ()(IsEqual()([reqData[ReqIdxReqType()], ReqTypeNumSecondLimitExchange() ]), channelIn, orderRootFlow, accountRootFlow, nullifierRootFlow, epochFlow, reqData, tsPubKey, txId, nullifierTreeId, nullifierElemId, r_orderLeafId, r_oriOrderLeaf, r_newOrderLeaf, r_orderRootFlow, r_accountLeafId, r_oriAccountLeaf, r_newAccountLeaf, r_accountRootFlow, r_tokenLeafId, r_oriTokenLeaf, r_newTokenLeaf, r_tokenRootFlow, r_nullifierLeafId, r_oriNullifierLeaf, r_newNullifierLeaf, r_nullifierRootFlow, digest);
-    (temp[7] , temp2[7] ) <== DoReqSecondLimitEnd       ()(IsEqual()([reqData[ReqIdxReqType()], ReqTypeNumSecondLimitEnd()      ]), channelIn, orderRootFlow, accountRootFlow, nullifierRootFlow, epochFlow, reqData, tsPubKey, txId, nullifierTreeId, nullifierElemId, r_orderLeafId, r_oriOrderLeaf, r_newOrderLeaf, r_orderRootFlow, r_accountLeafId, r_oriAccountLeaf, r_newAccountLeaf, r_accountRootFlow, r_tokenLeafId, r_oriTokenLeaf, r_newTokenLeaf, r_tokenRootFlow, r_nullifierLeafId, r_oriNullifierLeaf, r_newNullifierLeaf, r_nullifierRootFlow, digest);
-    (temp[8] , temp2[8] ) <== DoReqSecondMarketOrder    ()(IsEqual()([reqData[ReqIdxReqType()], ReqTypeNumSecondMarketOrder()   ]), channelIn, orderRootFlow, accountRootFlow, nullifierRootFlow, epochFlow, reqData, tsPubKey, txId, nullifierTreeId, nullifierElemId, r_orderLeafId, r_oriOrderLeaf, r_newOrderLeaf, r_orderRootFlow, r_accountLeafId, r_oriAccountLeaf, r_newAccountLeaf, r_accountRootFlow, r_tokenLeafId, r_oriTokenLeaf, r_newTokenLeaf, r_tokenRootFlow, r_nullifierLeafId, r_oriNullifierLeaf, r_newNullifierLeaf, r_nullifierRootFlow, digest);
-    (temp[9] , temp2[9] ) <== DoReqSecondMarketExchange ()(IsEqual()([reqData[ReqIdxReqType()], ReqTypeNumSecondMarketExchange()]), channelIn, orderRootFlow, accountRootFlow, nullifierRootFlow, epochFlow, reqData, tsPubKey, txId, nullifierTreeId, nullifierElemId, r_orderLeafId, r_oriOrderLeaf, r_newOrderLeaf, r_orderRootFlow, r_accountLeafId, r_oriAccountLeaf, r_newAccountLeaf, r_accountRootFlow, r_tokenLeafId, r_oriTokenLeaf, r_newTokenLeaf, r_tokenRootFlow, r_nullifierLeafId, r_oriNullifierLeaf, r_newNullifierLeaf, r_nullifierRootFlow, digest);
-    (temp[10], temp2[10]) <== DoReqSecondMarketEnd      ()(IsEqual()([reqData[ReqIdxReqType()], ReqTypeNumSecondMarketEnd()     ]), channelIn, orderRootFlow, accountRootFlow, nullifierRootFlow, epochFlow, reqData, tsPubKey, txId, nullifierTreeId, nullifierElemId, r_orderLeafId, r_oriOrderLeaf, r_newOrderLeaf, r_orderRootFlow, r_accountLeafId, r_oriAccountLeaf, r_newAccountLeaf, r_accountRootFlow, r_tokenLeafId, r_oriTokenLeaf, r_newTokenLeaf, r_tokenRootFlow, r_nullifierLeafId, r_oriNullifierLeaf, r_newNullifierLeaf, r_nullifierRootFlow, digest);
-    (temp[11], temp2[11]) <== DoReqCancel               ()(IsEqual()([reqData[ReqIdxReqType()], ReqTypeNumCancel()              ]), channelIn, orderRootFlow, accountRootFlow, nullifierRootFlow, epochFlow, reqData, tsPubKey, txId, nullifierTreeId, nullifierElemId, r_orderLeafId, r_oriOrderLeaf, r_newOrderLeaf, r_orderRootFlow, r_accountLeafId, r_oriAccountLeaf, r_newAccountLeaf, r_accountRootFlow, r_tokenLeafId, r_oriTokenLeaf, r_newTokenLeaf, r_tokenRootFlow, r_nullifierLeafId, r_oriNullifierLeaf, r_newNullifierLeaf, r_nullifierRootFlow, digest);
+    (temp[0] , temp2[0] ) <== DoReqUnknow               ()(IsEqual()([reqData[ReqIdxReqType()], ReqTypeNumUnknow()              ]), channelIn, orderRootFlow, accountRootFlow, reqData, tsPubKey, txId, r_orderLeafId, r_oriOrderLeaf, r_newOrderLeaf, r_orderRootFlow, r_accountLeafId, r_oriAccountLeaf, r_newAccountLeaf, r_accountRootFlow, r_tokenLeafId, r_oriTokenLeaf, r_newTokenLeaf, r_tokenRootFlow, digest);
+    (temp[1] , temp2[1] ) <== DoReqRegister             ()(IsEqual()([reqData[ReqIdxReqType()], ReqTypeNumRegister()            ]), channelIn, orderRootFlow, accountRootFlow, reqData, tsPubKey, txId, r_orderLeafId, r_oriOrderLeaf, r_newOrderLeaf, r_orderRootFlow, r_accountLeafId, r_oriAccountLeaf, r_newAccountLeaf, r_accountRootFlow, r_tokenLeafId, r_oriTokenLeaf, r_newTokenLeaf, r_tokenRootFlow, digest);
+    (temp[2] , temp2[2] ) <== DoReqDeposit              ()(IsEqual()([reqData[ReqIdxReqType()], ReqTypeNumDeposit()             ]), channelIn, orderRootFlow, accountRootFlow, reqData, tsPubKey, txId, r_orderLeafId, r_oriOrderLeaf, r_newOrderLeaf, r_orderRootFlow, r_accountLeafId, r_oriAccountLeaf, r_newAccountLeaf, r_accountRootFlow, r_tokenLeafId, r_oriTokenLeaf, r_newTokenLeaf, r_tokenRootFlow, digest);
+    (temp[3] , temp2[3] ) <== DoReqWithdraw             ()(IsEqual()([reqData[ReqIdxReqType()], ReqTypeNumWithdraw()            ]), channelIn, orderRootFlow, accountRootFlow, reqData, tsPubKey, txId, r_orderLeafId, r_oriOrderLeaf, r_newOrderLeaf, r_orderRootFlow, r_accountLeafId, r_oriAccountLeaf, r_newAccountLeaf, r_accountRootFlow, r_tokenLeafId, r_oriTokenLeaf, r_newTokenLeaf, r_tokenRootFlow, digest);
+    (temp[4] , temp2[4] ) <== DoReqSecondLimitOrder     ()(IsEqual()([reqData[ReqIdxReqType()], ReqTypeNumSecondLimitOrder()    ]), channelIn, orderRootFlow, accountRootFlow, reqData, tsPubKey, txId, r_orderLeafId, r_oriOrderLeaf, r_newOrderLeaf, r_orderRootFlow, r_accountLeafId, r_oriAccountLeaf, r_newAccountLeaf, r_accountRootFlow, r_tokenLeafId, r_oriTokenLeaf, r_newTokenLeaf, r_tokenRootFlow, digest);
+    (temp[5] , temp2[5] ) <== DoReqSecondLimitStart     ()(IsEqual()([reqData[ReqIdxReqType()], ReqTypeNumSecondLimitStart()    ]), channelIn, orderRootFlow, accountRootFlow, reqData, tsPubKey, txId, r_orderLeafId, r_oriOrderLeaf, r_newOrderLeaf, r_orderRootFlow, r_accountLeafId, r_oriAccountLeaf, r_newAccountLeaf, r_accountRootFlow, r_tokenLeafId, r_oriTokenLeaf, r_newTokenLeaf, r_tokenRootFlow, digest);
+    (temp[6] , temp2[6] ) <== DoReqSecondLimitExchange  ()(IsEqual()([reqData[ReqIdxReqType()], ReqTypeNumSecondLimitExchange() ]), channelIn, orderRootFlow, accountRootFlow, reqData, tsPubKey, txId, r_orderLeafId, r_oriOrderLeaf, r_newOrderLeaf, r_orderRootFlow, r_accountLeafId, r_oriAccountLeaf, r_newAccountLeaf, r_accountRootFlow, r_tokenLeafId, r_oriTokenLeaf, r_newTokenLeaf, r_tokenRootFlow, digest);
+    (temp[7] , temp2[7] ) <== DoReqSecondLimitEnd       ()(IsEqual()([reqData[ReqIdxReqType()], ReqTypeNumSecondLimitEnd()      ]), channelIn, orderRootFlow, accountRootFlow, reqData, tsPubKey, txId, r_orderLeafId, r_oriOrderLeaf, r_newOrderLeaf, r_orderRootFlow, r_accountLeafId, r_oriAccountLeaf, r_newAccountLeaf, r_accountRootFlow, r_tokenLeafId, r_oriTokenLeaf, r_newTokenLeaf, r_tokenRootFlow, digest);
+    (temp[8] , temp2[8] ) <== DoReqSecondMarketOrder    ()(IsEqual()([reqData[ReqIdxReqType()], ReqTypeNumSecondMarketOrder()   ]), channelIn, orderRootFlow, accountRootFlow, reqData, tsPubKey, txId, r_orderLeafId, r_oriOrderLeaf, r_newOrderLeaf, r_orderRootFlow, r_accountLeafId, r_oriAccountLeaf, r_newAccountLeaf, r_accountRootFlow, r_tokenLeafId, r_oriTokenLeaf, r_newTokenLeaf, r_tokenRootFlow, digest);
+    (temp[9] , temp2[9] ) <== DoReqSecondMarketExchange ()(IsEqual()([reqData[ReqIdxReqType()], ReqTypeNumSecondMarketExchange()]), channelIn, orderRootFlow, accountRootFlow, reqData, tsPubKey, txId, r_orderLeafId, r_oriOrderLeaf, r_newOrderLeaf, r_orderRootFlow, r_accountLeafId, r_oriAccountLeaf, r_newAccountLeaf, r_accountRootFlow, r_tokenLeafId, r_oriTokenLeaf, r_newTokenLeaf, r_tokenRootFlow, digest);
+    (temp[10], temp2[10]) <== DoReqSecondMarketEnd      ()(IsEqual()([reqData[ReqIdxReqType()], ReqTypeNumSecondMarketEnd()     ]), channelIn, orderRootFlow, accountRootFlow, reqData, tsPubKey, txId, r_orderLeafId, r_oriOrderLeaf, r_newOrderLeaf, r_orderRootFlow, r_accountLeafId, r_oriAccountLeaf, r_newAccountLeaf, r_accountRootFlow, r_tokenLeafId, r_oriTokenLeaf, r_newTokenLeaf, r_tokenRootFlow, digest);
+    (temp[11], temp2[11]) <== DoReqCancel               ()(IsEqual()([reqData[ReqIdxReqType()], ReqTypeNumCancel()              ]), channelIn, orderRootFlow, accountRootFlow, reqData, tsPubKey, txId, r_orderLeafId, r_oriOrderLeaf, r_newOrderLeaf, r_orderRootFlow, r_accountLeafId, r_oriAccountLeaf, r_newAccountLeaf, r_accountRootFlow, r_tokenLeafId, r_oriTokenLeaf, r_newTokenLeaf, r_tokenRootFlow, digest);
     channelOut <== Multiplexer(LenOfChannel(), ReqTypeCount())(temp, reqData[ReqIdxReqType()]);
     resData <== Multiplexer(LenOfResponse(), ReqTypeCount())(temp2, reqData[ReqIdxReqType()]);
 
@@ -204,6 +192,9 @@ template CalcCommitment(){
     commitment <== b2n_commitment.out;
 }
 template Normal(){
+
+
+
     signal input orderRootFlow[NumOfReqs() + 1];
     signal input accountRootFlow[NumOfReqs() + 1];
     signal input nullifierRootFlow[2][NumOfReqs() + 1];
@@ -268,14 +259,14 @@ template Normal(){
         channelData[i + 1] <== DoRequest()(
             channelData[i],
             [orderRootFlow[i], orderRootFlow[i + 1]], 
-            [accountRootFlow[i], accountRootFlow[i + 1]], 
-            [[nullifierRootFlow[0][i], nullifierRootFlow[0][i + 1]], [nullifierRootFlow[1][i], nullifierRootFlow[1][i + 1]]], 
-            [[epochFlow[0][i], epochFlow[0][i + 1]], [epochFlow[1][i], epochFlow[1][i + 1]]], 
-            reqData[i], tsPubKey[i], txId[i], nullifierTreeId[i], nullifierElemId[i], sigR[i], sigS[i], 
+            [accountRootFlow[i], accountRootFlow[i + 1]],  
+            reqData[i], tsPubKey[i], txId[i],
+            
+            
+             sigR[i], sigS[i], 
             r_orderLeafId[i], r_oriOrderLeaf[i], r_newOrderLeaf[i], r_orderRootFlow[i], 
             r_accountLeafId[i], r_oriAccountLeaf[i], r_newAccountLeaf[i], r_accountRootFlow[i], 
             r_tokenLeafId[i], r_oriTokenLeaf[i], r_newTokenLeaf[i], r_tokenRootFlow[i], 
-            r_nullifierLeafId[i], r_oriNullifierLeaf[i], r_newNullifierLeaf[i], r_nullifierRootFlow[i], 
             r_chunks[i]
         );
         

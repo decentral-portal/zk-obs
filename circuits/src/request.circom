@@ -47,14 +47,10 @@ template DoReqUnknow(){
 
     signal input orderRootFlow[2];
     signal input accountRootFlow[2];
-    signal input nullifierRootFlow[2][2];
-    signal input epochFlow[2][2];
 
     signal input reqData[LenOfRequest()];
     signal input tsPubKey[2];
     signal input txId;
-    signal input nullifierTreeId;
-    signal input nullifierElemId;
 
     signal input r_orderLeafId[MaxOrderUnitsPerReq()];
     signal input r_oriOrderLeaf[MaxOrderUnitsPerReq()][LenOfOL()];
@@ -70,11 +66,6 @@ template DoReqUnknow(){
     signal input r_oriTokenLeaf[MaxTokenUnitsPerReq()][LenOfTL()];
     signal input r_newTokenLeaf[MaxTokenUnitsPerReq()][LenOfTL()];
     signal input r_tokenRootFlow[MaxTokenUnitsPerReq()][2];
-
-    signal input r_nullifierLeafId[MaxNullifierUnitsPerReq()];
-    signal input r_oriNullifierLeaf[MaxNullifierUnitsPerReq()][LenOfNL()];
-    signal input r_newNullifierLeaf[MaxNullifierUnitsPerReq()][LenOfNL()];
-    signal input r_nullifierRootFlow[MaxNullifierUnitsPerReq()][2];
     
     signal input digest;
 
@@ -89,67 +80,6 @@ template DoReqUnknow(){
     /* conn to the units*/
     ImplyEq()(enabled, orderRootFlow[0], orderRootFlow[1]);
     ImplyEq()(enabled, accountRootFlow[0], accountRootFlow[1]);
-    ImplyEq()(enabled, nullifierRootFlow[0][0], nullifierRootFlow[0][1]);
-    ImplyEq()(enabled, nullifierRootFlow[1][0], nullifierRootFlow[1][1]);
-    ImplyEq()(enabled, epochFlow[0][0], epochFlow[0][1]);
-    ImplyEq()(enabled, epochFlow[1][0], epochFlow[1][1]);
-}
-template DoReqSetEpoch(){
-    signal input enabled;
-
-    signal input channelIn[LenOfChannel()];
-    
-    signal input orderRootFlow[2];
-    signal input accountRootFlow[2];
-    signal input nullifierRootFlow[2][2];
-    signal input epochFlow[2][2];
-
-    signal input reqData[LenOfRequest()];
-    signal input tsPubKey[2];
-    signal input txId;
-    signal input nullifierTreeId;
-    signal input nullifierElemId;
-
-    signal input r_orderLeafId[MaxOrderUnitsPerReq()];
-    signal input r_oriOrderLeaf[MaxOrderUnitsPerReq()][LenOfOL()];
-    signal input r_newOrderLeaf[MaxOrderUnitsPerReq()][LenOfOL()];
-    signal input r_orderRootFlow[MaxOrderUnitsPerReq()][2];
-
-    signal input r_accountLeafId[MaxAccUnitsPerReq()];
-    signal input r_oriAccountLeaf[MaxAccUnitsPerReq()][LenOfAL()];
-    signal input r_newAccountLeaf[MaxAccUnitsPerReq()][LenOfAL()];
-    signal input r_accountRootFlow[MaxAccUnitsPerReq()][2];
-
-    signal input r_tokenLeafId[MaxTokenUnitsPerReq()];
-    signal input r_oriTokenLeaf[MaxTokenUnitsPerReq()][LenOfTL()];
-    signal input r_newTokenLeaf[MaxTokenUnitsPerReq()][LenOfTL()];
-    signal input r_tokenRootFlow[MaxTokenUnitsPerReq()][2];
-
-    signal input r_nullifierLeafId[MaxNullifierUnitsPerReq()];
-    signal input r_oriNullifierLeaf[MaxNullifierUnitsPerReq()][LenOfNL()];
-    signal input r_newNullifierLeaf[MaxNullifierUnitsPerReq()][LenOfNL()];
-    signal input r_nullifierRootFlow[MaxNullifierUnitsPerReq()][2];
-    
-    signal input digest;
-
-    signal output channelOut[LenOfChannel()] <== [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-    signal output resData[LenOfResponse()] <== [0, 0];
-    channelIn === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-
-    /* enabled be a boolean */
-    enabled * (enabled - 1) === 0;
-    //to-do: increase epoch?
-    // verify slt the other epoch
-    // +=2
-
-    /* conn to the units*/
-    ImplyEq()(enabled, orderRootFlow[0], orderRootFlow[1]);
-    ImplyEq()(enabled, accountRootFlow[0], accountRootFlow[1]);
-    ImplyEq()(enabled, nullifierRootFlow[0][0], nullifierRootFlow[0][1]);
-    ImplyEq()(enabled, nullifierRootFlow[1][0], nullifierRootFlow[1][1]);
-    ImplyEq()(enabled * (1 - reqData[ReqIdxArg(0)]), epochFlow[0][0], epochFlow[0][1]);
-    ImplyEq()(enabled * (1 - reqData[ReqIdxArg(0)]), epochFlow[1][0], epochFlow[1][1]);
-    ImplyEq()(enabled, Mux(2)([epochFlow[0][1], epochFlow[1][1]], reqData[ReqIdxArg(0)]), reqData[ReqIdxArg(1)]);
 }
 template DoReqRegister(){
     /* reqData[ReqIdxArg(1)] := tsAddr */
@@ -159,14 +89,10 @@ template DoReqRegister(){
     
     signal input orderRootFlow[2];
     signal input accountRootFlow[2];
-    signal input nullifierRootFlow[2][2];
-    signal input epochFlow[2][2];
 
     signal input reqData[LenOfRequest()];
     signal input tsPubKey[2];
     signal input txId;
-    signal input nullifierTreeId;
-    signal input nullifierElemId;
 
     signal input r_orderLeafId[MaxOrderUnitsPerReq()];
     signal input r_oriOrderLeaf[MaxOrderUnitsPerReq()][LenOfOL()];
@@ -182,11 +108,6 @@ template DoReqRegister(){
     signal input r_oriTokenLeaf[MaxTokenUnitsPerReq()][LenOfTL()];
     signal input r_newTokenLeaf[MaxTokenUnitsPerReq()][LenOfTL()];
     signal input r_tokenRootFlow[MaxTokenUnitsPerReq()][2];
-
-    signal input r_nullifierLeafId[MaxNullifierUnitsPerReq()];
-    signal input r_oriNullifierLeaf[MaxNullifierUnitsPerReq()][LenOfNL()];
-    signal input r_newNullifierLeaf[MaxNullifierUnitsPerReq()][LenOfNL()];
-    signal input r_nullifierRootFlow[MaxNullifierUnitsPerReq()][2];
     
     signal input digest;
 
@@ -208,12 +129,6 @@ template DoReqRegister(){
     ImplyEq()(enabled, r_tokenRootFlow[0][0], r_oriAccountLeaf[0][ALIdxTokenRoot()]);
     ImplyEq()(enabled, r_tokenRootFlow[0][1], r_newAccountLeaf[0][ALIdxTokenRoot()]);
     ImplyEq()(enabled, r_tokenLeafId[0], reqData[ReqIdxL2TokenAddr()]);
-
-    ImplyEq()(enabled, nullifierRootFlow[0][0], nullifierRootFlow[0][1]);
-    ImplyEq()(enabled, nullifierRootFlow[1][0], nullifierRootFlow[1][1]);
-
-    ImplyEq()(enabled, epochFlow[0][0], epochFlow[0][1]);
-    ImplyEq()(enabled, epochFlow[1][0], epochFlow[1][1]);
 
     /* legality */
     //Verified by contract. !!
@@ -232,14 +147,10 @@ template DoReqDeposit(){
     
     signal input orderRootFlow[2];
     signal input accountRootFlow[2];
-    signal input nullifierRootFlow[2][2];
-    signal input epochFlow[2][2];
 
     signal input reqData[LenOfRequest()];
     signal input tsPubKey[2];
     signal input txId;
-    signal input nullifierTreeId;
-    signal input nullifierElemId;
 
     signal input r_orderLeafId[MaxOrderUnitsPerReq()];
     signal input r_oriOrderLeaf[MaxOrderUnitsPerReq()][LenOfOL()];
@@ -255,11 +166,6 @@ template DoReqDeposit(){
     signal input r_oriTokenLeaf[MaxTokenUnitsPerReq()][LenOfTL()];
     signal input r_newTokenLeaf[MaxTokenUnitsPerReq()][LenOfTL()];
     signal input r_tokenRootFlow[MaxTokenUnitsPerReq()][2];
-
-    signal input r_nullifierLeafId[MaxNullifierUnitsPerReq()];
-    signal input r_oriNullifierLeaf[MaxNullifierUnitsPerReq()][LenOfNL()];
-    signal input r_newNullifierLeaf[MaxNullifierUnitsPerReq()][LenOfNL()];
-    signal input r_nullifierRootFlow[MaxNullifierUnitsPerReq()][2];
     
     signal input digest;
 
@@ -282,12 +188,6 @@ template DoReqDeposit(){
     ImplyEq()(enabled, r_tokenRootFlow[0][1], r_newAccountLeaf[0][ALIdxTokenRoot()]);
     ImplyEq()(enabled, r_tokenLeafId[0], reqData[ReqIdxL2TokenAddr()]);
 
-    ImplyEq()(enabled, nullifierRootFlow[0][0], nullifierRootFlow[0][1]);
-    ImplyEq()(enabled, nullifierRootFlow[1][0], nullifierRootFlow[1][1]);
-    
-    ImplyEq()(enabled, epochFlow[0][0], epochFlow[0][1]);
-    ImplyEq()(enabled, epochFlow[1][0], epochFlow[1][1]);
-
     /* legality */
     //Verified by contract. !!
 
@@ -298,93 +198,6 @@ template DoReqDeposit(){
     ImplyEq()(enabled, r_newTokenLeaf[0][TLIdxAvlAmt()], r_oriTokenLeaf[0][TLIdxAvlAmt()] + reqData[ReqIdxAmount()]); 
     ImplyEq()(enabled, r_newTokenLeaf[0][TLIdxLockedAmt()], r_oriTokenLeaf[0][TLIdxLockedAmt()]);
 }
-template DoReqTransfer(){
-    signal input enabled;
-
-    signal input channelIn[LenOfChannel()];
-    
-    signal input orderRootFlow[2];
-    signal input accountRootFlow[2];
-    signal input nullifierRootFlow[2][2];
-    signal input epochFlow[2][2];
-
-    signal input reqData[LenOfRequest()];
-    signal input tsPubKey[2];
-    signal input txId;
-    signal input nullifierTreeId;
-    signal input nullifierElemId;
-
-    signal input r_orderLeafId[MaxOrderUnitsPerReq()];
-    signal input r_oriOrderLeaf[MaxOrderUnitsPerReq()][LenOfOL()];
-    signal input r_newOrderLeaf[MaxOrderUnitsPerReq()][LenOfOL()];
-    signal input r_orderRootFlow[MaxOrderUnitsPerReq()][2];
-
-    signal input r_accountLeafId[MaxAccUnitsPerReq()];
-    signal input r_oriAccountLeaf[MaxAccUnitsPerReq()][LenOfAL()];
-    signal input r_newAccountLeaf[MaxAccUnitsPerReq()][LenOfAL()];
-    signal input r_accountRootFlow[MaxAccUnitsPerReq()][2];
-
-    signal input r_tokenLeafId[MaxTokenUnitsPerReq()];
-    signal input r_oriTokenLeaf[MaxTokenUnitsPerReq()][LenOfTL()];
-    signal input r_newTokenLeaf[MaxTokenUnitsPerReq()][LenOfTL()];
-    signal input r_tokenRootFlow[MaxTokenUnitsPerReq()][2];
-
-    signal input r_nullifierLeafId[MaxNullifierUnitsPerReq()];
-    signal input r_oriNullifierLeaf[MaxNullifierUnitsPerReq()][LenOfNL()];
-    signal input r_newNullifierLeaf[MaxNullifierUnitsPerReq()][LenOfNL()];
-    signal input r_nullifierRootFlow[MaxNullifierUnitsPerReq()][2];
-    
-    signal input digest;
-
-    signal output channelOut[LenOfChannel()] <== [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-    signal output resData[LenOfResponse()] <== [0, 0];
-    channelIn === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-
-    /* enabled be a boolean */
-    enabled * (enabled - 1) === 0;
-
-    /* conn to the units*/
-    ImplyEq()(enabled, orderRootFlow[0], orderRootFlow[1]);
-
-    ImplyEq()(enabled, r_accountRootFlow[0][0], accountRootFlow[0]);
-    ImplyEq()(enabled, r_accountRootFlow[0][1], r_accountRootFlow[1][0]);
-    ImplyEq()(enabled, r_accountRootFlow[1][1], accountRootFlow[1]);
-
-    ImplyEq()(enabled, r_accountLeafId[0], reqData[ReqIdxL2AddrSigner()]);
-    ImplyEq()(enabled, r_accountLeafId[1], reqData[ReqIdxArg(0)]);
-
-    ImplyEq()(enabled, r_tokenRootFlow[0][0], r_oriAccountLeaf[0][ALIdxTokenRoot()]);
-    ImplyEq()(enabled, r_tokenRootFlow[0][1], r_newAccountLeaf[0][ALIdxTokenRoot()]);
-    ImplyEq()(enabled, r_tokenLeafId[0], reqData[ReqIdxL2TokenAddr()]);
-
-    ImplyEq()(enabled, r_tokenRootFlow[1][0], r_oriAccountLeaf[1][ALIdxTokenRoot()]);
-    ImplyEq()(enabled, r_tokenRootFlow[1][1], r_newAccountLeaf[1][ALIdxTokenRoot()]);
-    ImplyEq()(enabled, r_tokenLeafId[1], reqData[ReqIdxL2TokenAddr()]);
-
-    ImplyEq()(enabled, nullifierRootFlow[0][0], nullifierRootFlow[0][1]);
-    ImplyEq()(enabled, nullifierRootFlow[1][0], nullifierRootFlow[1][1]);
-    
-    ImplyEq()(enabled, epochFlow[0][0], epochFlow[0][1]);
-    ImplyEq()(enabled, epochFlow[1][0], epochFlow[1][1]);
-
-    /* legality */
-    ImplyEq()(enabled, r_oriAccountLeaf[0][ALIdxTsAddr()], TsPubKey2TsAddr()(tsPubKey));
-    ImplyEq()(enabled, r_oriAccountLeaf[0][ALIdxNonce()], reqData[ReqIdxNonce()]);
-    ImplyEq()(enabled, LessThan(BitsAmount())([reqData[ReqIdxAmount()] + (1 << (BitsAmount() - 1)), r_oriTokenLeaf[0][TLIdxAvlAmt()] + (1 << (BitsAmount() - 1))]), 1);  
-
-    /* correctness */
-    ImplyEq()(enabled, r_newAccountLeaf[0][ALIdxTsAddr()], r_oriAccountLeaf[0][ALIdxTsAddr()]);
-    ImplyEq()(enabled, r_newAccountLeaf[0][ALIdxNonce()], r_oriAccountLeaf[0][ALIdxNonce()] + 1);
-    
-    ImplyEq()(enabled, r_newTokenLeaf[0][TLIdxAvlAmt()], r_oriTokenLeaf[0][TLIdxAvlAmt()] - reqData[ReqIdxAmount()]); 
-    ImplyEq()(enabled, r_newTokenLeaf[0][TLIdxLockedAmt()], r_oriTokenLeaf[0][TLIdxLockedAmt()]);
-    
-    ImplyEq()(enabled, r_newAccountLeaf[1][ALIdxTsAddr()], r_oriAccountLeaf[1][ALIdxTsAddr()]);
-    ImplyEq()(enabled, r_newAccountLeaf[1][ALIdxNonce()], r_oriAccountLeaf[1][ALIdxNonce()]);
-    
-    ImplyEq()(enabled, r_newTokenLeaf[1][TLIdxAvlAmt()], r_oriTokenLeaf[1][TLIdxAvlAmt()] + reqData[ReqIdxAmount()]); 
-    ImplyEq()(enabled, r_newTokenLeaf[1][TLIdxLockedAmt()], r_oriTokenLeaf[1][TLIdxLockedAmt()]);
-}
 template DoReqWithdraw(){
     signal input enabled;
 
@@ -392,14 +205,10 @@ template DoReqWithdraw(){
     
     signal input orderRootFlow[2];
     signal input accountRootFlow[2];
-    signal input nullifierRootFlow[2][2];
-    signal input epochFlow[2][2];
 
     signal input reqData[LenOfRequest()];
     signal input tsPubKey[2];
     signal input txId;
-    signal input nullifierTreeId;
-    signal input nullifierElemId;
 
     signal input r_orderLeafId[MaxOrderUnitsPerReq()];
     signal input r_oriOrderLeaf[MaxOrderUnitsPerReq()][LenOfOL()];
@@ -415,11 +224,6 @@ template DoReqWithdraw(){
     signal input r_oriTokenLeaf[MaxTokenUnitsPerReq()][LenOfTL()];
     signal input r_newTokenLeaf[MaxTokenUnitsPerReq()][LenOfTL()];
     signal input r_tokenRootFlow[MaxTokenUnitsPerReq()][2];
-
-    signal input r_nullifierLeafId[MaxNullifierUnitsPerReq()];
-    signal input r_oriNullifierLeaf[MaxNullifierUnitsPerReq()][LenOfNL()];
-    signal input r_newNullifierLeaf[MaxNullifierUnitsPerReq()][LenOfNL()];
-    signal input r_nullifierRootFlow[MaxNullifierUnitsPerReq()][2];
     
     signal input digest;
 
@@ -440,12 +244,6 @@ template DoReqWithdraw(){
     ImplyEq()(enabled, r_tokenRootFlow[0][0], r_oriAccountLeaf[0][ALIdxTokenRoot()]);
     ImplyEq()(enabled, r_tokenRootFlow[0][1], r_newAccountLeaf[0][ALIdxTokenRoot()]);
     ImplyEq()(enabled, r_tokenLeafId[0], reqData[ReqIdxL2TokenAddr()]);
-
-    ImplyEq()(enabled, nullifierRootFlow[0][0], nullifierRootFlow[0][1]);
-    ImplyEq()(enabled, nullifierRootFlow[1][0], nullifierRootFlow[1][1]);
-    
-    ImplyEq()(enabled, epochFlow[0][0], epochFlow[0][1]);
-    ImplyEq()(enabled, epochFlow[1][0], epochFlow[1][1]);
 
     /* legality */
     ImplyEq()(enabled, r_oriAccountLeaf[0][ALIdxTsAddr()], TsPubKey2TsAddr()(tsPubKey));
@@ -466,14 +264,10 @@ template DoReqCancel(){
     
     signal input orderRootFlow[2];
     signal input accountRootFlow[2];
-    signal input nullifierRootFlow[2][2];
-    signal input epochFlow[2][2];
 
     signal input reqData[LenOfRequest()];
     signal input tsPubKey[2];
     signal input txId;
-    signal input nullifierTreeId;
-    signal input nullifierElemId;
 
     signal input r_orderLeafId[MaxOrderUnitsPerReq()];
     signal input r_oriOrderLeaf[MaxOrderUnitsPerReq()][LenOfOL()];
@@ -489,11 +283,6 @@ template DoReqCancel(){
     signal input r_oriTokenLeaf[MaxTokenUnitsPerReq()][LenOfTL()];
     signal input r_newTokenLeaf[MaxTokenUnitsPerReq()][LenOfTL()];
     signal input r_tokenRootFlow[MaxTokenUnitsPerReq()][2];
-
-    signal input r_nullifierLeafId[MaxNullifierUnitsPerReq()];
-    signal input r_oriNullifierLeaf[MaxNullifierUnitsPerReq()][LenOfNL()];
-    signal input r_newNullifierLeaf[MaxNullifierUnitsPerReq()][LenOfNL()];
-    signal input r_nullifierRootFlow[MaxNullifierUnitsPerReq()][2];
     
     signal input digest;
 
@@ -517,12 +306,6 @@ template DoReqCancel(){
     ImplyEq()(enabled, r_tokenRootFlow[0][1], r_newAccountLeaf[0][ALIdxTokenRoot()]);
     ImplyEq()(enabled, r_tokenLeafId[0], r_oriOrderLeaf[0][OLIdxL2TokenAddr()]);
 
-    ImplyEq()(enabled, nullifierRootFlow[0][0], nullifierRootFlow[0][1]);
-    ImplyEq()(enabled, nullifierRootFlow[1][0], nullifierRootFlow[1][1]);
-    
-    ImplyEq()(enabled, epochFlow[0][0], epochFlow[0][1]);
-    ImplyEq()(enabled, epochFlow[1][0], epochFlow[1][1]);
-
     /* legality */
     
     /* correctness */
@@ -542,14 +325,10 @@ template DoReqSecondLimitOrder(){
     
     signal input orderRootFlow[2];
     signal input accountRootFlow[2];
-    signal input nullifierRootFlow[2][2];
-    signal input epochFlow[2][2];
 
     signal input reqData[LenOfRequest()];
     signal input tsPubKey[2];
     signal input txId;
-    signal input nullifierTreeId;
-    signal input nullifierElemId;
 
     signal input r_orderLeafId[MaxOrderUnitsPerReq()];
     signal input r_oriOrderLeaf[MaxOrderUnitsPerReq()][LenOfOL()];
@@ -565,11 +344,6 @@ template DoReqSecondLimitOrder(){
     signal input r_oriTokenLeaf[MaxTokenUnitsPerReq()][LenOfTL()];
     signal input r_newTokenLeaf[MaxTokenUnitsPerReq()][LenOfTL()];
     signal input r_tokenRootFlow[MaxTokenUnitsPerReq()][2];
-
-    signal input r_nullifierLeafId[MaxNullifierUnitsPerReq()];
-    signal input r_oriNullifierLeaf[MaxNullifierUnitsPerReq()][LenOfNL()];
-    signal input r_newNullifierLeaf[MaxNullifierUnitsPerReq()][LenOfNL()];
-    signal input r_nullifierRootFlow[MaxNullifierUnitsPerReq()][2];
     
     signal input digest;
 
@@ -579,7 +353,6 @@ template DoReqSecondLimitOrder(){
 
     signal leafId;
     (_, leafId) <== IntDivide(25)(digest, (1 << NullifierTreeHeight())); 
-    signal epoch <== Mux(2)([epochFlow[0][0],epochFlow[1][0]], nullifierTreeId);
 
     /* enabled be a boolean */
     enabled * (enabled - 1) === 0;
@@ -596,25 +369,12 @@ template DoReqSecondLimitOrder(){
     ImplyEq()(enabled, r_tokenRootFlow[0][1], r_newAccountLeaf[0][ALIdxTokenRoot()]);
     ImplyEq()(enabled, r_tokenLeafId[0], reqData[ReqIdxL2TokenAddr()]);
 
-    ImplyEq()(enabled * (1 - nullifierTreeId), nullifierRootFlow[0][0], nullifierRootFlow[0][1]);
-    ImplyEq()(enabled * (1 - nullifierTreeId), nullifierRootFlow[1][0], nullifierRootFlow[1][1]);
-    ImplyEq()(enabled, r_nullifierRootFlow[0][0], Mux(2)([nullifierRootFlow[0][0], nullifierRootFlow[1][0]], nullifierTreeId));
-    ImplyEq()(enabled, r_nullifierRootFlow[0][1], Mux(2)([nullifierRootFlow[0][1], nullifierRootFlow[1][1]], nullifierTreeId));
-    ImplyEq()(enabled, r_nullifierLeafId[0], leafId);
-    
-    ImplyEq()(enabled, epochFlow[0][0], epochFlow[0][1]);
-    ImplyEq()(enabled, epochFlow[1][0], epochFlow[1][1]);
-
     /* legality */
     ImplyEq()(enabled, r_oriAccountLeaf[0][ALIdxTsAddr()], TsPubKey2TsAddr()(tsPubKey));
     ImplyEq()(enabled, r_oriOrderLeaf[0][OLIdxReqType()], ReqTypeNumUnknow());
-    ImplyEq()(enabled, r_oriAccountLeaf[0][ALIdxNonce()], reqData[ReqIdxNonce()]);
+    ImplyEq()(enabled, r_oriAccountLeaf[0][ALIdxNonce()], reqData[ReqIdxNonce()] + 1);
     ImplyEq()(enabled, LessThan(BitsAmount())([reqData[ReqIdxAmount()] + (1 << (BitsAmount() - 1)), r_oriTokenLeaf[0][TLIdxAvlAmt()] + (1 << (BitsAmount() - 1))]), 1); 
-    ImplyEq()(enabled, epoch, reqData[ReqIdxArg(5)]);
-    for(var i = 0; i < LenOfNL(); i++)
-        ImplyEq()(enabled, IsEqual()([r_oriNullifierLeaf[0][i], digest]), 0);
-    ImplyEq()(enabled, Mux(LenOfNL())(r_oriNullifierLeaf[0], nullifierElemId), 0);
-
+    
     /* correctness */
     for(var i = 0; i < LenOfRequest(); i++)
         ImplyEq()(enabled, r_newOrderLeaf[0][i], reqData[i]);
@@ -626,8 +386,6 @@ template DoReqSecondLimitOrder(){
     ImplyEq()(enabled, r_newTokenLeaf[0][TLIdxAvlAmt()], r_oriTokenLeaf[0][TLIdxAvlAmt()] - reqData[ReqIdxAmount()]); 
     ImplyEq()(enabled, r_newTokenLeaf[0][TLIdxLockedAmt()], r_oriTokenLeaf[0][TLIdxLockedAmt()] + reqData[ReqIdxAmount()]); 
 
-    for(var i = 0; i < LenOfNL(); i++)
-        ImplyEq()(enabled, r_newNullifierLeaf[0][i], Mux(2)([r_oriNullifierLeaf[0][i], digest],IsEqual()([i, nullifierElemId])));
 }
 template DoReqSecondLimitStart(){
     signal input enabled;
@@ -636,14 +394,10 @@ template DoReqSecondLimitStart(){
     
     signal input orderRootFlow[2];
     signal input accountRootFlow[2];
-    signal input nullifierRootFlow[2][2];
-    signal input epochFlow[2][2];
 
     signal input reqData[LenOfRequest()];
     signal input tsPubKey[2];
     signal input txId;
-    signal input nullifierTreeId;
-    signal input nullifierElemId;
 
     signal input r_orderLeafId[MaxOrderUnitsPerReq()];
     signal input r_oriOrderLeaf[MaxOrderUnitsPerReq()][LenOfOL()];
@@ -659,11 +413,6 @@ template DoReqSecondLimitStart(){
     signal input r_oriTokenLeaf[MaxTokenUnitsPerReq()][LenOfTL()];
     signal input r_newTokenLeaf[MaxTokenUnitsPerReq()][LenOfTL()];
     signal input r_tokenRootFlow[MaxTokenUnitsPerReq()][2];
-
-    signal input r_nullifierLeafId[MaxNullifierUnitsPerReq()];
-    signal input r_oriNullifierLeaf[MaxNullifierUnitsPerReq()][LenOfNL()];
-    signal input r_newNullifierLeaf[MaxNullifierUnitsPerReq()][LenOfNL()];
-    signal input r_nullifierRootFlow[MaxNullifierUnitsPerReq()][2];
     
     signal input digest;
 
@@ -680,12 +429,6 @@ template DoReqSecondLimitStart(){
     ImplyEq()(enabled, r_orderLeafId[0], reqData[ReqIdxArg(1)]);
 
     ImplyEq()(enabled, accountRootFlow[0], accountRootFlow[1]);
-
-    ImplyEq()(enabled, nullifierRootFlow[0][0], nullifierRootFlow[0][1]);
-    ImplyEq()(enabled, nullifierRootFlow[1][0], nullifierRootFlow[1][1]);
-
-    ImplyEq()(enabled, epochFlow[0][0], epochFlow[0][1]);
-    ImplyEq()(enabled, epochFlow[1][0], epochFlow[1][1]);
 
     /* legality */
     
@@ -709,14 +452,10 @@ template DoReqSecondLimitExchange(){
     
     signal input orderRootFlow[2];
     signal input accountRootFlow[2];
-    signal input nullifierRootFlow[2][2];
-    signal input epochFlow[2][2];
 
     signal input reqData[LenOfRequest()];
     signal input tsPubKey[2];
     signal input txId;
-    signal input nullifierTreeId;
-    signal input nullifierElemId;
 
     signal input r_orderLeafId[MaxOrderUnitsPerReq()];
     signal input r_oriOrderLeaf[MaxOrderUnitsPerReq()][LenOfOL()];
@@ -732,11 +471,6 @@ template DoReqSecondLimitExchange(){
     signal input r_oriTokenLeaf[MaxTokenUnitsPerReq()][LenOfTL()];
     signal input r_newTokenLeaf[MaxTokenUnitsPerReq()][LenOfTL()];
     signal input r_tokenRootFlow[MaxTokenUnitsPerReq()][2];
-
-    signal input r_nullifierLeafId[MaxNullifierUnitsPerReq()];
-    signal input r_oriNullifierLeaf[MaxNullifierUnitsPerReq()][LenOfNL()];
-    signal input r_newNullifierLeaf[MaxNullifierUnitsPerReq()][LenOfNL()];
-    signal input r_nullifierRootFlow[MaxNullifierUnitsPerReq()][2];
     
     signal input digest;
 
@@ -770,12 +504,6 @@ template DoReqSecondLimitExchange(){
     ImplyEq()(enabled, r_tokenRootFlow[1][1], r_newAccountLeaf[0][ALIdxTokenRoot()]);
     ImplyEq()(enabled, r_tokenLeafId[0], r_oriOrderLeaf[0][OLIdxArg(3)]);
     ImplyEq()(enabled, r_tokenLeafId[1], r_oriOrderLeaf[0][OLIdxL2TokenAddr()]);
-
-    ImplyEq()(enabled, nullifierRootFlow[0][0], nullifierRootFlow[0][1]);
-    ImplyEq()(enabled, nullifierRootFlow[1][0], nullifierRootFlow[1][1]);
-
-    ImplyEq()(enabled, epochFlow[0][0], epochFlow[0][1]);
-    ImplyEq()(enabled, epochFlow[1][0], epochFlow[1][1]);
 
     /* legality */
     ImplyEq()(enabled, channelIn[ReqIdxReqType()], ReqTypeNumSecondLimitOrder());
@@ -828,14 +556,10 @@ template DoReqSecondLimitEnd(){
     
     signal input orderRootFlow[2];
     signal input accountRootFlow[2];
-    signal input nullifierRootFlow[2][2];
-    signal input epochFlow[2][2];
 
     signal input reqData[LenOfRequest()];
     signal input tsPubKey[2];
     signal input txId;
-    signal input nullifierTreeId;
-    signal input nullifierElemId;
 
     signal input r_orderLeafId[MaxOrderUnitsPerReq()];
     signal input r_oriOrderLeaf[MaxOrderUnitsPerReq()][LenOfOL()];
@@ -851,11 +575,6 @@ template DoReqSecondLimitEnd(){
     signal input r_oriTokenLeaf[MaxTokenUnitsPerReq()][LenOfTL()];
     signal input r_newTokenLeaf[MaxTokenUnitsPerReq()][LenOfTL()];
     signal input r_tokenRootFlow[MaxTokenUnitsPerReq()][2];
-
-    signal input r_nullifierLeafId[MaxNullifierUnitsPerReq()];
-    signal input r_oriNullifierLeaf[MaxNullifierUnitsPerReq()][LenOfNL()];
-    signal input r_newNullifierLeaf[MaxNullifierUnitsPerReq()][LenOfNL()];
-    signal input r_nullifierRootFlow[MaxNullifierUnitsPerReq()][2];
     
     signal input digest;
 
@@ -882,12 +601,6 @@ template DoReqSecondLimitEnd(){
     ImplyEq()(enabled, r_tokenRootFlow[1][1], r_newAccountLeaf[0][ALIdxTokenRoot()]);
     ImplyEq()(enabled, r_tokenLeafId[0], r_oriOrderLeaf[0][OLIdxL2TokenAddr()]);
     ImplyEq()(enabled, r_tokenLeafId[1], r_oriOrderLeaf[0][OLIdxArg(3)]);
-
-    ImplyEq()(enabled, nullifierRootFlow[0][0], nullifierRootFlow[0][1]);
-    ImplyEq()(enabled, nullifierRootFlow[1][0], nullifierRootFlow[1][1]);
-
-    ImplyEq()(enabled, epochFlow[0][0], epochFlow[0][1]);
-    ImplyEq()(enabled, epochFlow[1][0], epochFlow[1][1]);
 
     /* legality */
     ImplyEq()(enabled, channelIn[ReqIdxReqType()], ReqTypeNumSecondLimitOrder());
@@ -916,14 +629,10 @@ template DoReqSecondMarketOrder(){
 
     signal input orderRootFlow[2];
     signal input accountRootFlow[2];
-    signal input nullifierRootFlow[2][2];
-    signal input epochFlow[2][2];
 
     signal input reqData[LenOfRequest()];
     signal input tsPubKey[2];
     signal input txId;
-    signal input nullifierTreeId;
-    signal input nullifierElemId;
 
     signal input r_orderLeafId[MaxOrderUnitsPerReq()];
     signal input r_oriOrderLeaf[MaxOrderUnitsPerReq()][LenOfOL()];
@@ -939,11 +648,6 @@ template DoReqSecondMarketOrder(){
     signal input r_oriTokenLeaf[MaxTokenUnitsPerReq()][LenOfTL()];
     signal input r_newTokenLeaf[MaxTokenUnitsPerReq()][LenOfTL()];
     signal input r_tokenRootFlow[MaxTokenUnitsPerReq()][2];
-
-    signal input r_nullifierLeafId[MaxNullifierUnitsPerReq()];
-    signal input r_oriNullifierLeaf[MaxNullifierUnitsPerReq()][LenOfNL()];
-    signal input r_newNullifierLeaf[MaxNullifierUnitsPerReq()][LenOfNL()];
-    signal input r_nullifierRootFlow[MaxNullifierUnitsPerReq()][2];
     
     signal input digest;
 
@@ -958,10 +662,6 @@ template DoReqSecondMarketOrder(){
     /* conn to the units*/
     ImplyEq()(enabled, orderRootFlow[0], orderRootFlow[1]);
     ImplyEq()(enabled, accountRootFlow[0], accountRootFlow[1]);
-    ImplyEq()(enabled, nullifierRootFlow[0][0], nullifierRootFlow[0][1]);
-    ImplyEq()(enabled, nullifierRootFlow[1][0], nullifierRootFlow[1][1]);
-    ImplyEq()(enabled, epochFlow[0][0], epochFlow[0][1]);
-    ImplyEq()(enabled, epochFlow[1][0], epochFlow[1][1]);
     
     /* channel out */
     for(var i = 0; i < LenOfRequest(); i++)
@@ -976,14 +676,10 @@ template DoReqSecondMarketExchange(){
     
     signal input orderRootFlow[2];
     signal input accountRootFlow[2];
-    signal input nullifierRootFlow[2][2];
-    signal input epochFlow[2][2];
 
     signal input reqData[LenOfRequest()];
     signal input tsPubKey[2];
     signal input txId;
-    signal input nullifierTreeId;
-    signal input nullifierElemId;
 
     signal input r_orderLeafId[MaxOrderUnitsPerReq()];
     signal input r_oriOrderLeaf[MaxOrderUnitsPerReq()][LenOfOL()];
@@ -999,11 +695,6 @@ template DoReqSecondMarketExchange(){
     signal input r_oriTokenLeaf[MaxTokenUnitsPerReq()][LenOfTL()];
     signal input r_newTokenLeaf[MaxTokenUnitsPerReq()][LenOfTL()];
     signal input r_tokenRootFlow[MaxTokenUnitsPerReq()][2];
-
-    signal input r_nullifierLeafId[MaxNullifierUnitsPerReq()];
-    signal input r_oriNullifierLeaf[MaxNullifierUnitsPerReq()][LenOfNL()];
-    signal input r_newNullifierLeaf[MaxNullifierUnitsPerReq()][LenOfNL()];
-    signal input r_nullifierRootFlow[MaxNullifierUnitsPerReq()][2];
     
     signal input digest;
 
@@ -1035,12 +726,6 @@ template DoReqSecondMarketExchange(){
     ImplyEq()(enabled, r_tokenRootFlow[1][1], r_newAccountLeaf[0][ALIdxTokenRoot()]);
     ImplyEq()(enabled, r_tokenLeafId[0], r_oriOrderLeaf[0][OLIdxArg(3)]);
     ImplyEq()(enabled, r_tokenLeafId[1], r_oriOrderLeaf[0][OLIdxL2TokenAddr()]);
-
-    ImplyEq()(enabled, nullifierRootFlow[0][0], nullifierRootFlow[0][1]);
-    ImplyEq()(enabled, nullifierRootFlow[1][0], nullifierRootFlow[1][1]);
-
-    ImplyEq()(enabled, epochFlow[0][0], epochFlow[0][1]);
-    ImplyEq()(enabled, epochFlow[1][0], epochFlow[1][1]);
 
     /* legality */
     ImplyEq()(enabled, channelIn[ReqIdxReqType()], ReqTypeNumSecondMarketOrder());
@@ -1092,14 +777,10 @@ template DoReqSecondMarketEnd(){
     
     signal input orderRootFlow[2];
     signal input accountRootFlow[2];
-    signal input nullifierRootFlow[2][2];
-    signal input epochFlow[2][2];
 
     signal input reqData[LenOfRequest()];
     signal input tsPubKey[2];
     signal input txId;
-    signal input nullifierTreeId;
-    signal input nullifierElemId;
 
     signal input r_orderLeafId[MaxOrderUnitsPerReq()];
     signal input r_oriOrderLeaf[MaxOrderUnitsPerReq()][LenOfOL()];
@@ -1115,11 +796,6 @@ template DoReqSecondMarketEnd(){
     signal input r_oriTokenLeaf[MaxTokenUnitsPerReq()][LenOfTL()];
     signal input r_newTokenLeaf[MaxTokenUnitsPerReq()][LenOfTL()];
     signal input r_tokenRootFlow[MaxTokenUnitsPerReq()][2];
-
-    signal input r_nullifierLeafId[MaxNullifierUnitsPerReq()];
-    signal input r_oriNullifierLeaf[MaxNullifierUnitsPerReq()][LenOfNL()];
-    signal input r_newNullifierLeaf[MaxNullifierUnitsPerReq()][LenOfNL()];
-    signal input r_nullifierRootFlow[MaxNullifierUnitsPerReq()][2];
     
     signal input digest;
 
@@ -1144,12 +820,6 @@ template DoReqSecondMarketEnd(){
     ImplyEq()(enabled, r_tokenRootFlow[1][1], r_newAccountLeaf[0][ALIdxTokenRoot()]);
     ImplyEq()(enabled, r_tokenLeafId[0], r_oriOrderLeaf[0][OLIdxL2TokenAddr()]);
     ImplyEq()(enabled, r_tokenLeafId[1], r_oriOrderLeaf[0][OLIdxArg(3)]);
-
-    ImplyEq()(enabled, nullifierRootFlow[0][0], nullifierRootFlow[0][1]);
-    ImplyEq()(enabled, nullifierRootFlow[1][0], nullifierRootFlow[1][1]);
-
-    ImplyEq()(enabled, epochFlow[0][0], epochFlow[0][1]);
-    ImplyEq()(enabled, epochFlow[1][0], epochFlow[1][1]);
 
     /* legality */
     ImplyEq()(enabled, channelIn[ReqIdxReqType()], ReqTypeNumSecondMarketOrder());
