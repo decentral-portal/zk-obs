@@ -77,16 +77,17 @@ const config: HardhatUserConfig = {
         false,
       ),
     },
-    custom: {
-      url: process.env.CUSTOM_NETWORK_URL || '',
-      accounts: {
-        count: getNumber(process.env.CUSTOM_NETWORK_ACCOUNTS_COUNT, 10),
-        mnemonic: process.env.CUSTOM_NETWORK_ACCOUNTS_MNEMONIC || '',
-      },
-    },
+    // custom: {
+    //   url: process.env.CUSTOM_NETWORK_URL || '',
+    //   accounts: {
+    //     count: getNumber(process.env.CUSTOM_NETWORK_ACCOUNTS_COUNT, 10),
+    //     mnemonic: process.env.CUSTOM_NETWORK_ACCOUNTS_MNEMONIC || '',
+    //   },
+    // },
     goerli: {
-      url: process.env.GOERLI_RPC_URL || '',
-      accounts:   [`0x${process.env.GOERLI_KEY}`],
+      url: process.env.GOERLI_RPC_URL,
+      accounts: [process.env.GOERLI_KEY!],
+      
     },
   },
   etherscan: {
@@ -123,4 +124,10 @@ function getNumber(str: string, _default: number) {
     return num;
   }
   throw new Error(`'${str}' is not a number`);
+}
+
+function getString(value: any, defaultValue?: string) {
+  if (typeof value === 'string') return value;
+  if (defaultValue !== undefined) return defaultValue;
+  throw new Error(`Missing environment variable`);
 }

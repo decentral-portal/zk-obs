@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import "./Operations.sol";
+import "./IWETH.sol";
 import "hardhat/console.sol";
 
 /// @title ZkOBS contract
@@ -65,7 +66,22 @@ contract ZkOBS is Ownable {
         ++tokenNum;
     }
 
-    function register(bytes20 l2Addr, address tokenAddr, uint128 amount) external {
+    function registerETH(bytes20 l2Addr) external payable {
+        if(accountIdOf[msg.sender] != 0) {
+            revert("Account already registered");
+        }
+        uint16 l2TokenAddr = tokenIdOf[wETHAddr];
+        uint128 depositAmount = SafeCast.toUint128(msg.value);
+        IWETH(wETHAddr).deposit{ value: msg.value }();
+
+        _register(msg.sender, l2Addr);
+        _deposit(msg.sender, l2TokenAddr, depositAmount);
+    }
+
+    function registerERC20(bytes20 l2Addr, address tokenAddr, uint128 amount) external {
+        if(accountIdOf[msg.sender] != 0) {
+            revert("Account already registered");
+        }
         uint16 tokenId = tokenIdOf[tokenAddr];
         IERC20 token = IERC20(tokenAddr);
         uint256 balanceBefore = token.balanceOf(address(this));
@@ -82,7 +98,18 @@ contract ZkOBS is Ownable {
         _deposit(msg.sender, tokenId, depositAmount);
     }
 
-    function deposit(address tokenAddr, uint128 amount) external {
+    function depositETH() external payable {
+        if(accountIdOf[msg.sender] == 0) {
+            revert("Account not registered");
+        }
+        uint16 l2TokenAddr = tokenIdOf[wETHAddr];
+        uint128 depositAmount = SafeCast.toUint128(msg.value);
+        IWETH(wETHAddr).deposit{ value: msg.value }();
+
+        _deposit(msg.sender, l2TokenAddr, depositAmount);
+    }
+
+    function depositERC20(address tokenAddr, uint128 amount) external {
         if(accountIdOf[msg.sender] == 0) {
             revert("Account not registered");
         }
@@ -93,7 +120,7 @@ contract ZkOBS is Ownable {
         uint256 balanceAfter = token.balanceOf(address(this));
         uint128 depositAmount = SafeCast.toUint128(balanceAfter - balanceBefore);
         require(depositAmount == amount, "Deposit amount inconsistent");
-        // deposit
+        
         _deposit(msg.sender, tokenId, depositAmount);
     }
 
