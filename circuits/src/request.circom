@@ -1,4 +1,4 @@
-pragma circom 2.0.2;
+pragma circom 2.1.2;
 
 include "../../node_modules/circomlib/circuits/comparators.circom";
 include "../../node_modules/circomlib/circuits/bitify.circom";
@@ -6,9 +6,11 @@ include "../../node_modules/circomlib/circuits/multiplexer.circom";
 include "../../node_modules/circomlib/circuits/gates.circom";
 
 template ImplyEq(){
+    /* verify: (if "enabled", then in_0 == in_1) */
     signal input enabled;
     signal input in_0;
     signal input in_1;
+    (enabled) * (1 - enabled) === 0;
     in_0 === (in_1 - in_0) * enabled + in_0;
 }
 template IntDivide(bits_divisor){
@@ -69,9 +71,9 @@ template DoReqUnknow(){
     
     signal input digest;
 
-    signal output channelOut[LenOfChannel()] <== [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    signal output channelOut[LenOfChannel()] <== [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     signal output resData[LenOfResponse()] <== [0, 0];
-    channelIn === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    channelIn === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     
 
     /* enabled be a boolean */
@@ -111,9 +113,9 @@ template DoReqRegister(){
     
     signal input digest;
 
-    signal output channelOut[LenOfChannel()] <== [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    signal output channelOut[LenOfChannel()] <== [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     signal output resData[LenOfResponse()] <== [0, 0];
-    channelIn === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    channelIn === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     
 
     /* enabled be a boolean */
@@ -169,9 +171,9 @@ template DoReqDeposit(){
     
     signal input digest;
 
-    signal output channelOut[LenOfChannel()] <== [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    signal output channelOut[LenOfChannel()] <== [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     signal output resData[LenOfResponse()] <== [0, 0];
-    channelIn === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    channelIn === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     
 
     /* enabled be a boolean */
@@ -227,9 +229,9 @@ template DoReqWithdraw(){
     
     signal input digest;
 
-    signal output channelOut[LenOfChannel()] <== [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    signal output channelOut[LenOfChannel()] <== [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     signal output resData[LenOfResponse()] <== [0, 0];
-    channelIn === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    channelIn === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     
     /* enabled be a boolean */
     enabled * (enabled - 1) === 0;
@@ -286,9 +288,9 @@ template DoReqCancel(){
     
     signal input digest;
 
-    signal output channelOut[LenOfChannel()] <== [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    signal output channelOut[LenOfChannel()] <== [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     signal output resData[LenOfResponse()] <== [0, 0];
-    channelIn === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    channelIn === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
     /* enabled be a boolean */
     enabled * (enabled - 1) === 0;
@@ -347,9 +349,9 @@ template DoReqSecondLimitOrder(){
     
     signal input digest;
 
-    signal output channelOut[LenOfChannel()] <== [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    signal output channelOut[LenOfChannel()] <== [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     signal output resData[LenOfResponse()] <== [0, 0];
-    channelIn === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    channelIn === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
     signal leafId;
     (_, leafId) <== IntDivide(25)(digest, (1 << NullifierTreeHeight())); 
@@ -418,7 +420,7 @@ template DoReqSecondLimitStart(){
 
     signal output channelOut[LenOfChannel()];
     signal output resData[LenOfResponse()];
-    channelIn === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    channelIn === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
     /* enabled be a boolean */
     enabled * (enabled - 1) === 0;
@@ -578,7 +580,7 @@ template DoReqSecondLimitEnd(){
     
     signal input digest;
 
-    signal output channelOut[LenOfChannel()] <== [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    signal output channelOut[LenOfChannel()] <== [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     signal output resData[LenOfResponse()];
 
     signal matchedSellAmt <== r_oriOrderLeaf[0][OLIdxAmount()] - channelIn[ReqIdxAmount()];
@@ -653,7 +655,7 @@ template DoReqSecondMarketOrder(){
 
     signal output channelOut[LenOfChannel()];
     signal output resData[LenOfResponse()] <== [0, 0];
-    channelIn === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    channelIn === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     
 
     /* enabled be a boolean */
@@ -799,7 +801,7 @@ template DoReqSecondMarketEnd(){
     
     signal input digest;
 
-    signal output channelOut[LenOfChannel()] <== [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    signal output channelOut[LenOfChannel()] <== [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     signal output resData[LenOfResponse()];
 
     signal matchedBuyAmt <== channelIn[LenOfRequest()];

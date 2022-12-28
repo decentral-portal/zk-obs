@@ -3,11 +3,10 @@ pragma circom 2.0.2;
 *   "OL" means: OrderLeaf;
 *   "AL" means: AccountLeaf;
 *   "TL" means: TokenLeaf;
-*   "NL" means: NullifierLeaf;
 */
 /* Request */
 function LenOfRequest(){
-    return 11;
+    return 10;
 }
 function ReqIdxReqType(){
     return 0;
@@ -158,9 +157,4 @@ function BitsInterest(){
 }
 function BitsChunk(){
     return 8 * 12;
-}
-
-
-function InterestLimit(){
-    return 1 << BitsInterest() - 1;
 }

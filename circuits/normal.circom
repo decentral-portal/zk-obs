@@ -13,12 +13,17 @@ include "./src/request.circom";
 include "./src/fp.circom";
 
 template AllocReqData(){
+    /* 
+        Verify the signals in reqData be legally allocated or not.
+        the input signals of template "LessThan", ... in circomlib need to be verified in advance for legality of alloc.
+    */
     signal input reqData[LenOfRequest()];
-    var bits[LenOfRequest()] = [BitsReqType(), BitsL2Addr(), BitsTokenAddr(), BitsAmount(), BitsNonce(), BitsL2Addr(), BitsTsAddr(), BitsPrice(), BitsTokenAddr(), 32, 99];// 32 be bits_order_leaf_id; 99 be bits_epoch
+    var bits[LenOfRequest()] = [BitsReqType(), BitsL2Addr(), BitsTokenAddr(), BitsAmount(), BitsNonce(), BitsL2Addr(), BitsTsAddr(), BitsPrice(), BitsTokenAddr(), 32];
     for(var i = 0; i < LenOfRequest(); i++)
         _ <== Num2Bits(bits[i])(i);
 }
 template Chunkify(){
+    /* Please have a look at table "req_zkOBS" & "pubdata_zkOBS" in "https://docs.google.com/spreadsheets/d/15IM55Kg9z--yAdKQ4thVJd6Wtp0yuOorXLqi1TxBhg4/edit#gid=1909711629" */
     signal input reqData[LenOfRequest()];
     signal input resData[LenOfResponse()];
     signal input r_chunks[MaxChunksPerReq()];
@@ -70,6 +75,7 @@ template Chunkify(){
     }
 }
 template DoRequest(){
+    /* foreach req do: */
     signal input channelIn[LenOfChannel()];
 
     signal input orderRootFlow[2];
@@ -110,6 +116,7 @@ template DoRequest(){
     signal temp[ReqTypeCount()][LenOfChannel()];
     signal temp2[ReqTypeCount()][LenOfResponse()];
 
+    /* verify reqType is not "undefined" */
     slt === 1;
 
     /* alloc reqData */
@@ -123,7 +130,12 @@ template DoRequest(){
     );
     reqData[ReqIdxL2AddrSigner()] === (0 - reqData[ReqIdxL2AddrSigner()]) * isPuesdoReq + reqData[ReqIdxL2AddrSigner()];
 
-    /* dispatch */
+    /* 
+        dispatch & verify:
+            1.  conn        : alloc circuit unit to verify mk prf
+            2.  legality    : e.g. isSufficient, nonce
+            3.  correctness : verify correctness of new state, which calc by backend
+    */
     (temp[0] , temp2[0] ) <== DoReqUnknow               ()(IsEqual()([reqData[ReqIdxReqType()], ReqTypeNumUnknow()              ]), channelIn, orderRootFlow, accountRootFlow, reqData, tsPubKey, txId, r_orderLeafId, r_oriOrderLeaf, r_newOrderLeaf, r_orderRootFlow, r_accountLeafId, r_oriAccountLeaf, r_newAccountLeaf, r_accountRootFlow, r_tokenLeafId, r_oriTokenLeaf, r_newTokenLeaf, r_tokenRootFlow, digest);
     (temp[1] , temp2[1] ) <== DoReqRegister             ()(IsEqual()([reqData[ReqIdxReqType()], ReqTypeNumRegister()            ]), channelIn, orderRootFlow, accountRootFlow, reqData, tsPubKey, txId, r_orderLeafId, r_oriOrderLeaf, r_newOrderLeaf, r_orderRootFlow, r_accountLeafId, r_oriAccountLeaf, r_newAccountLeaf, r_accountRootFlow, r_tokenLeafId, r_oriTokenLeaf, r_newTokenLeaf, r_tokenRootFlow, digest);
     (temp[2] , temp2[2] ) <== DoReqDeposit              ()(IsEqual()([reqData[ReqIdxReqType()], ReqTypeNumDeposit()             ]), channelIn, orderRootFlow, accountRootFlow, reqData, tsPubKey, txId, r_orderLeafId, r_oriOrderLeaf, r_newOrderLeaf, r_orderRootFlow, r_accountLeafId, r_oriAccountLeaf, r_newAccountLeaf, r_accountRootFlow, r_tokenLeafId, r_oriTokenLeaf, r_newTokenLeaf, r_tokenRootFlow, digest);
@@ -143,6 +155,7 @@ template DoRequest(){
     Chunkify()(reqData, resData, r_chunks);
 }
 template UpdateMKT(leaf_len, tree_height){
+    /* atomically, verify ori state & update new state */
     signal input oriRoot;
     signal input oriLeaf[leaf_len];
     signal input newRoot;
@@ -153,6 +166,7 @@ template UpdateMKT(leaf_len, tree_height){
     VerifyExists(tree_height)(leafId, Poseidon(leaf_len)(newLeaf), mkPrf, newRoot);
 }
 template CalcCommitment(){
+    /* calc commitment := sha256(oriStateRoot | newStateRoot | newTsRoot | ...isCriticalChunk | ...chunks) */
     signal input oriStateRoot;
     signal input newStateRoot;
     signal input newTsRoot;
@@ -192,22 +206,23 @@ template CalcCommitment(){
     commitment <== b2n_commitment.out;
 }
 template Normal(){
-
-
+    /* the main circuits */
+    signal output commitment;
 
     signal input orderRootFlow[NumOfReqs() + 1];
     signal input accountRootFlow[NumOfReqs() + 1];
-    signal input nullifierRootFlow[2][NumOfReqs() + 1];
-    signal input epochFlow[2][NumOfReqs() + 1];
 
     signal input reqData[NumOfReqs()][LenOfRequest()];
     signal input tsPubKey[NumOfReqs()][2];
     signal input oriTxNum;
-    signal input nullifierTreeId[NumOfReqs()];
-    signal input nullifierElemId[NumOfReqs()];
     signal input sigR[NumOfReqs()][2];
     signal input sigS[NumOfReqs()];
 
+    /*
+        for example:
+            register: 1 accUnit, 1 tokenUnit, 0 orderUnit
+            borrowend: 1 accUnit, 2 tokenUnit (sell & buy), 1 orderUnit
+    */
     signal input r_accountLeafId[NumOfReqs()][MaxAccUnitsPerReq()];
     signal input r_oriAccountLeaf[NumOfReqs()][MaxAccUnitsPerReq()][LenOfAL()];
     signal input r_newAccountLeaf[NumOfReqs()][MaxAccUnitsPerReq()][LenOfAL()];
@@ -226,23 +241,14 @@ template Normal(){
     signal input r_orderRootFlow[NumOfReqs()][MaxOrderUnitsPerReq()][2];
     signal input r_orderMkPrf[NumOfReqs()][MaxOrderUnitsPerReq()][OrderTreeHeight()];
 
-    signal input r_nullifierLeafId[NumOfReqs()][MaxNullifierUnitsPerReq()];
-    signal input r_oriNullifierLeaf[NumOfReqs()][MaxNullifierUnitsPerReq()][LenOfNL()];
-    signal input r_newNullifierLeaf[NumOfReqs()][MaxNullifierUnitsPerReq()][LenOfNL()];
-    signal input r_nullifierRootFlow[NumOfReqs()][MaxNullifierUnitsPerReq()][2];
-    signal input r_nullifierMkPrf[NumOfReqs()][MaxNullifierUnitsPerReq()][NullifierTreeHeight()];
-
-    signal input isCriticalChunk[NumOfChunks()];
-    signal input r_chunks[NumOfReqs()][MaxChunksPerReq()];
-    signal input o_chunks[NumOfChunks()];
-
-    signal newNullifierRoot <== Poseidon(2)([nullifierRootFlow[0][NumOfReqs()], nullifierRootFlow[0][NumOfReqs()]]);
+    signal input isCriticalChunk[NumOfChunks()];// isCriticalChunk[i]:boolean := (is the first chunk of "deposit", "withdraw", "register")
+    signal input r_chunks[NumOfReqs()][MaxChunksPerReq()];// chunks calc from req. dynamic arr is not allowed in circom
+    signal input o_chunks[NumOfChunks()];// chunks used to calc commitment
 
     signal oriStateRoot <== Poseidon(3)([orderRootFlow[0], accountRootFlow[0], oriTxNum]);
     signal newStateRoot <== Poseidon(3)([orderRootFlow[NumOfReqs()], accountRootFlow[NumOfReqs()], oriTxNum + NumOfReqs()]);
     signal newTsRoot <== Poseidon(3)([newNullifierRoot, oriTxNum + NumOfReqs(), orderRootFlow[NumOfReqs()]]);
-    signal output commitment;
-
+    
     signal chunkCount[NumOfReqs()];
     signal chunkCounter[NumOfReqs() + 1];
     signal chunkMasks[NumOfReqs()][MaxChunksPerReq()];
@@ -253,24 +259,24 @@ template Normal(){
     for(var i = 0; i < NumOfReqs(); i++)
         txId[i] = oriTxNum + i;
 
+    // chunkCounter[i + 1] := the len of o_chunk after push calldata of first i req
+    // template "DoRequest()" input channelData[i] and output channelData[i + 1]. Some reqs are be required to be atomical.
     chunkCounter[0] <== 0;
-    channelData[0] <== [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    channelData[0] <== [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     for(var i = 0; i < NumOfReqs(); i++){
+        /* verify legality and correctness for each req */
         channelData[i + 1] <== DoRequest()(
             channelData[i],
             [orderRootFlow[i], orderRootFlow[i + 1]], 
             [accountRootFlow[i], accountRootFlow[i + 1]],  
-            reqData[i], tsPubKey[i], txId[i],
-            
-            
-             sigR[i], sigS[i], 
+            reqData[i], tsPubKey[i], txId[i], sigR[i], sigS[i], 
             r_orderLeafId[i], r_oriOrderLeaf[i], r_newOrderLeaf[i], r_orderRootFlow[i], 
             r_accountLeafId[i], r_oriAccountLeaf[i], r_newAccountLeaf[i], r_accountRootFlow[i], 
             r_tokenLeafId[i], r_oriTokenLeaf[i], r_newTokenLeaf[i], r_tokenRootFlow[i], 
             r_chunks[i]
         );
         
-        /* interface btwn do_req n mk_units  */
+        /* interface btwn r_chunks & o_chunks  */
             //to-do: replace "MaxXxxxUnitsPerReq()" with log_2(MaxXxxxUnitsPerReq()).
             //to-do: optimaize the complexity of interface.
         chunkCount[i]       <== Mux(ReqTypeCount())([0, 4, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1], reqData[i][ReqIdxReqType()]);//to-do: extract as a func
@@ -285,7 +291,7 @@ template Normal(){
                 Indexer(NumOfChunks())(chunkMasks[i][j], 0, chunkCounter[i] + j, isCriticalChunk);
         }
     }
-    channelData[NumOfReqs()] === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    channelData[NumOfReqs()] === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     
     for(var i = 0; i < NumOfReqs(); i++)
         for(var j = 0; j < MaxOrderUnitsPerReq(); j++)
@@ -301,7 +307,7 @@ template Normal(){
             UpdateMKT(LenOfNL(), NullifierTreeHeight())(r_nullifierRootFlow[i][j][0], r_oriNullifierLeaf[i][j], r_nullifierRootFlow[i][j][1], r_newNullifierLeaf[i][j], r_nullifierLeafId[i][j], r_nullifierMkPrf[i][j]);
     
     
-    //verify the remaining chunks are default
+    //verify the remaining o_chunks are "noop"
     component isDefaultChunk[NumOfChunks()];
     for(var i = 0; i < NumOfChunks(); i++){
         isDefaultChunk[i] = GreaterEqThan(NumOfChunks());

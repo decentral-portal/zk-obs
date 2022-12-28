@@ -8,13 +8,13 @@ include "../../node_modules/circomlib/circuits/multiplexer.circom";
         sign    : 1     bit
         integer : 100   bits
         decimal : 27    bits
-    TxAmount             - 48 bit
-        sign    : 1     bit
-        exp     : 6     bits
-        fraction: 41    bits
-        bias    : 31
+    TxAmount             - 41 bit
+        exp     : 5     bits
+        mantissa: 41    bits
+        bias    : 27
 */
 template TenToPowerOf(){
+    /* output 10 ^ in */
     signal input in;
     signal n2B[5] <== Num2Bits(5)(in);
     signal temp[5];

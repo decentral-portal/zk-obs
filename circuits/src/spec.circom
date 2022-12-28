@@ -1,5 +1,4 @@
-pragma circom 2.0.2;
-/* not yet set */
+pragma circom 2.1.2;
 
 function MinChunksPerReq(){
     return 5;
