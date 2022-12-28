@@ -1,0 +1,58 @@
+{
+  "compilerOptions": {
+    "module": "CommonJS",
+    "lib": ["es2020", "ESNext", "ESNext.bigint"],
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "target": "ESNext",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
+    "allowJs": true,
+    "checkJs": true,
+    "strict": true,
+    "paths": {
+      "@common/logger": ["common/logger/src"],
+      "@common/logger/*": ["common/logger/src/*"],
+      "@common/cluster": ["common/cluster/src"],
+      "@common/cluster/*": ["common/cluster/src/*"],
+      "@common/domain-event-publisher": ["common/domain-event-publisher/src"],
+      "@common/domain-event-publisher/*": ["common/domain-event-publisher/src/*"],
+      "@common/utils": ["common/utils"],
+      "@common/utils/*": ["common/utils/*"],
+      "@common/rbac": ["common/rbac/src"],
+      "@common/rbac/*": ["common/rbac/src/*"],
+      "@common/db-pubsub": ["common/db-pubsub/src"],
+      "@common/db-pubsub/*": ["common/db-pubsub/src/*"],
+      "@common/ts-typeorm": ["common/ts-typeorm/src"],
+      "@common/ts-typeorm/*": ["common/ts-typeorm/src/*"],
+      "@common/websocket": ["common/websocket/src"],
+      "@common/websocket/*": ["common/websocket/src/*"],
+      "@ts-rollup-api": ["ts-rollup-api/src"],
+      "@ts-rollup-api/*": ["ts-rollup-api/src/*"],
+
+      "@ts-core": ["ts-core/src/"],
+      "@ts-core/*": ["ts-core/src/*"],
+
+      "@ts-operator": ["ts-operator/src/"],
+      "@ts-operator/*": ["ts-operator/src/*"],
+
+      "@ts-prover": ["ts-prover/src/"],
+      "@ts-prover/*": ["ts-prover/src/*"],
+
+      "@ts-sequencer": ["ts-sequencer/src/"],
+      "@ts-sequencer/*": ["ts-sequencer/src/*"],
+
+      "@ts-sdk": ["ts-sdk/src/"],
+      "@ts-sdk/*": ["ts-sdk/src/*"],
+    }
+  },
+  "ts-node": {
+    "require": ["tsconfig-paths/register"]
+  }
+}

@@ -1,0 +1,19 @@
+stages:
+  - test
+  - build-binary
+build an test:
+  image: node:16.14.2
+  stage: test
+  script:
+   - yarn install --frozen-lockfile
+   - export RESERVED_ACCOUNTS=$RESERVED_ACCOUNTS
+   - yarn test:unit-r --detectOpenHandles
+build to binary:
+  image: node:16.14.2
+  stage: build-binary
+  script:
+   - yarn install --frozen-lockfile
+   - yarn run build
+  artifacts:
+    paths:
+      - dist

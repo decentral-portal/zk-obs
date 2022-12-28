@@ -1,0 +1,524 @@
+[
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "sender",
+				"type": "address"
+			},
+			{
+				"components": [
+					{
+						"internalType": "uint256",
+						"name": "x",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "y",
+						"type": "uint256"
+					}
+				],
+				"internalType": "struct Utils.TsPubKey",
+				"name": "tsPubKey",
+				"type": "tuple"
+			}
+		],
+		"name": "_register",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "previousAdmin",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "newAdmin",
+				"type": "address"
+			}
+		],
+		"name": "AdminChanged",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "beacon",
+				"type": "address"
+			}
+		],
+		"name": "BeaconUpgraded",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "l1Addr",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint32",
+				"name": "l2Addr",
+				"type": "uint32"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint16",
+				"name": "l2TokenAddr",
+				"type": "uint16"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint128",
+				"name": "amount",
+				"type": "uint128"
+			}
+		],
+		"name": "Deposit",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"components": [
+					{
+						"internalType": "uint256",
+						"name": "x",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "y",
+						"type": "uint256"
+					}
+				],
+				"internalType": "struct Utils.TsPubKey",
+				"name": "tsPubKey",
+				"type": "tuple"
+			},
+			{
+				"internalType": "address",
+				"name": "l1TokenAddr",
+				"type": "address"
+			},
+			{
+				"internalType": "uint128",
+				"name": "amount",
+				"type": "uint128"
+			}
+		],
+		"name": "depositERC20",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"components": [
+					{
+						"internalType": "uint256",
+						"name": "x",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "y",
+						"type": "uint256"
+					}
+				],
+				"internalType": "struct Utils.TsPubKey",
+				"name": "tsPubKey",
+				"type": "tuple"
+			}
+		],
+		"name": "depositETH",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "bytes",
+				"name": "data",
+				"type": "bytes"
+			}
+		],
+		"name": "initialize",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint8",
+				"name": "version",
+				"type": "uint8"
+			}
+		],
+		"name": "Initialized",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "sender",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint64",
+				"name": "requestId",
+				"type": "uint64"
+			},
+			{
+				"indexed": false,
+				"internalType": "enum Operations.OpType",
+				"name": "opType",
+				"type": "uint8"
+			},
+			{
+				"indexed": false,
+				"internalType": "bytes",
+				"name": "pubData",
+				"type": "bytes"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "expirationBlock",
+				"type": "uint256"
+			}
+		],
+		"name": "NewPriorityRequest",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "previousOwner",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "newOwner",
+				"type": "address"
+			}
+		],
+		"name": "OwnershipTransferred",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "l1Addr",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint32",
+				"name": "l2Addr",
+				"type": "uint32"
+			},
+			{
+				"components": [
+					{
+						"internalType": "uint256",
+						"name": "x",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "y",
+						"type": "uint256"
+					}
+				],
+				"indexed": false,
+				"internalType": "struct Utils.TsPubKey",
+				"name": "tsPubKey",
+				"type": "tuple"
+			}
+		],
+		"name": "Register",
+		"type": "event"
+	},
+	{
+		"inputs": [],
+		"name": "renounceOwnership",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "newOwner",
+				"type": "address"
+			}
+		],
+		"name": "transferOwnership",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "implementation",
+				"type": "address"
+			}
+		],
+		"name": "Upgraded",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "newImplementation",
+				"type": "address"
+			}
+		],
+		"name": "upgradeTo",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "newImplementation",
+				"type": "address"
+			},
+			{
+				"internalType": "bytes",
+				"name": "data",
+				"type": "bytes"
+			}
+		],
+		"name": "upgradeToAndCall",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"components": [
+					{
+						"internalType": "uint32",
+						"name": "l2Addr",
+						"type": "uint32"
+					},
+					{
+						"internalType": "uint16",
+						"name": "l2TokenAddr",
+						"type": "uint16"
+					},
+					{
+						"internalType": "uint128",
+						"name": "amount",
+						"type": "uint128"
+					}
+				],
+				"internalType": "struct Operations.Deposit",
+				"name": "deposit",
+				"type": "tuple"
+			},
+			{
+				"internalType": "uint64",
+				"name": "requestId",
+				"type": "uint64"
+			}
+		],
+		"name": "checkDepositPriorityRequest",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "isExisted",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"components": [
+					{
+						"internalType": "uint32",
+						"name": "l2Addr",
+						"type": "uint32"
+					},
+					{
+						"components": [
+							{
+								"internalType": "uint256",
+								"name": "x",
+								"type": "uint256"
+							},
+							{
+								"internalType": "uint256",
+								"name": "y",
+								"type": "uint256"
+							}
+						],
+						"internalType": "struct Utils.TsPubKey",
+						"name": "tsPubKey",
+						"type": "tuple"
+					}
+				],
+				"internalType": "struct Operations.Register",
+				"name": "register",
+				"type": "tuple"
+			},
+			{
+				"internalType": "uint64",
+				"name": "requestId",
+				"type": "uint64"
+			}
+		],
+		"name": "checkRegisterPriorityRequest",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "isExisted",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getAccountNum",
+		"outputs": [
+			{
+				"internalType": "uint32",
+				"name": "accountNum",
+				"type": "uint32"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getFirstPriorityRequestId",
+		"outputs": [
+			{
+				"internalType": "uint64",
+				"name": "firstPriorityRequestId",
+				"type": "uint64"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "l1Addr",
+				"type": "address"
+			}
+		],
+		"name": "getL2Addr",
+		"outputs": [
+			{
+				"internalType": "uint32",
+				"name": "l2Addr",
+				"type": "uint32"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getTotalPendingPriorityRequests",
+		"outputs": [
+			{
+				"internalType": "uint64",
+				"name": "totalPendingPriorityRequests",
+				"type": "uint64"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getWETHAddr",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "WETHAddr",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "owner",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "proxiableUUID",
+		"outputs": [
+			{
+				"internalType": "bytes32",
+				"name": "",
+				"type": "bytes32"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+]

@@ -1,0 +1,15 @@
+# compiled output
+/history
+/dist
+/node_modules
+/coverage
+/.history
+
+# OS
+.DS_Store
+
+# IDE - VSCode
+.vscode/*
+.env
+.*.local
+.history
