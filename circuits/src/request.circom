@@ -478,7 +478,7 @@ template DoReqSecondLimitExchange(){
 
     signal output channelOut[LenOfChannel()];
     signal output resData[LenOfResponse()];
-    signal supBuyAmtTaker;
+    signal supBuyAmtTaker, newSupBuyAmtTaker;
 
     var makerSellAmt = r_oriOrderLeaf[0][ReqIdxAmount()];
     var supBuyAmtMaker = r_oriOrderLeaf[0][ReqIdxArg(3)];
@@ -538,9 +538,11 @@ template DoReqSecondLimitExchange(){
     /* channel out */
     for(var i = 0; i < LenOfRequest(); i++){
         if(i == OLIdxAmount())
-            channelOut[i] <== makerSellAmt - matchedBuyAmt;
-        else if(i == OLIdxArg(3))
+            channelOut[i] <== takerSellAmt - matchedBuyAmt;
+        else if(i == OLIdxArg(3)){
+            (newSupBuyAmtTaker, _) <== IntDivide(BitsAmount())(channelOut[OLIdxAmount()] * channelIn[ReqIdxArg(3)], takerSellAmt);
             channelOut[i] <== supBuyAmtMaker + matchedSellAmt;
+        }
         else
             channelOut[i] <== r_oriOrderLeaf[0][i];
     }
