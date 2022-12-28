@@ -247,7 +247,7 @@ template Normal(){
 
     signal oriStateRoot <== Poseidon(3)([orderRootFlow[0], accountRootFlow[0], oriTxNum]);
     signal newStateRoot <== Poseidon(3)([orderRootFlow[NumOfReqs()], accountRootFlow[NumOfReqs()], oriTxNum + NumOfReqs()]);
-    signal newTsRoot <== Poseidon(3)([newNullifierRoot, oriTxNum + NumOfReqs(), orderRootFlow[NumOfReqs()]]);
+    signal newTsRoot <== Poseidon(2)([oriTxNum + NumOfReqs(), orderRootFlow[NumOfReqs()]]);
     
     signal chunkCount[NumOfReqs()];
     signal chunkCounter[NumOfReqs() + 1];
@@ -302,9 +302,6 @@ template Normal(){
     for(var i = 0; i < NumOfReqs(); i++)
         for(var j = 0; j < MaxTokenUnitsPerReq(); j++)
             UpdateMKT(LenOfTL(), TokenTreeHeight())(r_tokenRootFlow[i][j][0], r_oriTokenLeaf[i][j], r_tokenRootFlow[i][j][1], r_newTokenLeaf[i][j], r_tokenLeafId[i][j], r_tokenMkPrf[i][j]);
-    for(var i = 0; i < NumOfReqs(); i++)
-        for(var j = 0; j < MaxNullifierUnitsPerReq(); j++)
-            UpdateMKT(LenOfNL(), NullifierTreeHeight())(r_nullifierRootFlow[i][j][0], r_oriNullifierLeaf[i][j], r_nullifierRootFlow[i][j][1], r_newNullifierLeaf[i][j], r_nullifierLeafId[i][j], r_nullifierMkPrf[i][j]);
     
     
     //verify the remaining o_chunks are "noop"
