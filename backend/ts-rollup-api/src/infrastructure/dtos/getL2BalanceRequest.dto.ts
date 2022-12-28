@@ -5,7 +5,7 @@ export class GetL2BalanceRequestDto {
   @ApiProperty()
   L2Address!: string;
   @ApiPropertyOptional({
-    // isArray: true,
+    isArray: true,
     type: [TsTokenAddress],
   })
   L2TokenAddrList?: TsTokenAddress[];

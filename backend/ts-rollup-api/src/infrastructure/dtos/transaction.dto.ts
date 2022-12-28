@@ -233,7 +233,7 @@ export class BondTokensResponse implements PaginationResponse<BondTokenBO> {
   @ApiProperty()
   totalPage!: number;
   @ApiProperty({
-    type: BondTokenBO,
+    type: [BondTokenBO],
     isArray: true,
   })
   list!: BondTokenBO[];
