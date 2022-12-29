@@ -72,6 +72,7 @@ template Chunkify(){
         for(var j = 0; j < BitsChunk(); j++)
             t[j] = bit_arr[BitsChunk() * (i + 1) - 1 - j];
         Temp2[i] <== Bits2Num(BitsChunk())(t);
+        r_chunks[i] === Temp2[i];
     }
 }
 template DoRequest(){
@@ -298,7 +299,7 @@ template Normal(){
             UpdateMKT(LenOfOL(), OrderTreeHeight())(r_orderRootFlow[i][j][0], r_oriOrderLeaf[i][j], r_orderRootFlow[i][j][1], r_newOrderLeaf[i][j], r_orderLeafId[i][j], r_orderMkPrf[i][j]);
     for(var i = 0; i < NumOfReqs(); i++)
         for(var j = 0; j < MaxAccUnitsPerReq(); j++)
-            UpdateMKT(LenOfAL(), AccTreeHeight())(r_accountRootFlow[i][j][0], r_oriAccountLeaf[i][j], r_accountRootFlow[i][j][1], r_newAccountLeaf[i][j], r_accountLeafId[i][j], r_accountMkPrf[i][j]);
+            UpdateMKT(LenOfAL(), AccTreeHeight())(r_accountRootFlow[i][j][0], r_oriAccountLeaf[i][j], r_accountRootFlow[i][j][1], r_newAccountLeaf[i][j], r_accountLeafId[i][j], r_accountMkPrf[i][j]); 
     for(var i = 0; i < NumOfReqs(); i++)
         for(var j = 0; j < MaxTokenUnitsPerReq(); j++)
             UpdateMKT(LenOfTL(), TokenTreeHeight())(r_tokenRootFlow[i][j][0], r_oriTokenLeaf[i][j], r_tokenRootFlow[i][j][1], r_newTokenLeaf[i][j], r_tokenLeafId[i][j], r_tokenMkPrf[i][j]);
