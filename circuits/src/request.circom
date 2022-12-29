@@ -484,7 +484,7 @@ template DoReqSecondLimitExchange(){
             supMakerBuyAmt := makerRemainSellAmt * maker.buyAmt / maker.sellAmt;
             supTakerBuyAmt := takerRemainSellAmt * maker.sellAmt / maker.buyAmt;
             
-            isMatched := maker.buyAmt * taker.buyAmt < maker.sellAmt * taker.sellAmt;
+            isMatched := maker.sellAmt * taker.sellAmt >= maker.buyAmt * taker.buyAmt;
 
             matchedSellAmt := Min(makerRemainSellAmt, supTakerBuyAmt);
             matchedBuyAmt := Min(takerRemainSellAmt, supMakerBuyAmt);
@@ -501,7 +501,7 @@ template DoReqSecondLimitExchange(){
     (supMakerBuyAmt, _) <== IntDivide(BitsAmount())(makerRemainSellAmt * makerBuyAmt, (makerSellAmt - 1) * enabled + 1);
     signal supTakerBuyAmt;
     (supTakerBuyAmt, _) <== IntDivide(BitsAmount())(takerRemainSellAmt * makerSellAmt, (makerBuyAmt - 1) * enabled + 1);
-    signal isMatched <== LessThan(BitsAmount() * 2)([makerBuyAmt * takerBuyAmt, makerSellAmt * takerSellAmt]);
+    signal isMatched <== GreaterEqThan(BitsAmount() * 2)([makerSellAmt * takerSellAmt, makerBuyAmt * takerBuyAmt]);
 
     signal matchedSellAmt <== Min(BitsAmount())([makerRemainSellAmt, supTakerBuyAmt]);
     signal matchedBuyAmt  <== Min(BitsAmount())([takerRemainSellAmt, supMakerBuyAmt]);
