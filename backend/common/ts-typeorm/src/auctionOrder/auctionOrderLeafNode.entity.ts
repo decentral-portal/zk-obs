@@ -119,26 +119,26 @@ export class AuctionOrderLeafNode {
   })
   borrowingAmt!: bigint;
   // relations
-  @ManyToOne(
-    () => AccountInformation,
-    (accountInformation:AccountInformation) => accountInformation.fromAuctionOrderLeafNodes,
-    { onDelete: 'RESTRICT', onUpdate: 'CASCADE' }
-  )
-  @JoinColumn({
-    name: 'L2AddrFrom',
-    referencedColumnName: 'accountId',
-  })
-  L2AddrFromAccount!: AccountInformation;
-  @ManyToOne(
-    () => AccountInformation,
-    (accountInformation:AccountInformation) => accountInformation.toAuctionOrderLeafNodes,
-    { onDelete: 'RESTRICT', onUpdate: 'CASCADE' }
-  )
-  @JoinColumn({
-    name: 'L2AddrTo',
-    referencedColumnName: 'accountId',
-  })
-  L2AddrToAccount!: AccountInformation;
+  // @ManyToOne(
+  //   () => AccountInformation,
+  //   (accountInformation:AccountInformation) => accountInformation.fromAuctionOrderLeafNodes,
+  //   { onDelete: 'RESTRICT', onUpdate: 'CASCADE' }
+  // )
+  // @JoinColumn({
+  //   name: 'L2AddrFrom',
+  //   referencedColumnName: 'accountId',
+  // })
+  // L2AddrFromAccount!: AccountInformation;
+  // @ManyToOne(
+  //   () => AccountInformation,
+  //   (accountInformation:AccountInformation) => accountInformation.toAuctionOrderLeafNodes,
+  //   { onDelete: 'RESTRICT', onUpdate: 'CASCADE' }
+  // )
+  // @JoinColumn({
+  //   name: 'L2AddrTo',
+  //   referencedColumnName: 'accountId',
+  // })
+  // L2AddrToAccount!: AccountInformation;
   @OneToOne(
     () => AuctionOrderMerkleTreeNode,
     (auctionOrderMerkleTreeNode:AuctionOrderMerkleTreeNode) => auctionOrderMerkleTreeNode.auctionOrderLeafNode,

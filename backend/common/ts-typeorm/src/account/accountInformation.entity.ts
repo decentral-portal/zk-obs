@@ -1,5 +1,5 @@
 import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryColumn } from 'typeorm';
-import { AuctionOrderLeafNode } from '../auctionOrder/auctionOrderLeafNode.entity';
+// import { AuctionOrderLeafNode } from '../auctionOrder/auctionOrderLeafNode.entity';
 import { ObsOrderEntity } from '../auctionOrder/obsOrder.entity';
 import { BaseTimeEntity } from '../common/baseTimeEntity';
 import { AccountMerkleTreeNode } from './accountMerkleTreeNode.entity';
@@ -89,16 +89,16 @@ export class AccountInformation extends BaseTimeEntity {
     (accountMerkleTreeNode: AccountMerkleTreeNode) => accountMerkleTreeNode.leaf
   )
   accountMerkleTreeNode!: AccountMerkleTreeNode;
-  @OneToMany(
-    () => AuctionOrderLeafNode,
-    (auctionOrderLeafNode:AuctionOrderLeafNode) => auctionOrderLeafNode.L2AddrFromAccount
-  )
-  fromAuctionOrderLeafNodes!: AuctionOrderLeafNode[];
-  @OneToMany(
-    () => AuctionOrderLeafNode,
-    (auctionOrderLeafNode:AuctionOrderLeafNode) => auctionOrderLeafNode.L2AddrToAccount
-  )
-  toAuctionOrderLeafNodes!: AuctionOrderLeafNode[];
+  // @OneToMany(
+  //   () => AuctionOrderLeafNode,
+  //   (auctionOrderLeafNode:AuctionOrderLeafNode) => auctionOrderLeafNode.L2AddrFromAccount
+  // )
+  // fromAuctionOrderLeafNodes!: AuctionOrderLeafNode[];
+  // @OneToMany(
+  //   () => AuctionOrderLeafNode,
+  //   (auctionOrderLeafNode:AuctionOrderLeafNode) => auctionOrderLeafNode.L2AddrToAccount
+  // )
+  // toAuctionOrderLeafNodes!: AuctionOrderLeafNode[];
   @OneToMany(
     () => TransactionInfo,
     (transactionInfo: TransactionInfo) => transactionInfo.L2AccountInfo
