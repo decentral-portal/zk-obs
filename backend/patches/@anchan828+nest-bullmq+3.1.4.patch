@@ -1,0 +1,13 @@
+diff --git a/node_modules/@anchan828/nest-bullmq/dist/interfaces/bull-module.interface.d.ts b/node_modules/@anchan828/nest-bullmq/dist/interfaces/bull-module.interface.d.ts
+index 06c5aa1..cb1569f 100644
+--- a/node_modules/@anchan828/nest-bullmq/dist/interfaces/bull-module.interface.d.ts
++++ b/node_modules/@anchan828/nest-bullmq/dist/interfaces/bull-module.interface.d.ts
+@@ -20,7 +20,7 @@ export interface BullModuleOptions {
+ export interface BullModuleAsyncOptions extends Pick<ModuleMetadata, "imports"> {
+     useClass?: Type<BullModuleOptionsFactory>;
+     useExisting?: Type<BullModuleOptionsFactory>;
+-    useFactory?: (...args: unknown[]) => Promise<BullModuleOptions> | BullModuleOptions;
++    useFactory?: (...args: any[]) => Promise<BullModuleOptions> | BullModuleOptions;
+     inject?: Array<Type<BullModuleOptionsFactory> | string | any>;
+ }
+ export interface BullModuleOptionsFactory {

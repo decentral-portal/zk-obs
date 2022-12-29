@@ -1,0 +1,683 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "EdDSAPublicKeyType": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "BYTES_PER_ELEMENT": {
+            "type": "number"
+          },
+          "buffer": {
+            "type": "object",
+            "properties": {
+              "byteLength": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "byteLength"
+            ],
+            "additionalProperties": false
+          },
+          "byteLength": {
+            "type": "number"
+          },
+          "byteOffset": {
+            "type": "number"
+          },
+          "length": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "BYTES_PER_ELEMENT",
+          "buffer",
+          "byteLength",
+          "byteOffset",
+          "length"
+        ],
+        "additionalProperties": {
+          "type": "number"
+        }
+      },
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "EdDSASignaturePayload": {
+      "type": "object",
+      "properties": {
+        "R8": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "BYTES_PER_ELEMENT": {
+                "type": "number"
+              },
+              "buffer": {
+                "type": "object",
+                "properties": {
+                  "byteLength": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "byteLength"
+                ],
+                "additionalProperties": false
+              },
+              "byteLength": {
+                "type": "number"
+              },
+              "byteOffset": {
+                "type": "number"
+              },
+              "length": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "BYTES_PER_ELEMENT",
+              "buffer",
+              "byteLength",
+              "byteOffset",
+              "length"
+            ],
+            "additionalProperties": {
+              "type": "number"
+            }
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "S": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "R8",
+        "S"
+      ],
+      "additionalProperties": false
+    },
+    "TsTransferBaseType": {
+      "type": "object",
+      "properties": {
+        "reqType": {
+          "type": "string"
+        },
+        "reqDatas": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 5,
+          "maxItems": 5
+        },
+        "reqSigS": {
+          "type": "string"
+        },
+        "reqSigR8": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "reqSigMsg": {
+          "type": "string"
+        },
+        "tokenLeafIdFrom": {
+          "type": "string"
+        },
+        "tokenLeafIdTo": {
+          "type": "string"
+        },
+        "txL2TokenAddr": {
+          "type": "string"
+        },
+        "txAmount": {
+          "type": "string"
+        },
+        "txL2AddrFrom": {
+          "type": "string"
+        },
+        "txL2AddrTo": {
+          "type": "string"
+        },
+        "tsPubKeyFrom": {
+          "type": "string"
+        },
+        "txNonce": {
+          "type": "string"
+        },
+        "oriNonceFrom": {
+          "type": "string"
+        },
+        "newNonceFrom": {
+          "type": "string"
+        },
+        "oriL2TokenAddrFrom": {
+          "type": "string"
+        },
+        "newL2TokenAddrFrom": {
+          "type": "string"
+        },
+        "oriAmountFrom": {
+          "type": "string"
+        },
+        "newAmountFrom": {
+          "type": "string"
+        },
+        "tsPubKeyTo": {
+          "type": "string"
+        },
+        "oriNonceTo": {
+          "type": "string"
+        },
+        "newNonceTo": {
+          "type": "string"
+        },
+        "oriAmountTo": {
+          "type": "string"
+        },
+        "newAmountTo": {
+          "type": "string"
+        },
+        "oriL2TokenAddrTo": {
+          "type": "string"
+        },
+        "newL2TokenAddrTo": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "reqType",
+        "reqDatas",
+        "reqSigS",
+        "reqSigR8",
+        "reqSigMsg",
+        "tokenLeafIdFrom",
+        "tokenLeafIdTo",
+        "txL2TokenAddr",
+        "txAmount",
+        "txL2AddrFrom",
+        "txL2AddrTo",
+        "tsPubKeyFrom",
+        "txNonce",
+        "oriNonceFrom",
+        "newNonceFrom",
+        "oriL2TokenAddrFrom",
+        "newL2TokenAddrFrom",
+        "oriAmountFrom",
+        "newAmountFrom",
+        "tsPubKeyTo",
+        "oriNonceTo",
+        "newNonceTo",
+        "oriAmountTo",
+        "newAmountTo",
+        "oriL2TokenAddrTo",
+        "newL2TokenAddrTo"
+      ],
+      "additionalProperties": false
+    },
+    "TsTransferStateType": {
+      "type": "object",
+      "properties": {
+        "oriTokenRootFrom": {
+          "type": "string"
+        },
+        "oriTokenRootTo": {
+          "type": "string"
+        },
+        "accountMerkleProofFrom": {
+          "type": "string"
+        },
+        "accountMerkleProofTo": {
+          "type": "string"
+        },
+        "tokenMerkleProofFrom": {
+          "type": "string"
+        },
+        "tokenMerkleProofTo": {
+          "type": "string"
+        },
+        "newTokenRootFrom": {
+          "type": "string"
+        },
+        "newTokenRootTo": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "oriTokenRootFrom",
+        "oriTokenRootTo",
+        "accountMerkleProofFrom",
+        "accountMerkleProofTo",
+        "tokenMerkleProofFrom",
+        "tokenMerkleProofTo",
+        "newTokenRootFrom",
+        "newTokenRootTo"
+      ],
+      "additionalProperties": false
+    },
+    "TsTransferCircuitInputItemType": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "oriTokenRootFrom": {
+          "type": "string"
+        },
+        "oriTokenRootTo": {
+          "type": "string"
+        },
+        "accountMerkleProofFrom": {
+          "type": "string"
+        },
+        "accountMerkleProofTo": {
+          "type": "string"
+        },
+        "tokenMerkleProofFrom": {
+          "type": "string"
+        },
+        "tokenMerkleProofTo": {
+          "type": "string"
+        },
+        "newTokenRootFrom": {
+          "type": "string"
+        },
+        "newTokenRootTo": {
+          "type": "string"
+        },
+        "reqType": {
+          "type": "string"
+        },
+        "reqDatas": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 5,
+          "maxItems": 5
+        },
+        "reqSigS": {
+          "type": "string"
+        },
+        "reqSigR8": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "reqSigMsg": {
+          "type": "string"
+        },
+        "tokenLeafIdFrom": {
+          "type": "string"
+        },
+        "tokenLeafIdTo": {
+          "type": "string"
+        },
+        "txL2TokenAddr": {
+          "type": "string"
+        },
+        "txAmount": {
+          "type": "string"
+        },
+        "txL2AddrFrom": {
+          "type": "string"
+        },
+        "txL2AddrTo": {
+          "type": "string"
+        },
+        "tsPubKeyFrom": {
+          "type": "string"
+        },
+        "txNonce": {
+          "type": "string"
+        },
+        "oriNonceFrom": {
+          "type": "string"
+        },
+        "newNonceFrom": {
+          "type": "string"
+        },
+        "oriL2TokenAddrFrom": {
+          "type": "string"
+        },
+        "newL2TokenAddrFrom": {
+          "type": "string"
+        },
+        "oriAmountFrom": {
+          "type": "string"
+        },
+        "newAmountFrom": {
+          "type": "string"
+        },
+        "tsPubKeyTo": {
+          "type": "string"
+        },
+        "oriNonceTo": {
+          "type": "string"
+        },
+        "newNonceTo": {
+          "type": "string"
+        },
+        "oriAmountTo": {
+          "type": "string"
+        },
+        "newAmountTo": {
+          "type": "string"
+        },
+        "oriL2TokenAddrTo": {
+          "type": "string"
+        },
+        "newL2TokenAddrTo": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "tokenLeafIdFrom",
+        "tokenLeafIdTo",
+        "accountMerkleProofFrom",
+        "accountMerkleProofTo",
+        "newAmountFrom",
+        "newAmountTo",
+        "newL2TokenAddrFrom",
+        "newL2TokenAddrTo",
+        "newNonceFrom",
+        "newNonceTo",
+        "newTokenRootFrom",
+        "newTokenRootTo",
+        "oriAmountFrom",
+        "oriAmountTo",
+        "oriL2TokenAddrFrom",
+        "oriL2TokenAddrTo",
+        "oriNonceFrom",
+        "oriNonceTo",
+        "oriTokenRootFrom",
+        "oriTokenRootTo",
+        "reqDatas",
+        "reqSigMsg",
+        "reqSigR8",
+        "reqSigS",
+        "reqType",
+        "tokenMerkleProofFrom",
+        "tokenMerkleProofTo",
+        "tsPubKeyFrom",
+        "tsPubKeyTo",
+        "txAmount",
+        "txL2AddrFrom",
+        "txL2AddrTo",
+        "txL2TokenAddr",
+        "txNonce"
+      ]
+    },
+    "TsSystemAccountAddress": {
+      "type": "string",
+      "enum": [
+        "0",
+        "1"
+      ]
+    },
+    "TsTxType": {
+      "type": "number",
+      "enum": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    "TsTokenAddress": {
+      "type": "string",
+      "enum": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5"
+      ]
+    },
+    "TsTokenInfo": {
+      "type": "object",
+      "properties": {
+        "tokenAddr": {
+          "$ref": "#/definitions/TsTokenAddress"
+        },
+        "amount": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "tokenAddr",
+        "amount"
+      ],
+      "additionalProperties": false
+    },
+    "EdDSASignatureRequestType": {
+      "type": "object",
+      "properties": {
+        "R8": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "S": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "R8",
+        "S"
+      ],
+      "additionalProperties": false
+    },
+    "TsTxSignaturePayload": {
+      "type": "object",
+      "properties": {
+        "eddsaSig": {
+          "$ref": "#/definitions/EdDSASignaturePayload"
+        },
+        "ecdsaSig": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "eddsaSig"
+      ],
+      "additionalProperties": false
+    },
+    "TsTxRegisterRequest": {
+      "type": "object",
+      "properties": {
+        "L2AddrFrom": {
+          "type": "string"
+        },
+        "L2TokenAddr": {
+          "$ref": "#/definitions/TsTokenAddress"
+        },
+        "tsPubKey": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "amount": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "L2AddrFrom",
+        "tsPubKey"
+      ],
+      "additionalProperties": false,
+      "description": "Client Request Types"
+    },
+    "TsTxTransferNonSignatureRequest": {
+      "type": "object",
+      "properties": {
+        "L2AddrFrom": {
+          "type": "string"
+        },
+        "L2AddrTo": {
+          "type": "string"
+        },
+        "L2TokenAddr": {
+          "$ref": "#/definitions/TsTokenAddress"
+        },
+        "amount": {
+          "type": "string"
+        },
+        "nonce": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "L2AddrFrom",
+        "L2AddrTo",
+        "L2TokenAddr",
+        "amount",
+        "nonce"
+      ],
+      "additionalProperties": false
+    },
+    "TsTxTransferRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "eddsaSig": {
+          "$ref": "#/definitions/EdDSASignaturePayload"
+        },
+        "ecdsaSig": {
+          "type": "string"
+        },
+        "L2AddrFrom": {
+          "type": "string"
+        },
+        "L2AddrTo": {
+          "type": "string"
+        },
+        "L2TokenAddr": {
+          "$ref": "#/definitions/TsTokenAddress"
+        },
+        "amount": {
+          "type": "string"
+        },
+        "nonce": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "L2AddrFrom",
+        "L2AddrTo",
+        "L2TokenAddr",
+        "amount",
+        "eddsaSig",
+        "nonce"
+      ]
+    },
+    "TsTxDepositRequest": {
+      "type": "object",
+      "properties": {
+        "L2AddrFrom": {
+          "type": "string",
+          "const": "0"
+        },
+        "L2AddrTo": {
+          "type": "string"
+        },
+        "L2TokenAddr": {
+          "$ref": "#/definitions/TsTokenAddress"
+        },
+        "amount": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "L2AddrFrom",
+        "L2AddrTo",
+        "L2TokenAddr",
+        "amount"
+      ],
+      "additionalProperties": false
+    },
+    "TsTxWithdrawNonSignatureRequest": {
+      "type": "object",
+      "properties": {
+        "L2AddrFrom": {
+          "type": "string"
+        },
+        "L2AddrTo": {
+          "type": "string",
+          "const": "1"
+        },
+        "L2TokenAddr": {
+          "$ref": "#/definitions/TsTokenAddress"
+        },
+        "amount": {
+          "type": "string"
+        },
+        "nonce": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "L2AddrFrom",
+        "L2AddrTo",
+        "L2TokenAddr",
+        "amount",
+        "nonce"
+      ],
+      "additionalProperties": false
+    },
+    "TsTxWithdrawRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "eddsaSig": {
+          "$ref": "#/definitions/EdDSASignaturePayload"
+        },
+        "ecdsaSig": {
+          "type": "string"
+        },
+        "L2AddrFrom": {
+          "type": "string"
+        },
+        "L2AddrTo": {
+          "type": "string",
+          "const": "1"
+        },
+        "L2TokenAddr": {
+          "$ref": "#/definitions/TsTokenAddress"
+        },
+        "amount": {
+          "type": "string"
+        },
+        "nonce": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "L2AddrFrom",
+        "L2AddrTo",
+        "L2TokenAddr",
+        "amount",
+        "eddsaSig",
+        "nonce"
+      ]
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "ts-core/src",
+  "monorepo": true,
+  "root": "ts-core",
+  "compilerOptions": {
+      "webpack": true,
+      "tsConfigPath": "ts-core/tsconfig.app.json"
+  },
+  "projects": {
+    "ts-rollup-api": {
+      "type": "application",
+      "root": "ts-rollup-api",
+      "entryFile": "main",
+      "sourceRoot": "ts-rollup-api/src",
+      "compilerOptions": {
+        "tsConfigPath": "ts-rollup-api/tsconfig.app.json"
+      }
+    },
+    "ts-core": {
+      "type": "application",
+      "root": "ts-core",
+      "entryFile": "main",
+      "sourceRoot": "ts-core/src",
+      "compilerOptions": {
+        "tsConfigPath": "ts-core/tsconfig.app.json"
+      },
+      "core-log": {
+        "type": "library",
+        "root": "libs/core-log",
+        "entryFile": "index",
+        "sourceRoot": "libs/core-log/src",
+        "compilerOptions": {
+          "tsConfigPath": "libs/core-log/tsconfig.lib.json"
+        }
+      }
+    }
+  }
+}
