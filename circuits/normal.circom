@@ -262,7 +262,7 @@ template Normal(){
     // chunkCounter[i + 1] := the len of o_chunk after push calldata of first i req
     // template "DoRequest()" input channelData[i] and output channelData[i + 1]. Some reqs are be required to be atomical.
     chunkCounter[0] <== 0;
-    channelData[0] <== [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    channelData[0] <== [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     for(var i = 0; i < NumOfReqs(); i++){
         /* verify legality and correctness for each req */
         channelData[i + 1] <== DoRequest()(
@@ -291,7 +291,7 @@ template Normal(){
                 Indexer(NumOfChunks())(chunkMasks[i][j], 0, chunkCounter[i] + j, isCriticalChunk);
         }
     }
-    channelData[NumOfReqs()] === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    channelData[NumOfReqs()] === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     
     for(var i = 0; i < NumOfReqs(); i++)
         for(var j = 0; j < MaxOrderUnitsPerReq(); j++)

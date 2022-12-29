@@ -24,13 +24,10 @@ template IntDivide(bits_divisor){
     slt === 1;
     signal n2b[253 - bits_divisor] <== Num2Bits(253 - bits_divisor)(quotient);
 }
-template CalcSupAmt(){
-    /* calc the supremum of sellAmt, buyAmt */
-    signal input sellAmt;
-    signal input sellPrice;
-    signal input buyPrice;
-    signal output supBuyAmt; 
-    (supBuyAmt, _) <== IntDivide(BitsAmount())(sellAmt * sellPrice, buyPrice);
+template Min(bits){
+    signal input in[2];
+    signal slt <== LessThan(bits)(in);
+    signal output out <== (in[0] - in[1]) * slt + in[1];
 }
 template TsPubKey2TsAddr(){
     signal input in[2];
@@ -71,9 +68,9 @@ template DoReqUnknow(){
     
     signal input digest;
 
-    signal output channelOut[LenOfChannel()] <== [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    signal output channelOut[LenOfChannel()] <== [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     signal output resData[LenOfResponse()] <== [0, 0];
-    channelIn === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    channelIn === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     
 
     /* enabled be a boolean */
@@ -113,9 +110,9 @@ template DoReqRegister(){
     
     signal input digest;
 
-    signal output channelOut[LenOfChannel()] <== [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    signal output channelOut[LenOfChannel()] <== [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     signal output resData[LenOfResponse()] <== [0, 0];
-    channelIn === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    channelIn === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     
 
     /* enabled be a boolean */
@@ -171,9 +168,9 @@ template DoReqDeposit(){
     
     signal input digest;
 
-    signal output channelOut[LenOfChannel()] <== [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    signal output channelOut[LenOfChannel()] <== [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     signal output resData[LenOfResponse()] <== [0, 0];
-    channelIn === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    channelIn === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     
 
     /* enabled be a boolean */
@@ -229,9 +226,9 @@ template DoReqWithdraw(){
     
     signal input digest;
 
-    signal output channelOut[LenOfChannel()] <== [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    signal output channelOut[LenOfChannel()] <== [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     signal output resData[LenOfResponse()] <== [0, 0];
-    channelIn === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    channelIn === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     
     /* enabled be a boolean */
     enabled * (enabled - 1) === 0;
@@ -288,9 +285,9 @@ template DoReqCancel(){
     
     signal input digest;
 
-    signal output channelOut[LenOfChannel()] <== [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    signal output channelOut[LenOfChannel()] <== [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     signal output resData[LenOfResponse()] <== [0, 0];
-    channelIn === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    channelIn === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
     /* enabled be a boolean */
     enabled * (enabled - 1) === 0;
@@ -349,12 +346,9 @@ template DoReqSecondLimitOrder(){
     
     signal input digest;
 
-    signal output channelOut[LenOfChannel()] <== [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    signal output channelOut[LenOfChannel()] <== [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     signal output resData[LenOfResponse()] <== [0, 0];
-    channelIn === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-
-    signal leafId;
-    (_, leafId) <== IntDivide(25)(digest, (1 << NullifierTreeHeight())); 
+    channelIn === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
     /* enabled be a boolean */
     enabled * (enabled - 1) === 0;
@@ -380,7 +374,9 @@ template DoReqSecondLimitOrder(){
     /* correctness */
     for(var i = 0; i < LenOfRequest(); i++)
         ImplyEq()(enabled, r_newOrderLeaf[0][i], reqData[i]);
-    ImplyEq()(enabled, r_newOrderLeaf[0][LenOfRequest()], txId);
+    ImplyEq()(enabled, r_newOrderLeaf[0][OLIdxTxId()], txId);
+    ImplyEq()(enabled, r_newOrderLeaf[0][OLIdxAccumulatedBuyAmt()]  , 0);
+    ImplyEq()(enabled, r_newOrderLeaf[0][OLIdxAccumulatedSellAmt()] , 0);
 
     ImplyEq()(enabled, r_newAccountLeaf[0][ALIdxTsAddr()], r_oriAccountLeaf[0][ALIdxTsAddr()]);
     ImplyEq()(enabled, r_newAccountLeaf[0][ALIdxNonce()], r_oriAccountLeaf[0][ALIdxNonce()] + 1);
@@ -420,7 +416,7 @@ template DoReqSecondLimitStart(){
 
     signal output channelOut[LenOfChannel()];
     signal output resData[LenOfResponse()];
-    channelIn === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    channelIn === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
     /* enabled be a boolean */
     enabled * (enabled - 1) === 0;
@@ -439,10 +435,10 @@ template DoReqSecondLimitStart(){
         ImplyEq()(enabled, r_newOrderLeaf[0][i], 0);
 
     /* channel out */
-    for(var i = 0; i < LenOfRequest(); i++)
+    for(var i = 0; i < LenOfOL(); i++)
         channelOut[i] <== r_oriOrderLeaf[0][i];
-    for(var i = LenOfRequest(); i < LenOfChannel(); i++)
-        channelOut[i] <== 0;
+    channelOut[LenOfOL() + 0] <== r_oriOrderLeaf[0][LenOfRequest() + 1];
+    channelOut[LenOfOL() + 1] <== r_oriOrderLeaf[0][LenOfRequest() + 2];
 
     /* response */    
     resData <== [r_oriOrderLeaf[0][LenOfRequest()], 0];
@@ -478,16 +474,22 @@ template DoReqSecondLimitExchange(){
 
     signal output channelOut[LenOfChannel()];
     signal output resData[LenOfResponse()];
-    signal supBuyAmtTaker, newSupBuyAmtTaker;
 
-    var makerSellAmt = r_oriOrderLeaf[0][ReqIdxAmount()];
-    var supBuyAmtMaker = r_oriOrderLeaf[0][ReqIdxArg(3)];
-    var takerSellAmt = channelIn[ReqIdxAmount()];
-    (supBuyAmtTaker, _) <== IntDivide(BitsAmount())(takerSellAmt * makerSellAmt, supBuyAmtMaker);
+    var makerSellAmt = r_oriOrderLeaf[0][OLIdxAmount()];
+    var makerBuyAmt  = r_oriOrderLeaf[0][OLIdxArg(3)];
+    var takerSellAmt = channelIn[OLIdxAmount()];
+    var takerBuyAmt  = channelIn[OLIdxArg(3)];
+    var makerRemainSellAmt = makerSellAmt - r_oriOrderLeaf[0][OLIdxAccumulatedSellAmt()];
+    var takerRemainSellAmt = channelIn[OLIdxAmount()] - channelIn[OLIdxAccumulatedSellAmt()];
 
-    signal temp[2] <== [channelIn[ReqIdxAmount()] * r_oriOrderLeaf[0][ReqIdxAmount()], channelIn[ReqIdxArg(3)] * r_oriOrderLeaf[0][ReqIdxArg(3)]];
-    signal isMatched <== GreaterEqThan(BitsAmount())([temp[1] * enabled, temp[0] * enabled]);
-    signal matchedBuyAmt, matchedSellAmt;
+    signal supMakerBuyAmt;
+    (supMakerBuyAmt, _) <== IntDivide(BitsAmount())(makerRemainSellAmt * makerBuyAmt, (makerSellAmt - 1) * enabled + 1);
+    signal supTakerBuyAmt;
+    (supTakerBuyAmt, _) <== IntDivide(BitsAmount())(takerRemainSellAmt * makerSellAmt, (makerBuyAmt - 1) * enabled + 1);
+    signal isMatched <== LessThan(BitsAmount() * 2)([makerSellAmt * takerSellAmt, makerBuyAmt * takerBuyAmt]);
+
+    signal matchedSellAmt <== Min(BitsAmount())([makerRemainSellAmt, supTakerBuyAmt]); //maker 
+    signal matchedBuyAmt  <== Min(BitsAmount())([takerRemainSellAmt, supMakerBuyAmt]); //maker
 
     /* enabled be a boolean */
     enabled * (enabled - 1) === 0;
@@ -511,21 +513,16 @@ template DoReqSecondLimitExchange(){
     ImplyEq()(enabled, channelIn[ReqIdxReqType()], ReqTypeNumSecondLimitOrder());
     ImplyEq()(enabled, channelIn[ReqIdxL2TokenAddr()], r_oriOrderLeaf[0][ReqIdxArg(3)]);
     ImplyEq()(enabled, channelIn[ReqIdxArg(3)], r_oriOrderLeaf[0][ReqIdxL2TokenAddr()]);
-
-    ImplyEq()(enabled, r_oriOrderLeaf[0][ReqIdxReqType()], ReqTypeNumSecondLimitOrder());
     ImplyEq()(enabled, 1, isMatched);
 
     /* correctness */
-    matchedSellAmt <== Mux(2)([makerSellAmt, supBuyAmtTaker], LessThan(BitsAmount())([makerSellAmt * enabled, supBuyAmtTaker * enabled]));
-    matchedBuyAmt  <== Mux(2)([supBuyAmtMaker, takerSellAmt], LessThan(BitsAmount())([makerSellAmt * enabled, supBuyAmtTaker * enabled]));
-    for(var i = 0; i < LenOfOL(); i++){
-        if(i == OLIdxAmount())
-            ImplyEq()(enabled, r_newOrderLeaf[0][i], makerSellAmt - matchedSellAmt);
-        else if(i == OLIdxArg(3))
-            ImplyEq()(enabled, r_newOrderLeaf[0][i], supBuyAmtMaker - matchedBuyAmt);
-        else
-            ImplyEq()(enabled, r_newOrderLeaf[0][i], r_oriOrderLeaf[0][i]);
-    }
+        //to-do: remove order if cumSellAmt == sellAmt;
+    for(var i = 0; i < LenOfRequest(); i++)
+        ImplyEq()(enabled, r_newOrderLeaf[0][i], r_oriOrderLeaf[0][i]);
+    ImplyEq()(enabled, r_newOrderLeaf[0][OLIdxTxId()], r_oriOrderLeaf[0][OLIdxTxId()]);
+    ImplyEq()(enabled, r_newOrderLeaf[0][OLIdxAccumulatedSellAmt()], r_oriOrderLeaf[0][OLIdxAccumulatedSellAmt()] + matchedSellAmt);
+    ImplyEq()(enabled, r_newOrderLeaf[0][OLIdxAccumulatedBuyAmt() ], r_oriOrderLeaf[0][OLIdxAccumulatedBuyAmt() ] + matchedBuyAmt );
+    
     ImplyEq()(enabled, r_newAccountLeaf[0][ALIdxTsAddr()], r_oriAccountLeaf[0][ALIdxTsAddr()]);
     ImplyEq()(enabled, r_newAccountLeaf[0][ALIdxNonce()], r_oriAccountLeaf[0][ALIdxNonce()]);
     
@@ -536,22 +533,16 @@ template DoReqSecondLimitExchange(){
     ImplyEq()(enabled, r_newTokenLeaf[1][TLIdxLockedAmt()], r_oriTokenLeaf[1][TLIdxLockedAmt()] - matchedSellAmt);
     
     /* channel out */
-    for(var i = 0; i < LenOfRequest(); i++){
-        if(i == OLIdxAmount())
-            channelOut[i] <== takerSellAmt - matchedBuyAmt;
-        else if(i == OLIdxArg(3)){
-            (newSupBuyAmtTaker, _) <== IntDivide(BitsAmount())(channelOut[OLIdxAmount()] * channelIn[ReqIdxArg(3)], takerSellAmt);
-            channelOut[i] <== supBuyAmtMaker + matchedSellAmt;
-        }
-        else
-            channelOut[i] <== r_oriOrderLeaf[0][i];
-    }
-    channelOut[LenOfRequest()] <== channelIn[LenOfRequest()] + matchedSellAmt;
-    for(var i = LenOfRequest() + 1; i < LenOfChannel(); i++)
-        channelOut[i] <== 0;
+    for(var i = 0; i < LenOfRequest(); i++)
+        channelOut[i] <== channelIn[i];
+    channelOut[OLIdxTxId()] <== channelIn[OLIdxTxId()];
+    channelOut[OLIdxAccumulatedSellAmt()] <== channelIn[OLIdxAccumulatedSellAmt()] + matchedBuyAmt;
+    channelOut[OLIdxAccumulatedBuyAmt()]  <== channelIn[OLIdxAccumulatedBuyAmt() ] + makerSellAmt;
+    channelOut[LenOfOL() + 0] <== channelIn[LenOfOL() + 0];
+    channelOut[LenOfOL() + 1] <== channelIn[LenOfOL() + 1];
 
     /* response */
-    resData <== [txId - r_oriOrderLeaf[0][LenOfRequest()], supBuyAmtMaker];
+    resData <== [txId - r_oriOrderLeaf[0][OLIdxTxId()], makerBuyAmt];
 }
 template DoReqSecondLimitEnd(){
     signal input enabled;
@@ -582,11 +573,11 @@ template DoReqSecondLimitEnd(){
     
     signal input digest;
 
-    signal output channelOut[LenOfChannel()] <== [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    signal output channelOut[LenOfChannel()] <== [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     signal output resData[LenOfResponse()];
 
-    signal matchedSellAmt <== r_oriOrderLeaf[0][OLIdxAmount()] - channelIn[ReqIdxAmount()];
-    signal matchedBuyAmt <== r_oriOrderLeaf[0][LenOfRequest()];
+    signal matchedSellAmt <== channelIn[OLIdxAccumulatedSellAmt()] - channelIn[LenOfOL() + 0];
+    signal matchedBuyAmt  <== channelIn[OLIdxAccumulatedBuyAmt()]  - channelIn[LenOfOL() + 1];
     
     /* enabled be a boolean */
     enabled * (enabled - 1) === 0;
@@ -614,9 +605,11 @@ template DoReqSecondLimitEnd(){
     /* correctness */
     for(var i = 0; i < LenOfOL(); i++)
         ImplyEq()(enabled, r_newOrderLeaf[0][i], channelIn[i]);
+
     ImplyEq()(enabled, r_newAccountLeaf[0][ALIdxTsAddr()], r_oriAccountLeaf[0][ALIdxTsAddr()]);
     ImplyEq()(enabled, r_newAccountLeaf[0][ALIdxNonce()], r_oriAccountLeaf[0][ALIdxNonce()]);
     
+    // get avl amt first
     ImplyEq()(enabled, r_newTokenLeaf[0][TLIdxAvlAmt()], r_oriTokenLeaf[0][TLIdxAvlAmt()] + matchedBuyAmt); 
     ImplyEq()(enabled, r_newTokenLeaf[0][TLIdxLockedAmt()], r_oriTokenLeaf[0][TLIdxLockedAmt()]);
     
@@ -624,7 +617,7 @@ template DoReqSecondLimitEnd(){
     ImplyEq()(enabled, r_newTokenLeaf[1][TLIdxLockedAmt()], r_oriTokenLeaf[1][TLIdxLockedAmt()] - matchedSellAmt);
 
     /* response */
-    resData <== [matchedSellAmt, matchedBuyAmt];
+    resData <== [0, 0];
 }
 template DoReqSecondMarketOrder(){
     signal input enabled;
@@ -657,7 +650,7 @@ template DoReqSecondMarketOrder(){
 
     signal output channelOut[LenOfChannel()];
     signal output resData[LenOfResponse()] <== [0, 0];
-    channelIn === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    channelIn === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     
 
     /* enabled be a boolean */
@@ -669,9 +662,12 @@ template DoReqSecondMarketOrder(){
     
     /* channel out */
     for(var i = 0; i < LenOfRequest(); i++)
-        channelOut[i] <== r_oriOrderLeaf[0][i];
-    for(var i = LenOfRequest(); i < LenOfChannel(); i++)
-        channelOut[i] <== 0;
+        channelOut[i] <== reqData[i];
+    channelOut[OLIdxTxId()] <== txId;
+    channelOut[OLIdxAccumulatedSellAmt()] <== 0;
+    channelOut[OLIdxAccumulatedBuyAmt()]  <== 0;
+    channelOut[LenOfOL() + 0] <== 0;
+    channelOut[LenOfOL() + 1] <== 0;
 }
 template DoReqSecondMarketExchange(){
     signal input enabled;
@@ -704,14 +700,21 @@ template DoReqSecondMarketExchange(){
 
     signal output channelOut[LenOfChannel()];
     signal output resData[LenOfResponse()];
-    signal supBuyAmtTaker;
 
-    var makerSellAmt = r_oriOrderLeaf[0][ReqIdxAmount()];
-    var supBuyAmtMaker = r_oriOrderLeaf[0][ReqIdxArg(3)];
-    var takerSellAmt = channelIn[ReqIdxAmount()];
-    (supBuyAmtTaker, _) <== IntDivide(BitsAmount())(takerSellAmt * makerSellAmt, supBuyAmtMaker);
+    var makerSellAmt = r_oriOrderLeaf[0][OLIdxAmount()];
+    var makerBuyAmt  = r_oriOrderLeaf[0][OLIdxArg(3)];
+    var takerSellAmt = channelIn[OLIdxAmount()];
+    var takerBuyAmt  = channelIn[OLIdxArg(3)];
+    var makerRemainSellAmt = makerSellAmt - r_oriOrderLeaf[0][OLIdxAccumulatedSellAmt()];
+    var takerRemainSellAmt = channelIn[OLIdxAmount()] - channelIn[OLIdxAccumulatedSellAmt()];
 
-    signal matchedBuyAmt, matchedSellAmt;
+    signal supMakerBuyAmt;
+    (supMakerBuyAmt, _) <== IntDivide(BitsAmount())(makerRemainSellAmt * makerBuyAmt, (makerSellAmt - 1) * enabled + 1);
+    signal supTakerBuyAmt;
+    (supTakerBuyAmt, _) <== IntDivide(BitsAmount())(takerRemainSellAmt * makerSellAmt, (makerBuyAmt - 1) * enabled + 1);
+    
+    signal matchedSellAmt <== Min(BitsAmount())([makerRemainSellAmt, supTakerBuyAmt]); //maker 
+    signal matchedBuyAmt  <== Min(BitsAmount())([takerRemainSellAmt, supMakerBuyAmt]); //maker
 
     /* enabled be a boolean */
     enabled * (enabled - 1) === 0;
@@ -736,19 +739,14 @@ template DoReqSecondMarketExchange(){
     ImplyEq()(enabled, channelIn[ReqIdxL2TokenAddr()], r_oriOrderLeaf[0][ReqIdxArg(3)]);
     ImplyEq()(enabled, channelIn[ReqIdxArg(3)], r_oriOrderLeaf[0][ReqIdxL2TokenAddr()]);
 
-    ImplyEq()(enabled, r_oriOrderLeaf[0][ReqIdxReqType()], ReqTypeNumSecondLimitOrder());
-
     /* correctness */
-    matchedSellAmt <== Mux(2)([makerSellAmt, supBuyAmtTaker], LessThan(BitsAmount())([makerSellAmt * enabled, supBuyAmtTaker * enabled]));
-    matchedBuyAmt  <== Mux(2)([supBuyAmtMaker, takerSellAmt], LessThan(BitsAmount())([makerSellAmt * enabled, supBuyAmtTaker * enabled]));
-    for(var i = 0; i < LenOfOL(); i++){
-        if(i == OLIdxAmount())
-            ImplyEq()(enabled, r_newOrderLeaf[0][i], makerSellAmt - matchedSellAmt);
-        else if(i == OLIdxArg(3))
-            ImplyEq()(enabled, r_newOrderLeaf[0][i], supBuyAmtMaker - matchedBuyAmt);
-        else
-            ImplyEq()(enabled, r_newOrderLeaf[0][i], r_oriOrderLeaf[0][i]);
-    }
+        //to-do: remove order if cumSellAmt == sellAmt;
+    for(var i = 0; i < LenOfRequest(); i++)
+        ImplyEq()(enabled, r_newOrderLeaf[0][i], r_oriOrderLeaf[0][i]);
+    ImplyEq()(enabled, r_newOrderLeaf[0][OLIdxTxId()], r_oriOrderLeaf[0][OLIdxTxId()]);
+    ImplyEq()(enabled, r_newOrderLeaf[0][OLIdxAccumulatedSellAmt()], r_oriOrderLeaf[0][OLIdxAccumulatedSellAmt()] + matchedSellAmt);
+    ImplyEq()(enabled, r_newOrderLeaf[0][OLIdxAccumulatedBuyAmt() ], r_oriOrderLeaf[0][OLIdxAccumulatedBuyAmt() ] + matchedBuyAmt );
+    
     ImplyEq()(enabled, r_newAccountLeaf[0][ALIdxTsAddr()], r_oriAccountLeaf[0][ALIdxTsAddr()]);
     ImplyEq()(enabled, r_newAccountLeaf[0][ALIdxNonce()], r_oriAccountLeaf[0][ALIdxNonce()]);
     
@@ -759,20 +757,16 @@ template DoReqSecondMarketExchange(){
     ImplyEq()(enabled, r_newTokenLeaf[1][TLIdxLockedAmt()], r_oriTokenLeaf[1][TLIdxLockedAmt()] - matchedSellAmt);
     
     /* channel out */
-    for(var i = 0; i < LenOfRequest(); i++){
-        if(i == OLIdxAmount())
-            channelOut[i] <== makerSellAmt - matchedBuyAmt;
-        else if(i == OLIdxArg(3))
-            channelOut[i] <== supBuyAmtMaker + matchedSellAmt;
-        else
-            channelOut[i] <== r_oriOrderLeaf[0][i];
-    }
-    channelOut[LenOfRequest()] <== channelIn[LenOfRequest()] + matchedSellAmt;
-    for(var i = LenOfRequest() + 1; i < LenOfChannel(); i++)
-        channelOut[i] <== 0;
+    for(var i = 0; i < LenOfRequest(); i++)
+        channelOut[i] <== channelIn[i];
+    channelOut[OLIdxTxId()] <== channelIn[OLIdxTxId()];
+    channelOut[OLIdxAccumulatedSellAmt()] <== channelIn[OLIdxAccumulatedSellAmt()] + matchedBuyAmt;
+    channelOut[OLIdxAccumulatedBuyAmt()]  <== channelIn[OLIdxAccumulatedBuyAmt() ] + makerSellAmt;
+    channelOut[LenOfOL() + 0] <== channelIn[LenOfOL() + 0];
+    channelOut[LenOfOL() + 1] <== channelIn[LenOfOL() + 1];
 
     /* response */
-    resData <== [txId - r_oriOrderLeaf[0][LenOfRequest()], supBuyAmtMaker];
+    resData <== [txId - r_oriOrderLeaf[0][OLIdxTxId()], makerBuyAmt];
 }
 template DoReqSecondMarketEnd(){
     signal input enabled;
@@ -803,11 +797,11 @@ template DoReqSecondMarketEnd(){
     
     signal input digest;
 
-    signal output channelOut[LenOfChannel()] <== [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    signal output channelOut[LenOfChannel()] <== [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     signal output resData[LenOfResponse()];
 
-    signal matchedBuyAmt <== channelIn[LenOfRequest()];
-    signal matchedSellAmt <== channelIn[LenOfRequest() + 1];
+    signal matchedSellAmt <== channelIn[OLIdxAccumulatedSellAmt()] - channelIn[LenOfOL() + 0];
+    signal matchedBuyAmt  <== channelIn[OLIdxAccumulatedBuyAmt()]  - channelIn[LenOfOL() + 1];
     
     /* enabled be a boolean */
     enabled * (enabled - 1) === 0;
@@ -839,5 +833,5 @@ template DoReqSecondMarketEnd(){
     ImplyEq()(enabled, r_newTokenLeaf[1][TLIdxLockedAmt()], r_oriTokenLeaf[1][TLIdxLockedAmt()] - matchedSellAmt);
 
     /* response */
-    resData <== [matchedSellAmt, matchedBuyAmt];
+    resData <== [0, 0];
 }

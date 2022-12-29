@@ -47,6 +47,3 @@ function AccTreeHeight(){
 function TokenTreeHeight(){
     return 2;
 }
-function NullifierTreeHeight(){
-    return 2;
-}

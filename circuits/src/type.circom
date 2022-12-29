@@ -99,7 +99,7 @@ function ALIdxTokenRoot(){
 
 /* OrderLeaf */
 function LenOfOL(){
-    return LenOfRequest() + 1; // > req.concate([tx_id])
+    return LenOfRequest() + 3; // > req.concate([tx_id])
 }
 function OLIdxReqType(){
     return ReqIdxReqType();
@@ -113,13 +113,25 @@ function OLIdxL2TokenAddr(){
 function OLIdxAmount(){
     return ReqIdxAmount();
 }
+function OLIdxNonce(){
+    return ReqIdxNonce();
+}
 function OLIdxArg(idx){
     return ReqIdxArg(idx);
+}
+function OLIdxTxId(){
+    return LenOfRequest();
+}
+function OLIdxAccumulatedSellAmt(){
+    return LenOfRequest() + 1;
+}
+function OLIdxAccumulatedBuyAmt(){
+    return LenOfRequest() + 2;
 }
 
 /* Channel */
 function LenOfChannel(){
-    return LenOfRequest() + 3;
+    return LenOfOL() + 3;
 }
 
 /* Response */
