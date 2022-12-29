@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { Connection, IsNull, Not, Repository } from 'typeorm';
@@ -17,9 +18,10 @@ export class TsTokenTreeService extends TsMerkleTree<TokenLeafNode> {
     @InjectRepository(TokenMerkleTreeNode)
     private readonly tokenMerkleTreeRepository: Repository<TokenMerkleTreeNode>,
     private readonly connection: Connection,
+    private configService: ConfigService,
   ) {
     console.time('init token tree');
-    super(16, tsHashFunc);
+    super(configService.get<number>('TOKENS_TREE_HEIGHT', 2), tsHashFunc);
     console.timeEnd('init token tree');
   }
   async getCurrentLeafIdCount(L2Address: bigint): Promise<number> {

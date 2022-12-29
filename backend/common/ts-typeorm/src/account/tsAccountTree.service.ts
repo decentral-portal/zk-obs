@@ -6,6 +6,7 @@ import { Connection, Repository } from 'typeorm';
 import { toTreeLeaf, tsHashFunc } from '../common/ts-helper';
 import { TsMerkleTree } from '../common/tsMerkleTree';
 import { UpdateAccountTreeDto } from './dto/updateAccountTree.dto';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class TsAccountTreeService extends TsMerkleTree<AccountLeafNode>{
@@ -15,10 +16,11 @@ export class TsAccountTreeService extends TsMerkleTree<AccountLeafNode>{
     private accountLeafNodeRepository: Repository<AccountLeafNode>,
     @InjectRepository(AccountMerkleTreeNode)
     private accountMerkleTreeRepository: Repository<AccountMerkleTreeNode>,
-    private connection: Connection
+    private connection: Connection,
+    private readonly configService: ConfigService,
   ) {
     console.time('create Account Tree');
-    super(32, tsHashFunc);
+    super(configService.get<number>('ACCOUNTS_TREE_HEIGHT', 32), tsHashFunc);
     console.timeEnd('create Account Tree');
   }
   async getCurrentLeafIdCount(): Promise<number> {

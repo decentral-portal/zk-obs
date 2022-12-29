@@ -1,4 +1,5 @@
 import { Global, Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AccountInformation } from './accountInformation.entity';
 import { AccountLeafNode } from './accountLeafNode.entity';
@@ -13,6 +14,7 @@ import { TsTokenTreeService } from './tsTokenTree.service';
 @Global()
 @Module({
   imports: [
+    ConfigModule.forRoot(),
     TypeOrmModule.forFeature([
       AccountInformation,
       AccountLeafNode, 

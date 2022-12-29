@@ -1,30 +1,93 @@
-Table Account.Information {
-  L1Address varchar
-  L2Address decimal
+Table ObsOrder {
+  id integer [pk]
+  side integer
+  txId integer // create order id, nullable
+  reqType integer //
+  accountId integer
+  marketPair string // ETH-USDC
+  price decimal // if buy, price = buyAmt/sellAmt,  sellAmt/buyAmt
+  orderStatus integer // pending=1, canceled , matched 
+  mainQuantity decimal //  USDC - 6, ETH - 18 
+  baseQuantity decimal
+  remainMQ decimal //
+  remainBQ decimal
+  accumulatedSellAmt decimal
+  accumulatedBuyAmt decimal
+  mainTokenId integer
+  baseTokenId integer
+  timestamp timestamp // unix time
+  isMaker boolean
+  orderLeafId integer // nullable
+}
 
+Table ObsOrderLeaf {
+  orderLeafId integer [pk]
+  txId integer // create order id, nullable
+  reqType integer //
+  sender integer
+  sellTokenId decimal //  USDC - 6, ETH - 18
+  sellAmt decimal
+  buyTokenId decimal
+  buyAmt decimal
+  accumulatedSellAmt decimal
+  accumulatedBuyAmt decimal
+  orderId integer
+}
+Ref: ObsOrder.id - ObsOrderLeaf.orderId
+Table ObsOrderMerkleNode {
+  id decimal [pk]
+  hash decimal
+  leafId decimal
+}
+Ref: ObsOrderMerkleNode.leafId - ObsOrderLeaf.orderLeafId
+Ref: Transaction.List.txId - ObsOrder.txId
+Table MatchObsOrder {
+  id integer [pk]
+  side integer // buy, sell
+  txId integer  // craete match id, nullable
+  txId2 integer
+  reference_order integer(id)
+  reqType integer // Buy , Sell
+  marketPair string // ETH-USDC
+  matchedMQ decimal
+  matchedBQ decimal
+  timestamp timestamp
+  orderStatus integer // matched = 1, L2executed = 2 , L2confirmed = 4, L1confirmed=8
+}
+Ref: MatchObsOrder.reference_order > ObsOrder.id
+Ref: Transaction.List.txId - MatchObsOrder.txId
+Ref: Transaction.List.txId - MatchObsOrder.txId2
+Table Account.Information {
+  L1Address varchar [pk]
+  accountId decimal
+  
   email varchar
+  
   lastedLoginIp varchar
   lastLoginTime datetime
 
   createdAt datetime
+  createdBy varchar
   updatedAt datetime
   updatedBy varchar
   deletedAt datetime
   deletedBy varchar
+  label jsonb
+  labeledBy varchar
 }
-Ref: Account.Information.L2Address - Account.MerkleTreeNode.leafId
+Ref: Account.Information.accountId - Account.MerkleTreeNode.leafId
+Ref: Transaction.List.accountId - Account.Information.accountId
 
 Table Account.MerkleTreeNode {
   id decimal [pk]
   hash decimal
   
-  leafId decimal // L2Address
+  leafId decimal // accountId
 }
 
 Table Account.LeafNode {
   leafId decimal [pk]
-  tsPubKeyX decimal
-  tsPubKeyY decimal
+  tsAddr decimal
   nonce decimal
   tokenRoot decimal
 }
@@ -32,23 +95,22 @@ Ref: Account.LeafNode.leafId - Account.MerkleTreeNode.leafId
 
 
 Table Token.MerkleTreeNode {
-  L2Address decimal [pk]
+  accountId decimal [pk]
   id decimal [pk]
   hash decimal
   leafId decimal
 }
-Ref: Token.MerkleTreeNode.L2Address > Account.MerkleTreeNode.leafId
+Ref: Token.MerkleTreeNode.accountId > Account.MerkleTreeNode.leafId
 
 Table Token.LeafNode {
   leafId decimal [pk]
-
-  L2TokenAddr decimal
   availableAmt decimal
   lockedAmt decimal
 }
+
 Ref: Token.LeafNode.leafId - Token.MerkleTreeNode.leafId
-Table BlockInfo {
-  blockId integer [pk]
+Table BlockInformation {
+  blockNumber integer [pk]
   blockHash varchar
   
   L1TransactionHash varchar
@@ -59,7 +121,7 @@ Table BlockInfo {
   calldata json
   proof json
   
-  blockStatus integer
+  blockStatus enum
   
   createdAt datetime
   updatedAt datetime
@@ -67,17 +129,21 @@ Table BlockInfo {
   deletedAt datetime
   deletedBy varchar
 }
+Ref: BlockInformation.blockNumber < Transaction.List.blockNumber
 Table Transaction.List {
   txId integer [pk, increment]
   blockNumber integer  
   reqType decimal
-  L2AddrFrom decimal
-  L2AddrTo decimal
-  L2TokenAddr decimal
+  accountId decimal
+  tokenId decimal
+  
+  accumulatedSellAmt decimal
+  accumulatedBuyAmt decimal
+  
   amount decimal
   nonce decimal
-  eddsaSig decimal
-  ecdsaSig decimal
+  eddsaSig json
+  ecdsaSig varchar(256)
   
   args0 decimal
   args1 decimal
@@ -89,116 +155,22 @@ Table Transaction.List {
   feeToken decimal
   
   metadata json
-  
+  tsStatus enum
   createdAt datetime
   updatedAt datetime
   updatedBy varchar
   deletedAt datetime
   deletedBy varchar
 }
-Ref: Transaction.List.L2AddrFrom > Account.Information.L2Address
-Ref: Transaction.List.L2AddrTo > Account.Information.L2Address
-Ref: Transaction.List.blockNumber > BlockInfo.blockId
-Table AuctionOrder.MainOrder {
-  orderId decimal [pk]
-  reqType decimal
-  
-  L2AddrFrom decimal
-  L2AddrTo decimal
-  L2TokenAddrLending decimal
-  lendingAmt decimal
-  L2TokenAddrCollateral decimal
-  collateralAmt decimal
-  L2TokenAddrBorrowing decimal
-  borrowingAmt decimal
-  L2TokenAddrTSL decimal
-  interest decimal
-  nonce decimal
-  
-  expiredTime datetime
-  maturityDate datetime
-  orderStatus integer
-  
-  createdAt datetime
-  updatedAt datetime
-  updatedBy varchar
-  deletedAt datetime
-  deletedBy varchar
-}
-Ref: AuctionOrder.MainOrder.L2AddrFrom > Account.Information.L2Address
-Ref: AuctionOrder.MainOrder.L2AddrTo > Account.Information.L2Address
 
-Table AuctionOrder.MatchOrder {
-  txId integer [pk]
-  reqType decimal
-
-  matchId decimal 
-  orderId decimal
-  blockNumber integer
-  
-  L2AddrFrom decimal
-  L2AddrTo decimal
-  L2TokenAddrLending decimal
-  lendingAmt decimal
-  L2TokenAddrCollateral decimal
-  collateralAmt decimal
-  L2TokenAddrBorrowing decimal
-  borrowingAmt decimal
-  L2TokenAddrTSL decimal
-  interest decimal
-  nonce decimal
-  
-  expiredTime datetime
-  maturityDate datetime
-  orderStatus integer
-  
-  createdAt datetime
-  updatedAt datetime
-  updatedBy varchar
-  deletedAt datetime
-  deletedBy varchar
+Table CandleStick {
+  id integer [pk]
+  timestamp datetime
+  maxPrice varchar
+  minPrice varchar
+  openPrice varchar
+  closePrice varchar
+  volume varchar
+  marketPair varchar
 }
-Ref: AuctionOrder.MatchOrder.L2AddrFrom > Account.Information.L2Address
-Ref: AuctionOrder.MatchOrder.L2AddrTo > Account.Information.L2Address
-Ref: AuctionOrder.MatchOrder.matchId > AuctionOrder.MainOrder.orderId
-
-Table AuctionOrder.RemainOrderView {
-  // txId integer [pk]
-  orderId integer [pk]
-  L2AddrFrom decimal
-  L2AddrTo decimal
-  L2TokenAddrLending decimal
-  lendingAmt decimal
-  L2TokenAddrCollateral decimal
-  collateralAmt decimal
-  L2TokenAddrBorrowing decimal
-  borrowingAmt decimal
-  L2TokenAddrTSL decimal
-}
-Ref: AuctionOrder.RemainOrderView.orderId - AuctionOrder.MainOrder.orderId
-Table AuctionOrder.MerkleTreeNode {
-  id decimal
-  hash decimal
-  leafId decimal
-}
-Ref: AuctionOrder.LeafNode.leafId - AuctionOrder.MerkleTreeNode.leafId
-// Ref: AuctionOrder.MerkleTreeNode.L2AddrFrom > Account.Information.L2Address
-
-Table AuctionOrder.LeafNode {
-  leafId decimal [pk]
-  txId decimal
-  reqType decimal
-  L2AddrFrom decimal
-  L2AddrTo decimal
-  L2TokenAddr decimal
-  amount decimal // amount
-  nonce decimal
-  maturityDate decimal
-  expiredTime decimal
-  interest decimal
-  L2TokenAddrBorrowing decimal // L2TokenAddrBorrowing
-  borrowingAmt decimal // borrowingAmt
-}
-Ref: AuctionOrder.LeafNode.L2AddrFrom > Account.Information.L2Address
-Ref: AuctionOrder.LeafNode.L2AddrTo > Account.Information.L2Address
 
