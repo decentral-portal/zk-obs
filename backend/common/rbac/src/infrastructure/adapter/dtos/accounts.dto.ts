@@ -29,7 +29,7 @@ export class AccountBalanceQueryDto {
   @ApiProperty({ required: false})
   L1Address?: string;
   @ApiProperty({ required: false})
-  L2Address?: string;
+  accountId?: string;
 }
 
 export class AccountBalanceResponse {

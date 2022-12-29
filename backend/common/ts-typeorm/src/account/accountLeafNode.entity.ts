@@ -13,22 +13,13 @@ export class AccountLeafNode {
   leafId!: bigint; 
   @Column({
     type: 'decimal',
-    name: 'tsPubKeyX',
+    name: 'tsAddr',
     precision: 86,
     scale: 0,
     nullable: false,
     default: 0n,
   })
-  tsPubKeyX!: bigint;
-  @Column({
-    type: 'decimal',
-    name: 'tsPubKeyY',
-    precision: 86,
-    scale: 0,
-    nullable: false,
-    default: 0n
-  })
-  tsPubKeyY!: bigint;
+  tsAddr!: bigint;
   @Column({
     type: 'decimal',
     name: 'nonce',

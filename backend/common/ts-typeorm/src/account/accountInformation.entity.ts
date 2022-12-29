@@ -1,13 +1,13 @@
-import { Column, CreateDateColumn, DeleteDateColumn, Entity, OneToMany, OneToOne, PrimaryColumn, UpdateDateColumn } from 'typeorm';
-import { AuctionMainOrder } from '../auctionOrder/auctionMainOrder.entity';
-import { AuctionMatchOrder } from '../auctionOrder/auctionMatchOrder.entity';
+import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryColumn } from 'typeorm';
 import { AuctionOrderLeafNode } from '../auctionOrder/auctionOrderLeafNode.entity';
+import { ObsOrderEntity } from '../auctionOrder/obsOrder.entity';
+import { BaseTimeEntity } from '../common/baseTimeEntity';
 import { AccountMerkleTreeNode } from './accountMerkleTreeNode.entity';
 import { Role } from './role.enum';
 import { TransactionInfo } from './transactionInfo.entity';
 
 @Entity('AccountInformation', { schema: 'public' })
-export class AccountInformation {
+export class AccountInformation extends BaseTimeEntity {
   @PrimaryColumn({
     type: 'varchar', 
     name: 'L1Address', 
@@ -18,13 +18,12 @@ export class AccountInformation {
 
   @Column({
     type: 'decimal', 
-    name: 'L2Address',
+    name: 'accountId',
     precision: 86, 
     scale: 0,
     nullable: false, 
   })
-  L2Address!: string;
-
+  accountId!: string;
   @Column({
     type: 'varchar', 
     name: 'email',
@@ -33,7 +32,6 @@ export class AccountInformation {
     unique: true,
   })
   email!: string;
-
   @Column({
     type: 'varchar', 
     name: 'lastedLoginIp',
@@ -71,40 +69,20 @@ export class AccountInformation {
     nullable: true,
   })
   refreshToken!: string|null;
-  @CreateDateColumn({
-    type: 'timestamp without time zone',
-    name: 'createdAt',
-    nullable: false,
-    default: 'now()'
-  })
-  createdAt!: Date;
-  @UpdateDateColumn({
-    type: 'timestamp without time zone',
-    name: 'updatedAt',
-    nullable: false,
-    default: 'now()'
-  })
-  updatedAt!: Date;
-  @DeleteDateColumn({
-    type: 'timestamp without time zone',
-    name: 'deletedAt',
+  @Column({
+    type: 'jsonb',
+    name: 'label',
     nullable: true,
+    default: () => '\'{}\'',
   })
-  deletedAt!: Date | null;
+  label!: object;
   @Column({
     type: 'varchar',
-    name: 'updatedBy',
-    length: 300,
+    name: 'labelBy',
+    length: 256,
     nullable: true,
-  }) 
-  updatedBy!: string | null;
-  @Column({
-    type: 'varchar',
-    name: 'deletedBy',
-    length: 300,
-    nullable: true,
-  }) 
-  deletedBy!: string | null;
+  })
+  labelBy!: string | null;
   // relations
   @OneToOne(
     () => AccountMerkleTreeNode,
@@ -123,32 +101,16 @@ export class AccountInformation {
   toAuctionOrderLeafNodes!: AuctionOrderLeafNode[];
   @OneToMany(
     () => TransactionInfo,
-    (transactionInfo: TransactionInfo) => transactionInfo.L2FromAccountInfo
+    (transactionInfo: TransactionInfo) => transactionInfo.L2AccountInfo
   )
-  fromTransactionInfos!: TransactionInfo[];
+  transactionInfos!: TransactionInfo[];
   @OneToMany(
-    () => TransactionInfo,
-    (transactionInfo: TransactionInfo) => transactionInfo.L2ToAccountInfo
+    () => ObsOrderEntity,
+    (obsOrder: ObsOrderEntity) => obsOrder.accountInfo
   )
-  toTransactionInfos!: TransactionInfo[];
-  @OneToMany(
-    () => AuctionMainOrder,
-    (auctionMainOrder: AuctionMainOrder) => auctionMainOrder.L2AddrFromAccount
-  )
-  fromAuctionMainOrders!: AuctionMainOrder[];
-  @OneToMany(
-    () => AuctionMainOrder,
-    (auctionMainOrder: AuctionMainOrder) => auctionMainOrder.L2AddrToAccount
-  )
-  toAuctionMainOrders!: AuctionMainOrder[];
-  @OneToMany(
-    () => AuctionMatchOrder,
-    (auctionMatchOrder: AuctionMatchOrder) => auctionMatchOrder.L2AddrFromAccount
-  )
-  fromAuctionMatchOrders!: AuctionMatchOrder[];
-  @OneToMany(
-    () => AuctionMatchOrder,
-    (auctionMatchOrder: AuctionMatchOrder) => auctionMatchOrder.L2AddrToAccount
-  )
-  toAuctionMatchOrders!: AuctionMatchOrder[];
+  @JoinColumn({
+    name: 'accountId',
+    referencedColumnName: 'accountId',
+  })
+  obsOrders!: ObsOrderEntity[] | null; 
 }

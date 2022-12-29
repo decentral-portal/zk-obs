@@ -14,13 +14,13 @@ export class TokenLeafNode {
   leafId!: string;
   @PrimaryColumn({
     type: 'decimal',
-    name: 'L2Address',
+    name: 'accountId',
     precision: 86,
     scale: 0,
     primary: true,
     nullable: false,
   })
-  L2Address!: string;
+  accountId!: string;
   @Column({
     type: 'decimal',
     name: 'L2TokenAddr',
@@ -51,6 +51,6 @@ export class TokenLeafNode {
     { onDelete: 'RESTRICT', onUpdate: 'CASCADE' }
   )
   @JoinColumn([{ name: 'leafId', referencedColumnName: 'leafId' },
-  { name: 'L2Address', referencedColumnName: 'L2Address' }])
+  { name: 'accountId', referencedColumnName: 'accountId' }])
   tokenMerkleNode!: TokenMerkleTreeNode;
 }

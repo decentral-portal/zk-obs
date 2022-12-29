@@ -1,5 +1,5 @@
 export class TokenTreeResponseDto {
-  L2Address!: string;
+  accountId!: string;
   id!: number;
   leafId!: number|null;
   hash!: string;

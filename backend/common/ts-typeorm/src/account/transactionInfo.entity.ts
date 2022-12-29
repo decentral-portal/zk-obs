@@ -1,9 +1,8 @@
-import { TsTxType } from '@ts-sdk/domain/lib/ts-types/ts-types';
-// import { now } from 'fp-ts/lib/Date';
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryColumn } from 'typeorm';
+import { MatchObsOrderEntity } from '../auctionOrder/matchObsOrder.entity';
 import { BaseTimeEntity } from '../common/baseTimeEntity';
 import { AccountInformation } from './accountInformation.entity';
-import { BlockInfo } from './blockInfo.entity';
+import { BlockInformation } from './blockInformation.entity';
 import { TS_STATUS } from './tsStatus.enum';
 
 @Entity('TransactionInfo', { schema: 'public' })
@@ -26,32 +25,45 @@ export class TransactionInfo extends BaseTimeEntity {
     type: 'integer',
     name: 'reqType',
     nullable: false,
+    default: 0
   })
-  reqType!: TsTxType;
+  reqType!: number;
   @Column({
     type: 'decimal',
-    name: 'L2AddrFrom',
+    name: 'accountId',
     precision: 86,
     scale: 0,
     nullable: false,
+    default: 0n,
   })
-  L2AddrFrom!: bigint;
+  accountId!: bigint;
   @Column({
     type: 'decimal',
-    name: 'L2AddrTo',
+    name: 'tokenId',
     precision: 86,
     scale: 0,
     nullable: false,
+    default: 0n,
   })
-  L2AddrTo!: bigint;
+  tokenId!: bigint;
   @Column({
     type: 'decimal',
-    name: 'L2TokenAddr',
+    name: 'accumulatedSellAmt',
     precision: 86,
     scale: 0,
     nullable: false,
+    default: 0n,
   })
-  L2TokenAddr!: bigint;
+  accumulatedSellAmt!: bigint;
+  @Column({
+    type: 'decimal',
+    name: 'accumulatedBuyAmt',
+    precision: 86,
+    scale: 0,
+    nullable: false,
+    default: 0n,
+  })
+  accumulatedBuyAmt!: bigint;
   @Column({
     type: 'decimal',
     name: 'amount',
@@ -65,7 +77,8 @@ export class TransactionInfo extends BaseTimeEntity {
     name: 'nonce',
     precision: 86,
     scale: 0,
-    nullable: false
+    nullable: false,
+    default: 0n,
   })
   nonce!: bigint;
   @Column({
@@ -74,6 +87,7 @@ export class TransactionInfo extends BaseTimeEntity {
     precision: 86,
     scale: 0,
     nullable: false,
+    default: 0n,
   })
   eddsaSig!: bigint;
   @Column({
@@ -82,6 +96,7 @@ export class TransactionInfo extends BaseTimeEntity {
     precision: 86,
     scale: 0,
     nullable: false,
+    default: 0n,
   })
   ecdsaSig!: bigint;
   @Column({
@@ -90,6 +105,7 @@ export class TransactionInfo extends BaseTimeEntity {
     precision: 86,
     scale: 0,
     nullable: true,
+    default: 0n,
   })
   arg0!: string | null;
   @Column({
@@ -98,6 +114,7 @@ export class TransactionInfo extends BaseTimeEntity {
     precision: 86,
     scale: 0,
     nullable: true,
+    default: 0n,
   })
   arg1!: string | null;
   @Column({
@@ -106,6 +123,7 @@ export class TransactionInfo extends BaseTimeEntity {
     precision: 86,
     scale: 0,
     nullable: true,
+    default: 0n,
   })
   arg2!: string | null;
   @Column({
@@ -114,6 +132,7 @@ export class TransactionInfo extends BaseTimeEntity {
     precision: 86,
     scale: 0,
     nullable: true,
+    default: 0n,
   })
   arg3!: string | null;
   @Column({
@@ -122,6 +141,7 @@ export class TransactionInfo extends BaseTimeEntity {
     precision: 86,
     scale: 0,
     nullable: true,
+    default: 0n,
   })
   arg4!: string | null;
   @Column({
@@ -130,7 +150,7 @@ export class TransactionInfo extends BaseTimeEntity {
     precision: 86,
     scale: 0,
     nullable: false,
-    default: 0
+    default: 0n
   })
   fee!: bigint;
   @Column({
@@ -139,14 +159,14 @@ export class TransactionInfo extends BaseTimeEntity {
     precision: 86,
     scale: 0,
     nullable: false,
-    default: 0
+    default: 0n
   })
   feeToken!: bigint;
   @Column({
     type: 'json',
     name: 'metadata',
     nullable: true,
-    default: () => {}
+    default: () => '\'{}\''
   })
   metadata!: object | null;
   @Column({
@@ -162,37 +182,45 @@ export class TransactionInfo extends BaseTimeEntity {
       TS_STATUS.REJECTED
     ],
     nullable: false,
-    default: TS_STATUS.PENDING
+    default: `'${TS_STATUS.PENDING}'`
   })
   tsStatus!: TS_STATUS;
   @ManyToOne(
     () => AccountInformation,
-    (accountInformation: AccountInformation) => accountInformation.fromTransactionInfos,
+    (accountInformation: AccountInformation) => accountInformation.transactionInfos,
     { onDelete: 'RESTRICT', onUpdate: 'CASCADE' }
   )
   @JoinColumn({
-    name: 'L2AddrFrom',
-    referencedColumnName: 'L2Address'
+    name: 'accountId',
+    referencedColumnName: 'accountId'
   })
-  L2FromAccountInfo!: AccountInformation;
+  L2AccountInfo!: AccountInformation;
   @ManyToOne(
-    () => AccountInformation,
-    (accountInformation: AccountInformation) => accountInformation.toTransactionInfos,
-    { onDelete: 'RESTRICT', onUpdate: 'CASCADE' }
-  )
-  @JoinColumn({
-    name: 'L2AddrTo',
-    referencedColumnName: 'L2Address'
-  })
-  L2ToAccountInfo!: AccountInformation;
-  @ManyToOne(
-    () => BlockInfo,
-    (blockInfo: BlockInfo) => blockInfo.transactionInfos,
+    () => BlockInformation,
+    (blockInformation: BlockInformation) => blockInformation.transactionInfos,
     { onDelete: 'RESTRICT', onUpdate: 'CASCADE' } 
   )
   @JoinColumn({
     name: 'blockNumber',
-    referencedColumnName: 'blockId'
+    referencedColumnName: 'blockNumber'
   })
-  blockInfo!: BlockInfo;
+  blockInfo!: BlockInformation;
+  @OneToOne(
+    () => MatchObsOrderEntity,
+    (matchedObsOrder: MatchObsOrderEntity) => matchedObsOrder.matchedTx
+  )
+  @JoinColumn({
+    name: 'txId',
+    referencedColumnName: 'txId'
+  })
+  matchedOrder!: MatchObsOrderEntity | null;
+  @OneToOne(
+    () => MatchObsOrderEntity,
+    (matchedObsOrder: MatchObsOrderEntity) => matchedObsOrder.matchedTx2
+  )
+  @JoinColumn({
+    name: 'txId',
+    referencedColumnName: 'txId2'
+  })
+  matchedOrder2!: MatchObsOrderEntity | null;
 }

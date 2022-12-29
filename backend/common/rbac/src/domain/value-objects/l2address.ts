@@ -1,3 +1,3 @@
 import { Static, BigInt } from 'runtypes';
-export const L2Address = BigInt.withBrand('L2Address');
-export type L2Address = Static<typeof L2Address>;
+export const AccountId = BigInt.withBrand('accountId');
+export type AccountId = Static<typeof AccountId>;

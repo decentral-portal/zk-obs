@@ -5,18 +5,19 @@ import fs from 'fs';
 import path from 'path';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
-import { BlockInfomation } from 'common/ts-typeorm/src/account/blockInformation.entity';
+import { BlockInformation } from 'common/ts-typeorm/src/account/blockInformation.entity';
 import { Repository } from 'typeorm';
-import { TS_STATUS } from '../../../common/ts-typeorm/src/account/tsStatus.enum';
+// import { TS_STATUS } from '../../../common/ts-typeorm/src/account/tsStatus.enum';
 import { BullWorker, BullWorkerProcess } from '@anchan828/nest-bullmq';
 import { Job } from 'bullmq';
+import { BLOCK_STATUS } from '@common/ts-typeorm/account/blockStatus.enum';
 @BullWorker({queueName: TsWorkerName.PROVER})
 export class ProverConsumer {
   constructor(
     private readonly config: ConfigService,
     private readonly logger: PinoLoggerService,
-    @InjectRepository(BlockInfomation)
-    private blockRepository: Repository<BlockInfomation>,
+    @InjectRepository(BlockInformation)
+    private blockRepository: Repository<BlockInformation>,
   // eslint-disable-next-line no-empty-function
   ) { }
 
@@ -26,13 +27,13 @@ export class ProverConsumer {
   }
 
   @BullWorkerProcess()
-  async process(job: Job<BlockInfomation>) {
+  async process(job: Job<BlockInformation>) {
     this.logger.log(`ProverConsumer.process ${job.data.blockNumber}`);
 
-    const { circuitInput } = job.data;
+    // const { circuitInput } = job.data;
     const inputName = job.data.blockNumber.toString();
     const inputPath = this.getCircuitInputPath(inputName);
-    fs.writeFileSync(inputPath, JSON.stringify(circuitInput));
+    // fs.writeFileSync(inputPath, JSON.stringify(circuitInput));
 
     const { proofPath, publicPath } = await prove(inputName, inputPath, 'circuit');
     const proof = JSON.parse(fs.readFileSync(proofPath, 'utf8'));
@@ -41,9 +42,9 @@ export class ProverConsumer {
     await this.blockRepository.update({
       blockNumber: job.data.blockNumber,
     },{
-      status: TS_STATUS.L2CONFIRMED,
+      blockStatus: BLOCK_STATUS.L2CONFIRMED,
       proof,
-      publicInput,
+      // publicInput,
     });
     return true;
   }

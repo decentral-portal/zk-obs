@@ -21,43 +21,43 @@ export default class CreateAccountInfos implements Seeder {
       .into(AccountInformation)
       .values([{
         L1Address: 'burnAccount',
-        L2Address: 0n.toString(),
+        accountId: 0n.toString(),
         email: 'burnAccount@tkspring.com', 
         updatedBy: 'Server'
       }, {
         L1Address: 'mintAccount',
-        L2Address: 1n.toString(),
+        accountId: 1n.toString(),
         email: 'mintAccount@tkpsring.com',
         updatedBy: 'Server'
       }, {
         L1Address: 'withdrawAccount',
-        L2Address: 2n.toString(),
+        accountId: 2n.toString(),
         email: 'withdrawAccount@tkspring.com',
         updatedBy: 'Server'
       }, {
         L1Address: 'redeemAccount',
-        L2Address: 3n.toString(),
+        accountId: 3n.toString(),
         email: 'redeemmAccount@tkspring.com',
         updatedBy: 'Server'
       }, {
         L1Address: 'auditionAccount',
-        L2Address: 10n.toString(),
+        accountId: 10n.toString(),
         email: 'auctionAccount@tkspring.com',
         updatedBy: 'Server'
       }, {
         L1Address: 'secondaryAccount',
-        L2Address: 11n.toString(),
+        accountId: 11n.toString(),
         email: 'secondaryAccount@tkpsring.com',
         updatedBy: 'Server'
       }, {
         L1Address: 'repoAccount',
-        L2Address: 12n.toString(),
+        accountId: 12n.toString(),
         email: 'repoAccount@tkspring.com',
         updatedBy: 'Server'
       },
       {
         L1Address: '690B9A9E9aa1C9dB991C7721a92d351Db4FaC990',
-        L2Address: 100n.toString(),
+        accountId: 100n.toString(),
         email: 'yuanyu90221@gmail.com',
         lastedLoginIp: '127.0.0.1',
         lastLoginTime: now,
@@ -66,7 +66,7 @@ export default class CreateAccountInfos implements Seeder {
         updatedBy: 'Server'
       }, {
         L1Address: '319AbFF6695E87d5E402F803045AaD0F07b5dA7d',
-        L2Address: 101n.toString(),
+        accountId: 101n.toString(),
         email: 'yuanyu.liang@tkspring.com',
         lastedLoginIp: '127.0.0.1',
         lastLoginTime: now,

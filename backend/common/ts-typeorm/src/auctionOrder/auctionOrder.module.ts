@@ -1,22 +1,30 @@
 import { Global, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuctionMainOrder } from './auctionMainOrder.entity';
-import { AuctionMatchOrder } from './auctionMatchOrder.entity';
 import { AuctionOrderLeafNode } from './auctionOrderLeafNode.entity';
 import { AuctionBondTokenEntity } from './auctionBondToken.entity';
 import { AuctionOrderMerkleTreeNode } from './auctionOrderMerkleTreeNode.entity';
-import { AuctionRemainOrderView } from './auctionRemainOrderView.entity';
-import { TsAuctionOrderTreeService } from './tsAuctionOrderTree.service';
-import { AuctionL2RealBalanceViewEntity } from './auctionL2RealBalanceView.entity';
+import { ObsOrderEntity } from './obsOrder.entity';
+import { ObsOrderLeafEntity } from './obsOrderLeaf.entity';
+import { MatchObsOrderEntity } from './matchObsOrder.entity';
+import { CandleStickEntity } from './candleStick.entity';
+import { ObsOrderLeafMerkleTreeNode } from './obsOrderLeafMerkleTreeNode.entity';
+import { MarketPairInfoEntity } from './marketPairInfo.entity';
 
 @Global()
 @Module({
-  imports: [ConfigModule, TypeOrmModule.forFeature([AuctionOrderMerkleTreeNode, AuctionOrderLeafNode, 
-    AuctionMainOrder, AuctionMatchOrder, AuctionRemainOrderView, AuctionBondTokenEntity,
-    AuctionL2RealBalanceViewEntity
+  imports: [ConfigModule, TypeOrmModule.forFeature([
+    // AuctionOrderMerkleTreeNode,
+    // AuctionOrderLeafNode,
+    ObsOrderEntity,
+    ObsOrderLeafEntity,
+    ObsOrderLeafMerkleTreeNode,
+    MatchObsOrderEntity,
+    MarketPairInfoEntity,
+    CandleStickEntity, 
+    AuctionBondTokenEntity,
   ])],
-  providers: [ConfigService, TsAuctionOrderTreeService],
+  providers: [ConfigService],
   exports: [TypeOrmModule]
 })
 export class AuctionOrderMoudle {}

@@ -7,7 +7,7 @@ import { hasRoles } from '@common/rbac/infrastructure/adapter/decorators/roles.d
 import { SignInRequestDto, SignInResponseDto } from '@common/rbac/infrastructure/adapter/dtos/signIn.dto';
 import { SignOutRequestDto, SignOutResponseDto } from '@common/rbac/infrastructure/adapter/dtos/signout.dto';
 import { SignUpRequestDto, SignUpResponseDto } from '@common/rbac/infrastructure/adapter/dtos/signUp.dto';
-import { L2Address } from '@common/rbac/domain/value-objects/l2address';
+import { AccountId } from '@common/rbac/domain/value-objects/l2address';
 import { Email } from '@common/rbac/domain/value-objects/email';
 import { HashedPassword } from '@common/rbac/domain/value-objects/password';
 import { Role, RoleEnum } from '@common/rbac/domain/value-objects/role';
@@ -36,13 +36,13 @@ export class AccountController {
         this.hashingService.hashPlainPassword(HashedPassword.check(signUpDto.password)),
         this.accountService.getAccountInfoCount()
       ]);
-      const l2Address = 1n + BigInt(currentAccountCount.toString());
+      const accountId = 1n + BigInt(currentAccountCount.toString());
       const accountInfo = await this.accountService.createAccount(
         {
           email: Email.check(signUpDto.email),
           password: hashedPassword,
           L1Address: L1Address.check(upperCaseL1Address),
-          L2Address: L2Address.check(l2Address),
+          accountId: AccountId.check(accountId),
           role: Role.check(RoleEnum.MEMBER)  
         }
       );

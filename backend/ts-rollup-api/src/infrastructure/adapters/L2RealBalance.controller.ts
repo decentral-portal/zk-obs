@@ -10,11 +10,11 @@ export class L2RealBalanceController {
   ) {}
 
   @Get()
-  async getL2RealBalance(@Query('L2Address') L2Address: string, @Query('L2TokenAddrList') L2TokenAddrList: string[]): Promise<any> {
-    if (L2Address === undefined || L2Address === '') {
-      throw new BadRequestException('L2Address is not provided');
+  async getL2RealBalance(@Query('accountId') accountId: string, @Query('L2TokenAddrList') L2TokenAddrList: string[]): Promise<any> {
+    if (accountId === undefined || accountId === '') {
+      throw new BadRequestException('accountId is not provided');
     }
-    this.logger.debug(`getL2RealBalance: L2Address=${L2Address}, L2TokenAddrList=${L2TokenAddrList}`);
+    this.logger.debug(`getL2RealBalance: accountId=${accountId}, L2TokenAddrList=${L2TokenAddrList}`);
     if (L2TokenAddrList && L2TokenAddrList.length === 1) {
       L2TokenAddrList = [L2TokenAddrList[0]];
     }
@@ -22,7 +22,7 @@ export class L2RealBalanceController {
       return toTsTokenAddressFromStr(item);
     }): undefined;
     return this.L2RealBalanceService.getL2RealBalance({
-      L2Address: L2Address,
+      accountId: accountId,
       L2TokenAddrList: l2TokenList
     });
   }

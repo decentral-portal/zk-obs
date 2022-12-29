@@ -6,24 +6,24 @@ import { L2BalanceRepository } from '@ts-rollup-api/infrastructure/ports/L2Balan
 
 export class L2RealBalanceServiceFake implements L2BalanceRepository {
   realBalanceList =  [{
-    L2Address: 100n,
+    accountId: 100n,
     L2TokenAddr: TsTokenAddress.USDT,
     availableAmt: 100,
     lockedAmt: 0,
   },{
-    L2Address: 100n,
+    accountId: 100n,
     L2TokenAddr: TsTokenAddress.USDC,
     availableAmt: 10,
     lockedAmt: 60,
   }, {
-    L2Address: 100n,
+    accountId: 100n,
     L2TokenAddr: TsTokenAddress.DAI,
     availableAmt: 0,
     lockedAmt: 10,
   }];
   async getL2RealBalance(req: GetL2BalanceRequestDto): Promise<GetL2BalanceResponseDto> {
-    if (req.L2Address === undefined) {
-      throw new BadRequestException('L2Address is not provided');
+    if (req.accountId === undefined) {
+      throw new BadRequestException('accountId is not provided');
     }
     // get L2TokenAddrList from req
     let L2TokenAddrList: TsTokenAddress[] = (req.L2TokenAddrList === undefined||req.L2TokenAddrList.length === 0) ? [
@@ -34,7 +34,7 @@ export class L2RealBalanceServiceFake implements L2BalanceRepository {
       TsTokenAddress.DAI,
     ]: req.L2TokenAddrList;
     const result = this.realBalanceList.filter((item) => {
-      return item.L2Address.toString() === req.L2Address && L2TokenAddrList.includes(item.L2TokenAddr);
+      return item.accountId.toString() === req.accountId && L2TokenAddrList.includes(item.L2TokenAddr);
     });
     return Promise.resolve({
       list: result.map((item) => {

@@ -1,90 +1,82 @@
-// import { now } from 'fp-ts/lib/Date';
-import { Column, CreateDateColumn, DeleteDateColumn, Entity, Index, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
-import { TS_STATUS } from './tsStatus.enum';
+import { Column, Entity, JoinColumn, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { BaseTimeEntity } from '../common/baseTimeEntity';
+import { BLOCK_STATUS } from './blockStatus.enum';
+import { TransactionInfo } from './transactionInfo.entity';
 
-export enum CircuitName {
-  REGISTER = 'REGISTER',
-  NORMAL = 'NORMAL',
-  AUCTION_MATCH = 'AUCTION_MATCH',
-  SECONDARY_MATCH = 'SECONDARY_MATCH',
-  REPO_MATCH = 'REPO_MATCH',
-}
-
-@Index('BlockInfomation_pkey',['blockNumber',],{ unique:true })
-@Entity('BlockInformation' ,{schema:'public' } )
-export class BlockInfomation {
-  
-  @PrimaryGeneratedColumn({ type:'integer', name:'blockNumber' })
-  blockNumber!:number;
-
-  @Column('enum',{ name:'name',enum:[CircuitName.REGISTER, CircuitName.NORMAL, CircuitName.AUCTION_MATCH, CircuitName.SECONDARY_MATCH, CircuitName.REPO_MATCH]})
-  name!: CircuitName;
-
-  @Column('integer',{ name:'startTxId',default: () => '0', })
-  startTxId!:number;
-
-  @Column('integer',{ name:'endTxId',default: () => '0', })
-  endTxId!:number;
-
+@Entity('BlockInformation', { schema: 'public' })
+export class BlockInformation extends BaseTimeEntity {
+  @PrimaryGeneratedColumn({
+    type: 'integer',
+    name: 'blockNumber'
+  })
+  blockNumber!: number;
+  @Column({
+    type: 'varchar',
+    name: 'blockHash',
+    length: 256,
+    nullable: true,
+  })
+  blockHash!: string | null;
+  @Column({
+    type: 'varchar',
+    name: 'L1TransactionHash',
+    length: 512,
+  })
+  L1TransactionHash!: string;
+  @Column({ 
+    type: 'timestamp without time zone',
+    name: 'verifiedAt',
+    nullable: false,
+  })
+  verifiedAt!: Date;
+  @Column({
+    type: 'varchar',  
+    name: 'operatorAddress',
+    length: 256,
+    nullable: false,
+  })
+  operatorAddress!: string;
+  @Column({
+    type: 'text',
+    name: 'rawData',
+    nullable: true,
+  })
+  rawData!: string | null;
+  @Column({
+    type: 'json',
+    name: 'callData',
+    nullable: true,
+    default: () => '\'{}\'',
+  })
+  callData!: object | '{}';
+  @Column({
+    type: 'json',
+    name: 'proof',
+    nullable: true,
+    default: () => '\'{}\'',
+  })
+  proof!: object | '{}';
   @Column({
     type: 'enum',
-    name: 'status',
-    enumName: 'TS_STATUS',
+    name: 'blockStatus',
+    nullable: false,
+    enumName: 'BLOCK_STATUS',
     enum: [
-      TS_STATUS.PENDING,
-      TS_STATUS.PROCESSING,
-      TS_STATUS.L2EXECUTED,
-      TS_STATUS.L2CONFIRMED,
-      TS_STATUS.L1CONFIRMED,
-      TS_STATUS.FAILED,
-      TS_STATUS.REJECTED
+      BLOCK_STATUS.PROCESSING,
+      BLOCK_STATUS.L2EXECUTED,
+      BLOCK_STATUS.L2CONFIRMED,
+      BLOCK_STATUS.L1CONFIRMED
     ],
-    nullable: false,
-    default: TS_STATUS.PENDING
+    default: `'${BLOCK_STATUS.PROCESSING}'`,
   })
-  status!: TS_STATUS;
-
-  @Column('json',{ name:'circuitInput' })
-  circuitInput!:object;
-
-  @Column('json',{ name:'proof' })
-  proof!:object;
-
-  @Column('json',{ name:'publicInput' })
-  publicInput!:object;
-
-  @CreateDateColumn({
-    type: 'timestamp without time zone',
-    name: 'createdAt',
-    nullable: false,
-    default: 'now()',
+  blockStatus!: BLOCK_STATUS;
+  @OneToMany(
+    () => TransactionInfo,
+    transactionInfo => transactionInfo.blockInfo,
+  )
+  @JoinColumn({
+    name: 'blockNumber',
+    referencedColumnName: 'blockNumber'
   })
-  createdAt!: Date;
-  @UpdateDateColumn({
-    type: 'timestamp without time zone',
-    name: 'updatedAt',
-    nullable: false,
-    default: 'now()'
-  })
-  updatedAt!: Date;
-  @DeleteDateColumn({
-    type: 'timestamp without time zone',
-    name: 'deletedAt',
-    nullable: true
-  })
-  deletedAt!: Date;
-  @Column({
-    type: 'varchar',
-    name: 'updatedBy',
-    length: 256,
-    nullable: true,
-  })
-  updatedBy!: string | null;
-  @Column({
-    type: 'varchar',
-    name: 'deletedBy',
-    length: 256,
-    nullable: true,
-  })
-  deletedBy!: string | null;
+  transactionInfos!: TransactionInfo[] | null;
 }

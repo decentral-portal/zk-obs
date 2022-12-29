@@ -28,8 +28,8 @@ describe('[UnitTest] L2RealBalanceController', () => {
   it('L2RealBalanceController is defined', async () => {
     expect(L2RealBalanceController).toBeDefined();
   });
-  it('When L2RealBalanceController is called with missing L2Address', async() => {
-    await expect(l2RealBalanceController.getL2RealBalance('', [])).rejects.toThrowError('L2Address is not provided');
+  it('When L2RealBalanceController is called with missing accountId', async() => {
+    await expect(l2RealBalanceController.getL2RealBalance('', [])).rejects.toThrowError('accountId is not provided');
   });
   it('When L2RealBalanceController is called with missing tokenIds', async() => {
     const result = await l2RealBalanceController.getL2RealBalance('100',[]);

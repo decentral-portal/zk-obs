@@ -2,7 +2,7 @@ import { AccountInfo, AccountInfoWithoutPassword, AccountNonceInfo } from '@comm
 import { UserNotFoundException } from '@common/rbac/domain/exceptions/userNotFound.exception';
 import { Email } from '@common/rbac/domain/value-objects/email';
 import { L1Address } from '@common/rbac/domain/value-objects/l1address';
-import { L2Address } from '@common/rbac/domain/value-objects/l2address';
+import { AccountId } from '@common/rbac/domain/value-objects/l2address';
 import { Nonce } from '@common/rbac/domain/value-objects/nonce';
 import { HashedPassword } from '@common/rbac/domain/value-objects/password';
 import { RefreshToken } from '@common/rbac/domain/value-objects/refreshToken';
@@ -17,7 +17,7 @@ export class FakeAccountInfoRepository implements AccountInfoRepository {
     email: Email.check('yuanyu.liang@tkspring.com'),
     password: HashedPassword.check('$2b$10$uPKEP0XrlFezBHITfpNcRe1rDZJIhTdkFUOWN03x6jVpUNGB622jG'),
     L1Address: L1Address.check('319AbFF6695E87d5E402F803045AaD0F07b5dA7d'),
-    L2Address: L2Address.check(101n),
+    accountId: AccountId.check(101n),
     nonce: Nonce.check(0n),
     role: Role.check(RoleEnum.MEMBER),
   }];

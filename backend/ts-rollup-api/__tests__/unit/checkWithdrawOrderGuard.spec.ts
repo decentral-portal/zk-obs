@@ -11,7 +11,7 @@ describe('[Unit] checkWithdrawOrderGuard', () => {
   let checkWithdrawrOrderGuard: CheckWithdrawOrderGuard;
   const tokenInfoList = [
     {
-      L2Address: '100',
+      accountId: '100',
       id: BigInt(0),
       hash: BigInt(10),
       L2TokenAddrLending: TsTokenAddress.DAI,
@@ -19,7 +19,7 @@ describe('[Unit] checkWithdrawOrderGuard', () => {
       lockedAmt: '10'
     },
     {
-      L2Address: '100',
+      accountId: '100',
       id: BigInt(1),
       hash: BigInt(10),
       L2TokenAddrLending: TsTokenAddress.USDC,
@@ -27,7 +27,7 @@ describe('[Unit] checkWithdrawOrderGuard', () => {
       lockedAmt: '0'
     },
     {
-      L2Address: '100',
+      accountId: '100',
       id: BigInt(2),
       hash: BigInt(10),
       L2TokenAddrLending: TsTokenAddress.USDT,
@@ -35,7 +35,7 @@ describe('[Unit] checkWithdrawOrderGuard', () => {
       lockedAmt: '0'
     },
     {
-      L2Address: '100',
+      accountId: '100',
       id: BigInt(5),
       hash: BigInt(10),
       L2TokenAddrLending: TsTokenAddress.WBTC,
@@ -62,7 +62,7 @@ describe('[Unit] checkWithdrawOrderGuard', () => {
             ) => {
               const result = tokenInfoList.filter((tokenInfo) => {
                 return lenderInfo.L2TokenAddrList?.includes(tokenInfo.L2TokenAddrLending) 
-                && tokenInfo.L2Address == lenderInfo.L2Address;
+                && tokenInfo.accountId == lenderInfo.accountId;
               });
               return {
                 list: result

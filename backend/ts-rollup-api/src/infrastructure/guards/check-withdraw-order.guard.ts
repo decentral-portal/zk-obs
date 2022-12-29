@@ -28,7 +28,7 @@ export class CheckWithdrawOrderGuard implements CanActivate {
     }
     try {
       const tokenInfos = await this.l2BalanceService.getL2RealBalance({
-        L2Address: L2AddrFrom,
+        accountId: L2AddrFrom,
         L2TokenAddrList: [targetWithdrawToken],
       });
       if (tokenInfos.list.length == 0) {

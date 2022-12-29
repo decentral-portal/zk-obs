@@ -3,7 +3,7 @@ Table ObsOrder {
   side integer
   txId integer // create order id, nullable
   reqType integer //
-  accountId integer
+  accountId decimal
   marketPair string // ETH-USDC
   price decimal // if buy, price = buyAmt/sellAmt,  sellAmt/buyAmt
   orderStatus integer // pending=1, canceled , matched 
@@ -15,7 +15,7 @@ Table ObsOrder {
   accumulatedBuyAmt decimal
   mainTokenId integer
   baseTokenId integer
-  timestamp timestamp // unix time
+  timestamp timestamp(3) // unix time
   isMaker boolean
   orderLeafId integer // nullable
 }
@@ -24,7 +24,7 @@ Table ObsOrderLeaf {
   orderLeafId integer [pk]
   txId integer // create order id, nullable
   reqType integer //
-  sender integer
+  sender decimal
   sellTokenId decimal //  USDC - 6, ETH - 18
   sellAmt decimal
   buyTokenId decimal
@@ -34,19 +34,19 @@ Table ObsOrderLeaf {
   orderId integer
 }
 Ref: ObsOrder.id - ObsOrderLeaf.orderId
-Table ObsOrderMerkleNode {
+Table ObsOrderLeafMerkleTreeNode {
   id decimal [pk]
   hash decimal
   leafId decimal
 }
-Ref: ObsOrderMerkleNode.leafId - ObsOrderLeaf.orderLeafId
+Ref: ObsOrderLeafMerkleTreeNode.leafId - ObsOrderLeaf.orderLeafId
 Ref: Transaction.List.txId - ObsOrder.txId
 Table MatchObsOrder {
   id integer [pk]
   side integer // buy, sell
   txId integer  // craete match id, nullable
   txId2 integer
-  reference_order integer(id)
+  referenceOrder integer(id)
   reqType integer // Buy , Sell
   marketPair string // ETH-USDC
   matchedMQ decimal
@@ -54,7 +54,7 @@ Table MatchObsOrder {
   timestamp timestamp
   orderStatus integer // matched = 1, L2executed = 2 , L2confirmed = 4, L1confirmed=8
 }
-Ref: MatchObsOrder.reference_order > ObsOrder.id
+Ref: MatchObsOrder.referenceOrder > ObsOrder.id
 Ref: Transaction.List.txId - MatchObsOrder.txId
 Ref: Transaction.List.txId - MatchObsOrder.txId2
 Table Account.Information {
@@ -62,7 +62,8 @@ Table Account.Information {
   accountId decimal
   
   email varchar
-  
+  password varchar
+  refreshToken varchar
   lastedLoginIp varchar
   lastLoginTime datetime
 
@@ -104,6 +105,7 @@ Ref: Token.MerkleTreeNode.accountId > Account.MerkleTreeNode.leafId
 
 Table Token.LeafNode {
   leafId decimal [pk]
+  accountId decimal [pk]
   availableAmt decimal
   lockedAmt decimal
 }
@@ -174,3 +176,10 @@ Table CandleStick {
   marketPair varchar
 }
 
+
+Table MarketPairInfo {
+  id integer [pk]
+  mainTokenId decimal
+  baseTokenId decimal
+  marketPair varchar // ETH-USDC
+}

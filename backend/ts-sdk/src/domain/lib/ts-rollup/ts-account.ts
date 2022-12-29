@@ -10,7 +10,7 @@ import { RESERVED_ACCOUNTS } from './ts-env';
 import assert from 'assert';
 
 export class TsRollupAccount {
-  L2Address = -1n;
+  accountId = -1n;
 
   
   private eddsaPubKey: [bigint, bigint];
@@ -23,7 +23,7 @@ export class TsRollupAccount {
   
   tokenTreeSize: number;
   get isNormalAccount() {
-    return TsRollupAccount.checkIsNormalAccount(this.L2Address);
+    return TsRollupAccount.checkIsNormalAccount(this.accountId);
   }
   static checkIsNormalAccount(l2Addr: bigint) {
     return l2Addr >= RESERVED_ACCOUNTS;
@@ -51,7 +51,7 @@ export class TsRollupAccount {
   }
 
   setAccountAddress(l2Addr: bigint) {
-    this.L2Address = l2Addr;
+    this.accountId = l2Addr;
   }
     
   updateNonce(newNonce: bigint) {
@@ -238,10 +238,10 @@ export class TsRollupSigner {
     return EddsaSigner.verify(EddsaSigner.toE(msgHash), signature, tsPubKey);
   }
 
-  prepareTxWithdraw(nonce: bigint, L2Address: bigint, tokenAddr: TsTokenAddress, amount: bigint): TsTxWithdrawRequest {
+  prepareTxWithdraw(nonce: bigint, accountId: bigint, tokenAddr: TsTokenAddress, amount: bigint): TsTxWithdrawRequest {
     const req: TsTxWithdrawNonSignatureRequest = {
       reqType: TsTxType.WITHDRAW,
-      L2AddrFrom: L2Address.toString(),
+      L2AddrFrom: accountId.toString(),
       L2AddrTo: TsSystemAccountAddress.WITHDRAW_ADDR,
       L2TokenAddr: tokenAddr,
       amount: amount.toString(),

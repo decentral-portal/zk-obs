@@ -28,7 +28,7 @@ export class TsAccountTreeService extends TsMerkleTree<AccountLeafNode>{
     return leafIdCount;
   }
   getLeafDefaultVavlue(): string {
-    return toTreeLeaf([0n, 0n, 0n, 0n]);
+    return toTreeLeaf([0n, 0n, 0n]);
   }
   async updateLeaf(leafId: bigint, value: UpdateAccountTreeDto) {
     console.time('updateLeaf for account tree');
@@ -40,14 +40,12 @@ export class TsAccountTreeService extends TsMerkleTree<AccountLeafNode>{
         id: id.toString(),
         leafId: leafId,
         hash: BigInt(toTreeLeaf([
-          BigInt(value.tsPubKeyX), 
-          BigInt(value.tsPubKeyY), 
+          BigInt(value.tsAddr), 
           BigInt(value.nonce), 
           BigInt(value.tokenRoot)])) 
         }, ['id']);
       await manager.upsert(AccountLeafNode, {
-        tsPubKeyX: BigInt(value.tsPubKeyX),
-        tsPubKeyY: BigInt(value.tsPubKeyY),
+        tsAddr: BigInt(value.tsAddr),
         nonce: BigInt(value.nonce),
         tokenRoot: BigInt(value.tokenRoot),
         leafId: leafId,
@@ -108,8 +106,7 @@ export class TsAccountTreeService extends TsMerkleTree<AccountLeafNode>{
         });
         await manager.insert(AccountLeafNode, {
           leafId: leaf_id,
-          tsPubKeyX: 0n,
-          tsPubKeyY: 0n,
+          tsAddr: 0n,
           nonce: 0n,
         });
       });

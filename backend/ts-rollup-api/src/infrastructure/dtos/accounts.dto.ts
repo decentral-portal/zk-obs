@@ -39,7 +39,7 @@ export class AccountLoginResponse {
     @ApiProperty()
       L1Address!: string;
     @ApiProperty()
-      L2Address!: string;
+      accountId!: string;
     @ApiProperty()
       expiredTime!: number;
     @ApiProperty()
@@ -57,7 +57,7 @@ export class AccountBalanceQueryDto {
     @ApiProperty({ required: false})
       L1Address?: string;
     @ApiProperty({ required: false})
-      L2Address?: string;
+      accountId?: string;
 }
 
 export class AccountBalanceResponse {
@@ -72,7 +72,7 @@ export class AccountQueryDto {
     @ApiProperty({ required: false})
       L1Address?: string;
     @ApiProperty({ required: false})
-      L2Address?: string;
+      accountId?: string;
 }
 
 // TODO: Account Infomation
@@ -93,7 +93,7 @@ export class AccountInfoResponse extends AccountInformation {
     @ApiProperty()
       L1Address!: string;
     @ApiProperty()
-      L2Address!: string;
+      accountId!: string;
     @ApiProperty()
       nonce!: string;
     @ApiProperty({
@@ -107,7 +107,7 @@ export class AccountLoginHistoryQueryDto {
     @ApiProperty({ required: false})
       L1Address?: string;
     @ApiProperty({ required: false})
-      L2Address?: string;
+      accountId?: string;
     @ApiProperty()
       start!: string;
 }
@@ -116,7 +116,7 @@ export class AccountLoginHistoryItem {
     @ApiProperty({ required: false})
       L1Address?: string;
     @ApiProperty({ required: false})
-      L2Address?: string;
+      accountId?: string;
     @ApiProperty()
       ip!: string;
     @ApiProperty()
@@ -178,7 +178,7 @@ export class L2TransactionHistoryResponse {
 export class AccountUpdateDto {
     // L1Address?: string;
     @ApiProperty()
-      L2Address!: string;
+      accountId!: string;
 
     // TODO: TsAccountInfo Model
     @ApiProperty({
@@ -193,7 +193,7 @@ export class AccountTxHistoryDto {
     @ApiProperty({ required: false})
       L1Address?: string;
     @ApiProperty({ required: false})
-      L2Address?: string;
+      accountId?: string;
     @ApiProperty({ required: false})
       startTime?: number;
     @ApiProperty({ required: false})

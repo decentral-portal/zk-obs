@@ -85,11 +85,11 @@ export class RollupTxTransfer implements TsRollupTxInterface {
 
     this.txL2TokenAddr = txL2TokenAddr;
     this.txAmount = txAmount;
-    this.txL2AddrFrom = fromAccount.L2Address;
-    this.txL2AddrTo = toAccount.L2Address;
+    this.txL2AddrFrom = fromAccount.accountId;
+    this.txL2AddrTo = toAccount.accountId;
     // TODO: Validaion Tx nonce in here ?
     // const newNonce = this.fromAccount.isNormalAccount ? this.fromAccount.nonce + 1n : 0n;
-    // assert(txNonce >= newNonce, `Tx nonce should be larger than account nonce. L2Addr=${fromAccount.L2Address}, txNonce=${txNonce}, correctNonce=${newNonce}`);
+    // assert(txNonce >= newNonce, `Tx nonce should be larger than account nonce. L2Addr=${fromAccount.accountId}, txNonce=${txNonce}, correctNonce=${newNonce}`);
     this.txNonce = txNonce;
 
     this.reqSigS = BigInt(_sig.S);

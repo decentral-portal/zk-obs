@@ -126,7 +126,7 @@ export class AuctionOrderLeafNode {
   )
   @JoinColumn({
     name: 'L2AddrFrom',
-    referencedColumnName: 'L2Address',
+    referencedColumnName: 'accountId',
   })
   L2AddrFromAccount!: AccountInformation;
   @ManyToOne(
@@ -136,7 +136,7 @@ export class AuctionOrderLeafNode {
   )
   @JoinColumn({
     name: 'L2AddrTo',
-    referencedColumnName: 'L2Address',
+    referencedColumnName: 'accountId',
   })
   L2AddrToAccount!: AccountInformation;
   @OneToOne(

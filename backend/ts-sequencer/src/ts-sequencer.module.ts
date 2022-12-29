@@ -8,7 +8,7 @@ import { SequencerConsumer } from './infrastructure/sequencer.processor';
 import { BullModule } from '@anchan828/nest-bullmq';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { BlockInfomation } from 'common/ts-typeorm/src/account/blockInformation.entity';
+import { BlockInformation } from 'common/ts-typeorm/src/account/blockInformation.entity';
 import { TransactionInfo } from 'common/ts-typeorm/src/account/transactionInfo.entity';
 import { TsTypeOrmModule } from 'common/ts-typeorm/src/tstypeorm.module';
 import { WorkerModule } from '@common/cluster/cluster.module';
@@ -25,7 +25,7 @@ import { WorkerService } from '@common/cluster/worker.service';
     TypeOrmModule.forFeature(
       [
         TransactionInfo,
-        BlockInfomation,
+        BlockInformation,
       ]),
     WorkerModule,
   ],

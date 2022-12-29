@@ -6,7 +6,7 @@ import * as ABI from '../domain/verified-abi.json';
 import { VerifierContract } from '@ts-operator/domain/verifier-contract';
 import { BullWorker, BullWorkerProcess } from '@anchan828/nest-bullmq';
 import { Job } from 'bullmq';
-import { BlockInfomation } from 'common/ts-typeorm/src/account/blockInformation.entity';
+import { BlockInformation } from 'common/ts-typeorm/src/account/blockInformation.entity';
 
 @BullWorker({
   queueName: TsWorkerName.OPERATOR,
@@ -31,7 +31,7 @@ export class OperatorConsumer {
   
   
   @BullWorkerProcess()
-  async process(job: Job<BlockInfomation>) {
+  async process(job: Job<BlockInformation>) {
     this.logger.log(`OperatorConsumer.process ${job.data.blockNumber}`);
     // ethers;
     // // TODO: refactor
@@ -44,7 +44,7 @@ export class OperatorConsumer {
     //   gas: gas.toNumber(),
     // });
     // this.logger.log(`OperatorConsumer.process txHash=${receipt.transactionHash}`);
-    // await this.prismaService.blockInfomation.update({
+    // await this.prismaService.BlockInformation.update({
     //   where: {
     //     blockNumber: job.data.blockNumber,
     //   },

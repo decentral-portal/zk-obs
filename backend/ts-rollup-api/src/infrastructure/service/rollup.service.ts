@@ -31,20 +31,20 @@ export class TsRollupService  {
     this.logger.setContext('TsRollupService');
   }
 
-  public getL1AddressFromL2Address(L2Address: string) {
-    const L1Address = this.L2ToL1.get(L2Address);
+  public getL1AddressFromaccountId(accountId: string) {
+    const L1Address = this.L2ToL1.get(accountId);
     if(!L1Address) {
-      throw new InternalServerErrorException('L2Address not found');
+      throw new InternalServerErrorException('accountId not found');
     }
     return L1Address;
   }
 
   public getAccountFromL1Address(L1Address: string) {
-    const L2Address = this.L1ToL2.get(L1Address.toLowerCase());
-    if(!L2Address) {
+    const accountId = this.L1ToL2.get(L1Address.toLowerCase());
+    if(!accountId) {
       throw new InternalServerErrorException('L1Address not found');
     }
-    return this.rollup.getAccount(BigInt(L2Address));
+    return this.rollup.getAccount(BigInt(accountId));
   }
 
   public async register(L1Address: string, account: TsRollupAccount) {

@@ -47,10 +47,10 @@ export class TsAccountController {
       type: AccountBalanceResponse,
     })
     async getL2Balances(@Query() dto: AccountBalanceQueryDto) {
-      if(dto.L2Address || dto.L1Address) {
+      if(dto.accountId || dto.L1Address) {
         try {
-          const acc = dto.L2Address
-            ? this.tsRollupService.rollup.getAccount(BigInt(dto.L2Address))
+          const acc = dto.accountId
+            ? this.tsRollupService.rollup.getAccount(BigInt(dto.accountId))
             : this.tsRollupService.getAccountFromL1Address(dto.L1Address!);
           let tokens: any[] = [];
           if(dto.L2TokenAddr?.length) {
@@ -71,7 +71,7 @@ export class TsAccountController {
           throw new BadRequestException(error.message);
         }
       } 
-      throw new BadRequestException('L2Address is required');
+      throw new BadRequestException('accountId is required');
     }
 
     @Get('profile')
@@ -79,14 +79,14 @@ export class TsAccountController {
       type: AccountInfoResponse,
     })
     async getAccountInfo(@Query() dto: AccountQueryDto) {
-      if(dto.L2Address || dto.L1Address) {
+      if(dto.accountId || dto.L1Address) {
         try {
-          const acc = dto.L2Address
-            ? this.tsRollupService.rollup.getAccount(BigInt(dto.L2Address))
+          const acc = dto.accountId
+            ? this.tsRollupService.rollup.getAccount(BigInt(dto.accountId))
             : this.tsRollupService.getAccountFromL1Address(dto.L1Address ?? '');
           return {
-            L1Address: this.tsRollupService.getL1AddressFromL2Address(acc.L2Address.toString()) ?? '?',
-            L2Address: acc.L2Address.toString(),
+            L1Address: this.tsRollupService.getL1AddressFromaccountId(acc.accountId.toString()) ?? '?',
+            accountId: acc.accountId.toString(),
             nonce: acc.nonce.toString(),
             tokenLeafs: acc.tokenLeafs.map((t: any) => ({
               tokenAddr: t.tokenAddr.toString(),
@@ -100,7 +100,7 @@ export class TsAccountController {
           throw new BadRequestException(error.message);
         }
       }
-      throw new BadRequestException('L2Address or L1Address is required');
+      throw new BadRequestException('accountId or L1Address is required');
     }
 
     @Post('update-profile')

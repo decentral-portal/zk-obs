@@ -1,7 +1,7 @@
 import { TsTokenAddress } from '@ts-sdk/domain/lib/ts-types/ts-types';
 
 export class L2AccountInfo {
-  L2Address!: bigint;
+  accountId!: bigint;
   L2TokenAddr!: TsTokenAddress;
 }
 

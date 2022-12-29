@@ -34,7 +34,7 @@ export class AccountMerkleTreeNode {
     (accountInformation: AccountInformation) => accountInformation.accountMerkleTreeNode , // map attribute
     { onDelete: 'RESTRICT', onUpdate: 'CASCADE' } 
   )
-  @JoinColumn([{ name: 'leafId', referencedColumnName: 'L2Address' }])
+  @JoinColumn([{ name: 'leafId', referencedColumnName: 'accountId' }])
   leaf!: AccountInformation;
   @OneToMany(
     () => TokenMerkleTreeNode,

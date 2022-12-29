@@ -1,6 +1,5 @@
 export class UpdateAccountTreeDto {
-  tsPubKeyX!: string;
-  tsPubKeyY!: string;
+  tsAddr!: string;
   nonce!: string;
   tokenRoot!: string;
 }

@@ -13,14 +13,18 @@ export const TsDefaultValue = {
 };
 
 export enum TsTxType {
-    UNKNOWN = '0',
-    REGISTER = '1',
-    DEPOSIT = '2',
-    TRANSFER = '3',
-    WITHDRAW = '4',
-    AUCTION_LEND = '5',
-    AUCTION_BORROW = '6',
-    AUCTION_CANCEL = '7',
+  UNKNOWN = '0',
+  REGISTER = '1',
+  DEPOSIT = '2',
+  WITHDRAW = '3',
+  SecondLimitOrder = '4',
+  SecondLimitStart = '5',
+  SecondLimitExchange = '6',
+  SecondLimitEnd = '7',
+  SecondMarketOrder = '8',
+  SecondMarketExchange = '9',
+  SecondMarketEnd = '10',
+  CancelOrder = '11'
 }
 export const toTsTxType = (txType: string): TsTxType => {
   const type =  Object.values(TsTxType).find((value) => value === txType);

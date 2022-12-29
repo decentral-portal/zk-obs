@@ -15,8 +15,8 @@ export class L2RealBalanceService implements L2BalanceRepository {
   }
   async getL2RealBalance(req: GetL2BalanceRequestDto): Promise<GetL2BalanceResponseDto> {
     // check req
-    if (req.L2Address === undefined) {
-      throw new BadRequestException('L2Address is not provided');
+    if (req.accountId === undefined) {
+      throw new BadRequestException('accountId is not provided');
     }
     // get L2TokenAddrList from req
     let L2TokenAddrList: TsTokenAddress[] = (req.L2TokenAddrList === undefined || req.L2TokenAddrList.length === 0) ? [
@@ -30,7 +30,7 @@ export class L2RealBalanceService implements L2BalanceRepository {
     // get L2RealBalance from db
     const result = await this.auctionL2RealBalanceRepository.find({
       where: {
-        L2Address: req.L2Address,
+        accountId: req.accountId,
         L2TokenAddr: In(L2TokenAddrList)
       },
     });

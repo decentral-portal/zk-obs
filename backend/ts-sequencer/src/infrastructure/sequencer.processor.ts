@@ -3,7 +3,7 @@ import { PinoLoggerService } from '@common/logger/adapters/real/pinoLogger.servi
 import { BullWorker, BullWorkerProcess } from '@anchan828/nest-bullmq';
 import { Job } from 'bullmq';
 import { InjectRepository } from '@nestjs/typeorm';
-import { BlockInfomation } from 'common/ts-typeorm/src/account/blockInformation.entity';
+import { BlockInformation } from 'common/ts-typeorm/src/account/blockInformation.entity';
 import { TransactionInfo } from 'common/ts-typeorm/src/account/transactionInfo.entity';
 import { Repository } from 'typeorm';
 import { TS_STATUS } from 'common/ts-typeorm/src/account/tsStatus.enum';
@@ -19,8 +19,8 @@ export class SequencerConsumer {
     private readonly logger: PinoLoggerService,
     @InjectRepository(TransactionInfo)
     private txRepository: Repository<TransactionInfo>,
-    @InjectRepository(BlockInfomation)
-    private blockRepository: Repository<BlockInfomation>,
+    @InjectRepository(BlockInformation)
+    private blockRepository: Repository<BlockInformation>,
 
   ) {
     this.logger.log('SEQUENCER.process START');

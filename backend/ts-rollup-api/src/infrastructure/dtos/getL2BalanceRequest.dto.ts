@@ -3,7 +3,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class GetL2BalanceRequestDto {
   @ApiProperty()
-  L2Address!: string;
+  accountId!: string;
   @ApiPropertyOptional({
     isArray: true,
     type: [TsTokenAddress],

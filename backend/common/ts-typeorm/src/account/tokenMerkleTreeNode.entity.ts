@@ -6,14 +6,14 @@ import { TokenLeafNode } from './tokenLeafNode.entity';
 export class TokenMerkleTreeNode {
   @PrimaryColumn({
     type: 'decimal',
-    name: 'L2Address',
+    name: 'accountId',
     primary: true,
     precision: 86,
     scale: 0,
     nullable: false,
     unique: false,
   })
-  L2Address!: string; // compose primary key
+  accountId!: string; // compose primary key
   @PrimaryColumn({
     type: 'decimal',
     name: 'id',
@@ -47,12 +47,19 @@ export class TokenMerkleTreeNode {
     (accountMerkleTreeNode: AccountMerkleTreeNode) => accountMerkleTreeNode.tokenMerkleTreeNodes,
     { onDelete: 'RESTRICT', onUpdate: 'CASCADE' }
   )
-  @JoinColumn({ name: 'L2Address', referencedColumnName: 'leafId' })
+  @JoinColumn({ name: 'accountId', referencedColumnName: 'leafId' })
   accountRoot!: AccountMerkleTreeNode;
   @OneToOne(
     () => TokenLeafNode,
     (tokenLeafNode: TokenLeafNode) => tokenLeafNode.tokenMerkleNode
   )
+  @JoinColumn([{
+    name: 'leafId',
+    referencedColumnName: 'leafId'
+  },{
+    name: 'accountId',
+    referencedColumnName: 'accountId'
+  }])
   leaf!:TokenLeafNode;
 
 }

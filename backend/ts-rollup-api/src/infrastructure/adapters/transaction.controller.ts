@@ -49,7 +49,7 @@ export class TsTransactionController {
       const {blockNumber} = await this.tsRollupService.register(
         dto.L1Address, account
       );
-      return {L2Address: account.L2Address.toString(), blockNumber: blockNumber.toString()};
+      return {accountId: account.accountId.toString(), blockNumber: blockNumber.toString()};
     } catch (error : any) {
       this
         .logger

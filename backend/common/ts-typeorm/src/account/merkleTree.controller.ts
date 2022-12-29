@@ -32,7 +32,7 @@ export class MerkleTreeController {
   @Post('updateTokenTree')
   async updateTokenTree(@Body() updateTokenTreeDto: UpdateTokenTreeDto) {
     console.time('controller updateTokenTree');
-    const tokeneLeafId = await this.tsTokenTreeService.getCurrentLeafIdCount(BigInt(updateTokenTreeDto.L2Address));
+    const tokeneLeafId = await this.tsTokenTreeService.getCurrentLeafIdCount(BigInt(updateTokenTreeDto.accountId));
     await this.tsTokenTreeService.updateLeaf(
       BigInt(tokeneLeafId),
       updateTokenTreeDto,

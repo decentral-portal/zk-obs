@@ -5,13 +5,14 @@ import { PinoLoggerService } from '@common/logger/adapters/real/pinoLogger.servi
 import { Injectable, Scope } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
-import { BlockInfomation } from 'common/ts-typeorm/src/account/blockInformation.entity';
+import { BlockInformation } from 'common/ts-typeorm/src/account/blockInformation.entity';
 import { TransactionInfo } from 'common/ts-typeorm/src/account/transactionInfo.entity';
 import { TS_STATUS } from 'common/ts-typeorm/src/account/tsStatus.enum';
 import { MoreThan, Repository } from 'typeorm';
 import { TsTxType } from '@ts-sdk/domain/lib/ts-types/ts-types';
 import { Queue } from 'bullmq';
 import { TsWorkerName } from '../../ts-sdk/src/constant';
+import { BLOCK_STATUS } from '@common/ts-typeorm/account/blockStatus.enum';
 
 @Injectable({
   scope: Scope.DEFAULT,
@@ -23,7 +24,7 @@ export class ProducerService {
   constructor(
     readonly logger: PinoLoggerService,
     @InjectRepository(TransactionInfo) private txRepository: Repository<TransactionInfo>,
-    @InjectRepository(BlockInfomation) private blockRepository: Repository<BlockInfomation>,
+    @InjectRepository(BlockInformation) private blockRepository: Repository<BlockInformation>,
     @BullQueueInject(TsWorkerName.SEQUENCER) private readonly seqQueue: Queue,
     @BullQueueInject(TsWorkerName.OPERATOR) private readonly operatorQueue: Queue,
     @BullQueueInject(TsWorkerName.PROVER) private readonly proverQueue: Queue,
@@ -89,7 +90,7 @@ export class ProducerService {
     const blocks = await this.blockRepository.find({
       where: {
         blockNumber: MoreThan(this.currentPendingBlock),
-        status: TS_STATUS.PENDING,
+        blockStatus: BLOCK_STATUS.PROCESSING,
       },
       order: {
         blockNumber: 'asc',
@@ -111,7 +112,7 @@ export class ProducerService {
     const blocks = await this.blockRepository.find({
       where: {
         blockNumber: MoreThan(this.currentProvedBlock),
-        status: TS_STATUS.L2CONFIRMED,
+        blockStatus: BLOCK_STATUS.L2CONFIRMED,
       },
       order: {
         blockNumber: 'asc',

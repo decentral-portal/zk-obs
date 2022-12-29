@@ -81,7 +81,7 @@ describe('[UnitTest] account.controller test', () => {
   //   });
   //   const result = await tsAccountController.getL2Balances({
   //     L2TokenAddr: [TsTokenAddress.DAI, TsTokenAddress.USDC, TsTokenAddress.USDT, TsTokenAddress.WBTC],
-  //     L2Address: '101'
+  //     accountId: '101'
   //   });
   //   expect(result).toHaveProperty('list');
   //   expect(result.list.length).toEqual(4);
@@ -92,7 +92,7 @@ describe('[UnitTest] account.controller test', () => {
     // const asyncEdDSA = circomlibjs.buildEddsa();
     await expect(tsAccountController.getL2Balances({
       L2TokenAddr: [TsTokenAddress.DAI, TsTokenAddress.USDC, TsTokenAddress.USDT, TsTokenAddress.WBTC],
-    })).rejects.toThrow('L2Address is required');
+    })).rejects.toThrow('accountId is required');
   });
   it('tsAccountController getAccountInfo after register', async () => {
     const publicKey = generatePublicKey();
@@ -114,7 +114,7 @@ describe('[UnitTest] account.controller test', () => {
   });
   it('tsAccountController getL2TransactionHistory', async () => {
     const result = await tsAccountController.getL2TransactionHistory({
-      L2Address: '101'
+      accountId: '101'
     });
     expect(result).toEqual('getL2TransactionHistory');
   });
@@ -123,7 +123,7 @@ describe('[UnitTest] account.controller test', () => {
     const pre7day = new Date();
     pre7day.setDate(now.getDate() - 7);
     const result = await tsAccountController.getLoginHistory({
-      L2Address: '100',
+      accountId: '100',
       start: pre7day.getTime().toString()
     });
     expect(result).toEqual('getLoginHistory');

@@ -5,7 +5,7 @@ import { from, Observable, map } from 'rxjs';
 import { AccountInfo, AccountInfoWithoutPassword, AccountNonceInfo } from '@common/rbac/domain/entities/accountInfo';
 import { UserNotFoundException } from '@common/rbac/domain/exceptions/userNotFound.exception';
 import { L1Address } from '@common/rbac/domain/value-objects/l1address';
-import { L2Address } from '@common/rbac/domain/value-objects/l2address';
+import { accountId } from '@common/rbac/domain/value-objects/accountId';
 import { HashedPassword } from '@common/rbac/domain/value-objects/password';
 import { RefreshToken } from '@common/rbac/domain/value-objects/refreshToken';
 import { Role } from '@common/rbac/domain/value-objects/role';
@@ -33,7 +33,7 @@ export class AccountInfoService implements AccountInfoRepository{
   async getAccountInfoCount(): Promise<number> {
     return this.accountInformationRepository.count({
       where: {
-        L2Address: MoreThan('100')
+        accountId: MoreThan('100')
       }
     });
   } 
@@ -50,7 +50,7 @@ export class AccountInfoService implements AccountInfoRepository{
     }
     const account = this.accountInformationRepository.create({
       L1Address: accountInfo.L1Address,
-      L2Address: accountIndex.toString(),
+      accountId: accountIndex.toString(),
       lastedLoginIp: '127.0.0.1',
       lastLoginTime: new Date(),
       email: accountInfo.email,
@@ -61,7 +61,7 @@ export class AccountInfoService implements AccountInfoRepository{
     this.currentCounter += 1n;
     return {
       L1Address: L1Address.check(account.L1Address),
-      L2Address: L2Address.check(BigInt(account.L2Address)),
+      accountId: accountId.check(BigInt(account.accountId)),
       email: Email.check(account.email),
       password: HashedPassword.check(account.password),
       role: Role.check(account.role)
@@ -81,7 +81,7 @@ export class AccountInfoService implements AccountInfoRepository{
       const nonce = result.accountMerkleTreeNode? result.accountMerkleTreeNode.accountLeafNode.nonce.toString(): '0';
       return {
         L1Address: L1Address.check(result.L1Address),
-        L2Address: L2Address.check(BigInt(result.L2Address.toString())),
+        accountId: accountId.check(BigInt(result.accountId.toString())),
         email: Email.check(result.email),
         password: HashedPassword.check(result.password),
         role: Role.check(result.role),
@@ -92,11 +92,11 @@ export class AccountInfoService implements AccountInfoRepository{
       throw new UserNotFoundException();
     }
   }
-  async findOneByL2Address(_L2Address: L2Address): Promise<AccountNonceInfo> {
+  async findOneByaccountId(_accountId: accountId): Promise<AccountNonceInfo> {
     try {
       const result = await this.accountInformationRepository.findOneOrFail({
         where: {
-          L2Address: _L2Address.toString()
+          accountId: _accountId.toString()
         },
         relations: {
           accountMerkleTreeNode: true
@@ -105,7 +105,7 @@ export class AccountInfoService implements AccountInfoRepository{
       const nonce = result.accountMerkleTreeNode? result.accountMerkleTreeNode.accountLeafNode.nonce.toString(): '0';
       return {
         L1Address: L1Address.check(result.L1Address),
-        L2Address: L2Address.check(BigInt(result.L2Address.toString())),
+        accountId: accountId.check(BigInt(result.accountId.toString())),
         email: Email.check(result.email),
         password: HashedPassword.check(result.password),
         role: Role.check(result.role),
@@ -121,7 +121,7 @@ export class AccountInfoService implements AccountInfoRepository{
       map((accountInfos: AccountInformation[]) => {
         return accountInfos.map((accountInfo) => ({
           L1Address: L1Address.check(accountInfo.L1Address),
-          L2Address: L2Address.check(accountInfo.L2Address),
+          accountId: accountId.check(accountInfo.accountId),
           email: Email.check(accountInfo.email),
           role: Role.check(accountInfo.role)
         }));
@@ -140,7 +140,7 @@ export class AccountInfoService implements AccountInfoRepository{
       }
       return {
         L1Address: L1Address.check(result.L1Address),
-        L2Address: L2Address.check(BigInt(result.L2Address.toString())),
+        accountId: accountId.check(BigInt(result.accountId.toString())),
         email: Email.check(result.email),
         password: HashedPassword.check(result.password),
         role: Role.check(result.role)    

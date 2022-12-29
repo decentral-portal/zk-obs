@@ -3,5 +3,5 @@ export class UpdateTokenTreeDto {
   L2TokenAddr!: string;
   lockedAmt!: string;
   availableAmt!: string;
-  L2Address!: string;
+  accountId!: string;
 }

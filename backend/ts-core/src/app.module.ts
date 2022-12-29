@@ -10,7 +10,7 @@ import { ProducerService } from './producer.service';
 import { BullQueueModule } from 'common/bull-queue/src/BullQueue.module';
 import { TsTypeOrmModule } from 'common/ts-typeorm/src/tstypeorm.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { BlockInfomation } from 'common/ts-typeorm/src/account/blockInformation.entity';
+import { BlockInformation } from 'common/ts-typeorm/src/account/blockInformation.entity';
 import { BullModule } from '@anchan828/nest-bullmq';
 import { DatabasePubSubModule } from '@common/db-pubsub/db-pubsub.module';
 import { TransactionInfo } from 'common/ts-typeorm/src/account/transactionInfo.entity';
@@ -28,7 +28,7 @@ import { MainProcessModule } from '@common/cluster/cluster.module';
     TypeOrmModule.forFeature(
       [
         TransactionInfo,
-        BlockInfomation,
+        BlockInformation,
       ]),
     BullModule.registerQueue(
       {
