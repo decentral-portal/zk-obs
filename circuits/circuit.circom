@@ -4,4 +4,4 @@ include "normal.circom";
 include "src/request.circom";
 
 component main = Normal();
-//component main = IntDivide(10);
+//component main = Fix2Float();

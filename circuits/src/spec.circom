@@ -20,7 +20,7 @@ function MaxChunksPerReq(){
 }
 
 function NumOfReqs(){
-    return 10;
+    return 1;
 }
 function NumOfOrderUnits(){
     return NumOfReqs() * MaxOrderUnitsPerReq();
@@ -32,7 +32,7 @@ function NumOfTokenUnits(){
     return NumOfReqs() * MaxTokenUnitsPerReq();
 }
 function NumOfChunks(){
-    return NumOfReqs() * 3;//MaxChunksPerReq();
+    return 9;//NumOfReqs() * 3;//MaxChunksPerReq();
 }
 function NumOfOuts(){
     return (NumOfChunks() + 5) \ 6;
@@ -42,8 +42,8 @@ function OrderTreeHeight(){
     return 3;
 }
 function AccTreeHeight(){
-    return 3;
+    return 8;
 }
 function TokenTreeHeight(){
-    return 2;
+    return 4;
 }

@@ -52,9 +52,11 @@ template Fix2Float(){
     signal output out;
     var val_in = in;
     var val_exp = 0;
-    while(val_in % 10 == 0){
-        val_in /= 10;
-        val_exp++;
+    if(in != 0){
+        while(val_in % 10 == 0){
+            val_in /= 10;
+            val_exp++;
+        }
     }
     out <-- val_in + (val_exp << 35);
     signal temp <== Float2Fix()(out);
