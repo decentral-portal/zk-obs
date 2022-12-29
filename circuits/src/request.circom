@@ -475,6 +475,21 @@ template DoReqSecondLimitExchange(){
     signal output channelOut[LenOfChannel()];
     signal output resData[LenOfResponse()];
 
+    /*
+        pseudo code:
+            INPUT maker, taker
+            makerRemainSellAmt := maker.sellAmt - maker.accumulatedSellAmt;
+            takerRemainSellAmt := taker.sellAmt - taker.accumulatedSellAmt;
+
+            supMakerBuyAmt := makerRemainSellAmt * maker.buyAmt / maker.sellAmt;
+            supTakerBuyAmt := takerRemainSellAmt * maker.sellAmt / maker.buyAmt;
+            
+            isMatched := maker.buyAmt * taker.buyAmt < maker.sellAmt * taker.sellAmt;
+
+            matchedSellAmt := Min(makerRemainSellAmt, supTakerBuyAmt);
+            matchedBuyAmt := Min(takerRemainSellAmt, supMakerBuyAmt);
+    */
+
     var makerSellAmt = r_oriOrderLeaf[0][OLIdxAmount()];
     var makerBuyAmt  = r_oriOrderLeaf[0][OLIdxArg(3)];
     var takerSellAmt = channelIn[OLIdxAmount()];
@@ -486,10 +501,10 @@ template DoReqSecondLimitExchange(){
     (supMakerBuyAmt, _) <== IntDivide(BitsAmount())(makerRemainSellAmt * makerBuyAmt, (makerSellAmt - 1) * enabled + 1);
     signal supTakerBuyAmt;
     (supTakerBuyAmt, _) <== IntDivide(BitsAmount())(takerRemainSellAmt * makerSellAmt, (makerBuyAmt - 1) * enabled + 1);
-    signal isMatched <== LessThan(BitsAmount() * 2)([makerSellAmt * takerSellAmt, makerBuyAmt * takerBuyAmt]);
+    signal isMatched <== LessThan(BitsAmount() * 2)([makerBuyAmt * takerBuyAmt, makerSellAmt * takerSellAmt]);
 
-    signal matchedSellAmt <== Min(BitsAmount())([makerRemainSellAmt, supTakerBuyAmt]); //maker 
-    signal matchedBuyAmt  <== Min(BitsAmount())([takerRemainSellAmt, supMakerBuyAmt]); //maker
+    signal matchedSellAmt <== Min(BitsAmount())([makerRemainSellAmt, supTakerBuyAmt]);
+    signal matchedBuyAmt  <== Min(BitsAmount())([takerRemainSellAmt, supMakerBuyAmt]);
 
     /* enabled be a boolean */
     enabled * (enabled - 1) === 0;
