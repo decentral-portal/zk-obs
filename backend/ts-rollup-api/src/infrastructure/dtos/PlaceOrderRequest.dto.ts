@@ -5,8 +5,10 @@ export class EdDSASignatureRequestType {
   @ApiProperty({
     isArray: true,
     type: [String],
+    maxLength: 2,
+    minLength: 2,
   })
-  R8!: string[];
+  R8!: string[2];
   @ApiProperty()
   S!: string;
 }
@@ -16,17 +18,17 @@ export class PlaceOrderRequest {
   })
   reqType!: TsTxType;
   @ApiProperty()
-  accountId!: string;
+  sender!: string;
   @ApiProperty()
-  buyAmt!: string;
-  @ApiProperty()
-  L2TokenAddrBuy!: string;
+  sellTokenId!: string;
   @ApiProperty()
   sellAmt!: string;
   @ApiProperty()
-  L2TokenAddrSell!: string;
-  @ApiProperty()
   nonce!: string;
+  @ApiProperty()
+  buyTokenId!: string;
+  @ApiProperty()
+  buyAmt!: string;
   @ApiProperty()
   ecdsaSig!: string;
   @ApiProperty({
