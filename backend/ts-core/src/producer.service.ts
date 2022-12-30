@@ -51,7 +51,7 @@ export class ProducerService {
     const transactions = await this.txRepository.find({
       where: {
         txId: MoreThan(this.currentPendingTxId),
-        tsStatus: TS_STATUS.PENDING,
+        txStatus: TS_STATUS.PENDING,
       },
       order: {
         txId: 'asc',

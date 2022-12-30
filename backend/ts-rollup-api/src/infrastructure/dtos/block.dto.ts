@@ -41,7 +41,7 @@ export class TransactionInfoDto {
   @ApiProperty({
     enum: TS_STATUS,
   })
-  tsStatus!: TS_STATUS;
+  txStatus!: TS_STATUS;
 }
 
 export class BlockInformationDto {

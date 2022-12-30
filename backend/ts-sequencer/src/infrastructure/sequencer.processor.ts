@@ -34,13 +34,13 @@ export class SequencerConsumer {
     await this.txRepository.update({
       txId: job.data.txId,
     }, {
-      tsStatus: TS_STATUS.PROCESSING
+      txStatus: TS_STATUS.PROCESSING
     });
     await delay(1000 * 1.5);
     await this.txRepository.update({
       txId: job.data.txId,
     }, {
-      tsStatus: TS_STATUS.L2EXECUTED
+      txStatus: TS_STATUS.L2EXECUTED
     });
     return true;
   }

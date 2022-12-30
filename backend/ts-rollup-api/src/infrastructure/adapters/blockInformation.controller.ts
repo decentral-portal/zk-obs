@@ -103,7 +103,7 @@ function getExampleTx(txId: number, blockNumber: number) {
     fee: getRandomInt().toString(),
     feeToken: getRandomInt().toString(),
     metadata: {},
-    tsStatus: TS_STATUS.PENDING,
+    txStatus: TS_STATUS.PENDING,
   };
 }
 

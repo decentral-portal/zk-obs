@@ -171,7 +171,7 @@ export class TransactionInfo extends BaseTimeEntity {
   metadata!: object | null;
   @Column({
     type: 'enum',
-    name: 'tsStatus',
+    name: 'txStatus',
     enum: [
       TS_STATUS.PENDING,
       TS_STATUS.PROCESSING,
@@ -184,7 +184,7 @@ export class TransactionInfo extends BaseTimeEntity {
     nullable: false,
     default: `'${TS_STATUS.PENDING}'`
   })
-  tsStatus!: TS_STATUS;
+  txStatus!: TS_STATUS;
   @ManyToOne(
     () => AccountInformation,
     (accountInformation: AccountInformation) => accountInformation.transactionInfos,

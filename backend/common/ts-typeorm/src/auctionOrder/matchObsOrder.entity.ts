@@ -86,6 +86,18 @@ export class MatchObsOrderEntity {
     default: 1,
   }) 
   orderStatus!: number;
+  @Column({
+    type: 'boolean',
+    name: 'isVoid',
+    default: 1,
+  }) 
+  isVoid!: boolean;
+  @Column({
+    type: 'boolean',
+    name: 'isCancel',
+    default: 1,
+  }) 
+  isCancel!: boolean;
   @ManyToOne(
     () => ObsOrderEntity,
     (obsOrder: ObsOrderEntity) => obsOrder.matchOrders,

@@ -512,7 +512,7 @@ export class INIT_1669198902099 implements MigrationInterface {
           default: '\'{}\'',
         }, {
           type: 'enum',
-          name: 'tsStatus',
+          name: 'txStatus',
           enumName: 'TX_STATUS',
           enum: [
             TS_STATUS.PENDING,
@@ -679,6 +679,16 @@ export class INIT_1669198902099 implements MigrationInterface {
           type: 'integer',
           isNullable: false,
           default: 1,
+        }, {
+          name: 'isVoid',
+          type: 'boolean',
+          isNullable: false,
+          default: false,
+        }, {
+          name: 'isCancel',
+          type: 'boolean',
+          isNullable: false,
+          default: false,
         }],
         foreignKeys: [{
           name: 'accountInfo',
