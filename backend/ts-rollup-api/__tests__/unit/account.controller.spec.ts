@@ -102,24 +102,24 @@ describe('[UnitTest] account.controller test', () => {
       L2TokenAddr: [TsTokenAddress.DAI, TsTokenAddress.USDC, TsTokenAddress.USDT, TsTokenAddress.WBTC],
     })).rejects.toThrow('accountId is required');
   });
-  it('tsAccountController getAccountInfo after register', async () => {
-    const publicKey = generatePublicKey();
-    rawX = publicKey.rawX;
-    rawY = publicKey.rawY;
-    // 1 register account
-    await tsTransactionController.register({
-      L1Address: '0x319AbFF6695E87d5E402F803045AaD0F07b5dA7d',
-      L2AddrFrom: '101',
-      tsPubKey: [rawX, rawY],
-      reqType: TsTxType.REGISTER,
-      amount: '100',
-      L2TokenAddr: TsTokenAddress.DAI
-    });
-    const result = await tsAccountController.getAccountInfo({
-      L1Address: '0x319AbFF6695E87d5E402F803045AaD0F07b5dA7d'
-    });
-    expect(result.L1Address).toEqual('0x319AbFF6695E87d5E402F803045AaD0F07b5dA7d'.toLowerCase());
-  });
+  // it('tsAccountController getAccountInfo after register', async () => {
+  //   const publicKey = generatePublicKey();
+  //   rawX = publicKey.rawX;
+  //   rawY = publicKey.rawY;
+  //   // 1 register account
+  //   await tsTransactionController.register({
+  //     L1Address: '0x319AbFF6695E87d5E402F803045AaD0F07b5dA7d',
+  //     L2AddrFrom: '101',
+  //     tsPubKey: [rawX, rawY],
+  //     reqType: TsTxType.REGISTER,
+  //     amount: '100',
+  //     L2TokenAddr: TsTokenAddress.DAI
+  //   });
+  //   const result = await tsAccountController.getAccountInfo({
+  //     L1Address: '0x319AbFF6695E87d5E402F803045AaD0F07b5dA7d'
+  //   });
+  //   expect(result.L1Address).toEqual('0x319AbFF6695E87d5E402F803045AaD0F07b5dA7d'.toLowerCase());
+  // });
   it('tsAccountController getL2TransactionHistory', async () => {
     const result = await tsAccountController.getL2TransactionHistory({
       accountId: '101'

@@ -21,7 +21,7 @@ export async function bootstrap() {
   });
 
   const options = new DocumentBuilder()
-    .setTitle('TermStructure API Documentation')
+    .setTitle('zkOBS API Documentation')
     .setVersion('0.0.1')
     .setDescription(
       `### REST
