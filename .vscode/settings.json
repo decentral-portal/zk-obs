@@ -1,0 +1,49 @@
+{
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/node_modules/*/**": true,
+    "**/build/*/**": true,
+    "**/artifacts/*/**": true,
+    "**/cache/*/**": true,
+    "**/coverage/*/**": true,
+    "**/soldata/*/**": true,
+    "**/typechain-types/*/**": true
+  },
+  "files.saveConflictResolution": "overwriteFileOnDisk",
+  "editor.tabSize": 2,
+  "editor.bracketPairColorization.enabled": true,
+  "editor.guides.bracketPairs": "active",
+  "editor.formatOnSave": true,
+  "editor.detectIndentation": false,
+  "editor.insertSpaces": true,
+  "json.validate.enable": false,
+  "json.format.enable": false,
+  "[dotenv][ignore][shellscript][dockerfile]": {
+    "editor.defaultFormatter": "foxundermoon.shell-format",
+    "editor.tabSize": 2
+  },
+  "editor.codeActionsOnSave": {
+    "source.fixAll": true,
+    "source.fixAll.stylelint": true
+  },
+  "eslint.probe": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact",
+    "html",
+    "vue",
+    "markdown",
+    "ts"
+  ],
+  "eslint.validate": ["javascript", "typescript"],
+  "[solidity]": {
+    //"editor.defaultFormatter": "NomicFoundation.hardhat-solidity",
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.tabSize": 4
+  },
+  "redhat.telemetry.enabled": false,
+  "hardhat.telemetry": false,
+  "cSpell.words": ["typechain"]
+}
