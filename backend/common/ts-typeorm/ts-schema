@@ -4,7 +4,7 @@ Table ObsOrder {
   txId integer // create order id, nullable
   reqType integer //
   accountId decimal
-  marketPair string // ETH-USDC
+  marketPair string // ETH/USDC
   price decimal // if buy, price = buyAmt/sellAmt,  sellAmt/buyAmt
   orderStatus integer // pending=1, canceled , matched 
   mainQuantity decimal //  USDC - 6, ETH - 18 
@@ -48,7 +48,7 @@ Table MatchObsOrder {
   txId2 integer
   referenceOrder integer(id)
   reqType integer // Buy , Sell
-  marketPair string // ETH-USDC
+  marketPair string // ETH/USDC
   matchedMQ decimal
   matchedBQ decimal
   timestamp timestamp
@@ -181,5 +181,5 @@ Table MarketPairInfo {
   id integer [pk]
   mainTokenId decimal
   baseTokenId decimal
-  marketPair varchar // ETH-USDC
+  marketPair varchar // ETH/USDC
 }

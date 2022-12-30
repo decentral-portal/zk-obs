@@ -5,7 +5,7 @@ import { AccountInformation } from './accountInformation.entity';
 import { AccountLeafNode } from './accountLeafNode.entity';
 import { AccountMerkleTreeNode } from './accountMerkleTreeNode.entity';
 import { BlockInformation } from './blockInformation.entity';
-import { MerkleTreeController } from './merkleTree.controller';
+// import { MerkleTreeController } from './merkleTree.controller';
 import { TokenLeafNode } from './tokenLeafNode.entity';
 import { TokenMerkleTreeNode } from './tokenMerkleTreeNode.entity';
 import { TransactionInfo } from './transactionInfo.entity';

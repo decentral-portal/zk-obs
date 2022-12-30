@@ -46,7 +46,7 @@ export class ObsOrderEntity {
     name: 'marketPair',
     length: 100,
     nullable: false,
-    default: `'ETH-USDC'`,
+    default: `'ETH/USDC'`,
   })
   marketPair!: string;
   @Column({
@@ -67,25 +67,25 @@ export class ObsOrderEntity {
   orderStatus!: number;
   @Column({
     type: 'decimal',
-    name: 'mainQuantity',
+    name: 'mainQty',
     precision: 86,
     scale: 0,
     nullable: false,
     default: 0n,
   })
-  mainQuantity!: bigint;
+  mainQty!: bigint;
   @Column({
     type: 'decimal',
-    name: 'baseQuantity',
+    name: 'baseQty',
     precision: 86,
     scale: 0,
     nullable: false,
     default: 0n,
   })
-  baseQuantity!: bigint;
+  baseQty!: bigint;
   @Column({
     type: 'decimal',
-    name: 'remainMQ',
+    name: 'remainMainQuantity',
     precision: 86,
     scale: 0,
     nullable: false,
@@ -94,7 +94,7 @@ export class ObsOrderEntity {
   remainMQ!: bigint;
   @Column({
     type: 'decimal',
-    name: 'remainBQ',
+    name: 'remainBaseQuantity',
     precision: 86,
     scale: 0,
     nullable: false,
@@ -103,22 +103,22 @@ export class ObsOrderEntity {
   remainBQ!: bigint;
   @Column({
     type: 'decimal',
-    name: 'accumulatedSellAmt',
+    name: 'accumulatedMainQty',
     precision: 86,
     scale: 0,
     nullable: false,
     default: 0n,
   })
-  accumulatedSellAmt!: bigint;
+  accumulatedMainQty!: bigint;
   @Column({
     type: 'decimal',
-    name: 'accumulatedBuyAmt',
+    name: 'accumulatedBaseQty',
     precision: 86,
     scale: 0,
     nullable: false,
     default: 0n,
   })
-  accumulatedBuyAmt!: bigint;
+  accumulatedBaseQty!: bigint;
   @Column({
     type: 'integer',
     name: 'mainTokenId',

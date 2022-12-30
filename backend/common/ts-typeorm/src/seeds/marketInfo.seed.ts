@@ -12,7 +12,7 @@ export default class CreateMarketInfos implements Seeder {
       .values([{
         mainTokenId: 0n.toString(),
         baseTokenId: 1n.toString(),
-        marketPair: 'ETH-USDC',
+        marketPair: 'ETH/USDC',
       }]).execute(); 
   }
 

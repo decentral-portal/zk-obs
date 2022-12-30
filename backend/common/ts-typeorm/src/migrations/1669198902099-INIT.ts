@@ -268,13 +268,7 @@ export class INIT_1669198902099 implements MigrationInterface {
           scale: 0,
           isPrimary: true
         }
-        , {
-          type: 'decimal',
-          name: 'L2TokenAddr',
-          precision: 86,
-          scale: 0,
-          isNullable: false,
-        }, {
+        ,  {
           type: 'decimal',
           name: 'lockedAmt',
           precision: 86,
@@ -604,51 +598,51 @@ export class INIT_1669198902099 implements MigrationInterface {
           type: 'varchar',
           length: '100',
           isNullable: false,
-          default: `'ETH-USDC'`
+          default: `'ETH/USDC'`
         }, {
           name: 'price',
           type: 'decimal',
           precision: 86,
-          scale: 0,
+          scale: 8,
           isNullable: true,
           default: 0n,
         }, {
-          name: 'mainQuantity',
+          name: 'mainQty',
           type: 'decimal',
           precision: 86,
           scale: 0,
           isNullable: false,
           default: 0n,
         }, {
-          name: 'baseQuantity',
+          name: 'baseQty',
           type: 'decimal',
           precision: 86,
           scale: 0,
           isNullable: false,
           default: 0n,
         }, {
-          name: 'remainMQ',
+          name: 'remainMainQty',
           type: 'decimal',
           precision: 86,
           scale: 0,
           isNullable: false,
           default: 0n
         }, {
-          name: 'remainBQ',
+          name: 'remainBaseQty',
           type: 'decimal',
           precision: 86,
           scale: 0,
           isNullable: false,
           default: 0n
         }, {
-          name: 'accumulatedSellAmt',
+          name: 'accumulatedMainQty',
           type: 'decimal',
           precision: 86,
           scale: 0,
           isNullable: false,
           default: 0n
         }, {
-          name: 'accumulatedBuyAmt',
+          name: 'accumulatedBaseQty',
           type: 'decimal',
           precision: 86,
           scale: 0,
@@ -864,7 +858,7 @@ export class INIT_1669198902099 implements MigrationInterface {
           name: 'marketPair',
           type: 'varchar',
           length: '100',
-          default: `'ETH-USDC'`,
+          default: `'ETH/USDC'`,
           isNullable: false,
         }, {
           name: 'matchedMQ',
@@ -965,7 +959,7 @@ export class INIT_1669198902099 implements MigrationInterface {
           type: 'varchar',
           length: '300',
           isNullable: false,
-          default: `'ETH-USDC'`
+          default: `'ETH/USDC'`
         }]
       })
     );
@@ -998,7 +992,7 @@ export class INIT_1669198902099 implements MigrationInterface {
           type: 'varchar',
           length: '100',
           isNullable: false,
-          default: `'ETH-USDC'`
+          default: `'ETH/USDC'`
         }]
       })
     )  

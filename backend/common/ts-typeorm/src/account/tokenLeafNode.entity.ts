@@ -23,14 +23,6 @@ export class TokenLeafNode {
   accountId!: string;
   @Column({
     type: 'decimal',
-    name: 'L2TokenAddr',
-    precision: 86,
-    scale: 0,
-    nullable: false,
-  })
-  L2TokenAddr!: bigint;
-  @Column({
-    type: 'decimal',
     name: 'availableAmt',
     precision: 86,
     scale: 0,

@@ -30,7 +30,7 @@ export class MarketPairInfoEntity {
     name: 'marketPair',
     length: '100',
     nullable: false,
-    default: () => 'ETH-USDC'
+    default: () => 'ETH/USDC'
   })
   marketPair!: string;
 }

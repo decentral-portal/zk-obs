@@ -55,7 +55,6 @@ export class TsTokenTreeService extends TsMerkleTree<TokenLeafNode> {
       await manager.upsert(TokenLeafNode, {
         leafId:  leafId.toString(),
         accountId: accountId,
-        L2TokenAddr: BigInt(value.L2TokenAddr),
         lockedAmt: BigInt(value.lockedAmt),
         availableAmt: BigInt(value.availableAmt)       
       }, ['leafId', 'accountId']);
@@ -114,7 +113,6 @@ export class TsTokenTreeService extends TsMerkleTree<TokenLeafNode> {
         await manager.insert(TokenLeafNode, {
           leafId: leaf_id.toString(),
           accountId: accountId,
-          L2TokenAddr: 1n,
         });
       });
       return  await this.tokenLeafRepository.findOneBy({leafId: leaf_id.toString(), accountId: accountId});

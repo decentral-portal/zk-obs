@@ -60,7 +60,7 @@ export class CandleStickEntity {
     name: 'marketPair',
     length: '300',
     nullable: false,
-    default: `'ETH-USDC'`
+    default: `'ETH/USDC'`
   })
   marketPair!: string;
 }
