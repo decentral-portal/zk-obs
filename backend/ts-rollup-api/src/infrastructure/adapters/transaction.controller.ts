@@ -9,12 +9,12 @@ import {
   ApiCreatedResponse,
   ApiOperation,
   ApiTags} from '@nestjs/swagger';
-import {RollupDepositDto, RollupRegisterDto, RollupTransferDto, RollupTransferRecipt, RollupWithdrawDto} from '../dtos/transaction.dto';
-import {TsRollupService} from '../service/rollup.service';
+// import {RollupDepositDto, RollupRegisterDto, RollupTransferDto, RollupTransferRecipt, RollupWithdrawDto} from '../dtos/transaction.dto';
+// import {TsRollupService} from '../service/rollup.service';
 import {PinoLogger} from 'nestjs-pino';
 import { TsDefaultValue, TsSystemAccountAddress, TsTokenInfo, TsTxType } from '@ts-sdk/domain/lib/ts-types/ts-types';
 import { TsRollupAccount } from '@ts-sdk/domain/lib/ts-rollup/ts-account';
-import { TsTxDepositRequest, TsTxTransferRequest, TsTxWithdrawRequest } from '@ts-sdk/domain/lib/ts-types/ts-req-types';
+// import { TsTxDepositRequest, TsTxTransferRequest, TsTxWithdrawRequest } from '@ts-sdk/domain/lib/ts-types/ts-req-types';
 import { RollupCircuitType } from '@ts-sdk/domain/lib/ts-rollup/ts-rollup';
 import { PlaceOrderRequest } from '../dtos/PlaceOrderRequest.dto';
 import { TsTxType as SecondTxType } from '@ts-rollup-api/domain/value-objects/tsTxType.enum';
@@ -24,6 +24,7 @@ import { MarketPairInfoService } from '@common/ts-typeorm/auctionOrder/marketPai
 import { TsSide } from '@common/ts-typeorm/auctionOrder/tsSide.enum';
 import { ObsOrderEntity } from '@common/ts-typeorm/auctionOrder/obsOrder.entity';
 import { RegisterRequestDto } from '../dtos/RegisterRequest.dto';
+import { TransactionInfo } from '@common/ts-typeorm/account/transactionInfo.entity';
 
 @Controller('v1/ts/transaction')
 @ApiTags('Transaction')
@@ -31,43 +32,43 @@ export class TsTransactionController {
 
   constructor(
         readonly logger : PinoLogger,
-        private readonly tsRollupService : TsRollupService,
+        // private readonly tsRollupService : TsRollupService,
         private readonly commandBus: CommandBus,
         private readonly marketPairInfoService: MarketPairInfoService,
         private readonly connection: Connection,
   ) {}
-    @Post('withdraw')
-    @ApiOperation({})
-    // @UseGuards(AuthenticationGuard)
-    // @ApiBearerAuth()
-    @ApiCreatedResponse({type: RollupTransferRecipt})
-    async withdraw(@Body()dto : RollupWithdrawDto) {
-      try {
-        const txWithdrawReq: TsTxWithdrawRequest = {
-          reqType: TsTxType.WITHDRAW,
-          L2AddrFrom: dto.L2AddrFrom,
-          L2AddrTo: TsSystemAccountAddress.WITHDRAW_ADDR,
-          L2TokenAddr: dto.L2TokenAddr,
-          amount: dto.amount,
-          nonce: dto
-            .nonce
-            .toString(),
-          eddsaSig: dto.eddsaSig
-        };
-        const {blockNumber} = await this
-          .tsRollupService
-          .rollup
-          .startRollup(async (rp, blockNumber) => {
-            rp.doTransaction(txWithdrawReq);
-          }, RollupCircuitType.Transfer);
-        return {blockNumber: blockNumber.toString()};
-      } catch (error : any) {
-        this
-          .logger
-          .error(error);
-        throw new BadRequestException(error.message);
-      }
-    }
+    // @Post('withdraw')
+    // @ApiOperation({})
+    // // @UseGuards(AuthenticationGuard)
+    // // @ApiBearerAuth()
+    // @ApiCreatedResponse({type: RollupTransferRecipt})
+    // async withdraw(@Body()dto : RollupWithdrawDto) {
+    //   try {
+    //     const txWithdrawReq: TsTxWithdrawRequest = {
+    //       reqType: TsTxType.WITHDRAW,
+    //       L2AddrFrom: dto.L2AddrFrom,
+    //       L2AddrTo: TsSystemAccountAddress.WITHDRAW_ADDR,
+    //       L2TokenAddr: dto.L2TokenAddr,
+    //       amount: dto.amount,
+    //       nonce: dto
+    //         .nonce
+    //         .toString(),
+    //       eddsaSig: dto.eddsaSig
+    //     };
+    //     const {blockNumber} = await this
+    //       .tsRollupService
+    //       .rollup
+    //       .startRollup(async (rp, blockNumber) => {
+    //         rp.doTransaction(txWithdrawReq);
+    //       }, RollupCircuitType.Transfer);
+    //     return {blockNumber: blockNumber.toString()};
+    //   } catch (error : any) {
+    //     this
+    //       .logger
+    //       .error(error);
+    //     throw new BadRequestException(error.message);
+    //   }
+    // }
 
     @Post('placeOrder')
     @ApiOperation({})
@@ -96,19 +97,46 @@ export class TsTransactionController {
       const price = (dto.reqType === SecondTxType.SecondMarketOrder)?
         '0': (Number(mainQty)/Number(baseQty)).toString();
       const formatPrice = this.toFixed8(price);
-      const result = await this.connection.getRepository(ObsOrderEntity).insert({
+      const nonce = dto.nonce.toString();
+      let txInfo = {
         reqType: Number(dto.reqType),
         accountId: BigInt(dto.sender),
-        side,
-        mainTokenId: BigInt(mainTokenId),
-        baseTokenId: BigInt(baseTokenId),
-        mainQty: BigInt(mainQty),
-        baseQty: BigInt(baseQty),
-        remainMainQty: BigInt(remainMainQty),
-        remainBaseQty: BigInt(remainBaseQty),
-        price: formatPrice,
+        nonce: BigInt(nonce),
+        amount: BigInt(dto.sellAmt),
+        tokenId: BigInt(dto.sellTokenId),
+        arg2: BigInt(dto.buyTokenId),
+        arg3: 0n,
+      }
+      if (dto.reqType === SecondTxType.SecondMarketOrder) {
+        txInfo["arg3"] = BigInt(dto.buyAmt);
+      }
+      console.log(txInfo);
+      const orderId = await this.connection.transaction(async (manager) => { 
+        const txInfoEntity = new TransactionInfo();
+        txInfoEntity.reqType = txInfo.reqType;
+        txInfoEntity.accountId = txInfo.accountId;
+        txInfoEntity.nonce = txInfo.nonce;
+        txInfoEntity.amount = txInfo.amount;
+        txInfoEntity.tokenId = txInfo.tokenId;
+        txInfoEntity.arg2 = txInfo.arg2;
+        txInfoEntity.arg3 = txInfo.arg3;
+        const txResult = await manager.getRepository(TransactionInfo).save(txInfoEntity);
+        const result = await this.connection.getRepository(ObsOrderEntity).insert({
+          txId: txResult.txId,
+          reqType: Number(dto.reqType),
+          accountId: BigInt(dto.sender),
+          side,
+          mainTokenId: BigInt(mainTokenId),
+          baseTokenId: BigInt(baseTokenId),
+          mainQty: BigInt(mainQty),
+          baseQty: BigInt(baseQty),
+          remainMainQty: BigInt(remainMainQty),
+          remainBaseQty: BigInt(remainBaseQty),
+          price: formatPrice,
+        });
+        const orderId = result.generatedMaps[0].id;
+        return orderId;
       });
-      const orderId = result.generatedMaps[0].id;
       return {
         orderId: orderId.toString()
       };

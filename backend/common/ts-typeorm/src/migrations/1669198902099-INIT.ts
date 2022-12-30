@@ -393,7 +393,7 @@ export class INIT_1669198902099 implements MigrationInterface {
         }, {
           type: 'integer',
           name: 'blockNumber',
-          isNullable: false,
+          isNullable: true,
         } ,
         {
           type: 'integer',
@@ -551,7 +551,14 @@ export class INIT_1669198902099 implements MigrationInterface {
           type: 'timestamp without time zone',
           name: 'deletedAt',
           isNullable: true,
-        }, {
+        },
+        {
+          type: 'varchar',
+          name: 'createdBy',
+          length: '256',
+          isNullable: true,
+        }, 
+        {
           type: 'varchar',
           name: 'updatedBy',
           length: '256',

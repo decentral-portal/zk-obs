@@ -209,21 +209,21 @@ export class RollupCore {
     return this.orderMap[orderId] || new TsAuctionEmptyOrder() ;
   }
 
-  async addAuctionOrder(reqType: TsTxType, txId: bigint, req: TsTxEntityRequest): Promise<number> {
-    const time = Date.now();
-    if(reqType === TsTxType.SecondLimitOrder) {
-      const orderId = this.currentOrderId;
-      const order = new TsAuctionLendOrder(orderId, txId, req as TsTxAuctionLendRequest, time);
-      // this.updateAccountToken(BigInt(req.L2AddrFrom), order.L2TokenAddrLending as TsTokenAddress, -order.lendingAmt, true);
-      // TODO: wrap auctio order tree logic;
-      const leaf = order.encodeOrderLeaf();
-      this.orderMap[orderId] = order;
-      this.mkOrderTree.updateLeafNode(orderId, leaf);
-      this.currentOrderId++;
-      return orderId;
-    }
-    throw new Error(`Invalid order reqType (${reqType})`);
-  }
+  // async addAuctionOrder(reqType: TsTxType, txId: bigint, req: TsTxEntityRequest): Promise<number> {
+  //   const time = Date.now();
+  //   if(reqType === TsTxType.SecondLimitOrder) {
+  //     const orderId = this.currentOrderId;
+  //     // const order = new TsAuctionLendOrder(orderId, txId, req as TsTxAuctionLendRequest, time);
+  //     // this.updateAccountToken(BigInt(req.L2AddrFrom), order.L2TokenAddrLending as TsTokenAddress, -order.lendingAmt, true);
+  //     // TODO: wrap auctio order tree logic;
+  //     const leaf = order.encodeOrderLeaf();
+  //     this.orderMap[orderId] = order;
+  //     this.mkOrderTree.updateLeafNode(orderId, leaf);
+  //     this.currentOrderId++;
+  //     return orderId;
+  //   }
+  //   throw new Error(`Invalid order reqType (${reqType})`);
+  // }
 
   // async cancelAuctionOrder(req: TsTxAuctionCancelRequest): Promise<number> {
   //   const _req = req as TsTxAuctionCancelRequest;
@@ -627,7 +627,7 @@ export class RollupCore {
     const orderLeafId = this.currentOrderId;
     const txId = this.txId + BigInt(this.currentTxLogs.length);
     this.orderBeforeUpdate(orderLeafId);
-    await this.addAuctionOrder(req.reqType, txId, req as unknown as TsTxAuctionLendRequest | TsTxAuctionBorrowRequest);
+    // await this.addAuctionOrder(req.reqType, txId, req as unknown as TsTxAuctionLendRequest | TsTxAuctionBorrowRequest);
     this.orderAfterUpdate(orderLeafId);
   
 

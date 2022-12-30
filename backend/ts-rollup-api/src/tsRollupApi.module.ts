@@ -10,7 +10,7 @@ import { TsTypeOrmModule } from '@common/ts-typeorm/tstypeorm.module';
 
 import { TsAccountController } from '@ts-rollup-api/infrastructure/adapters/account.controller';
 import { TsTransactionController } from '@ts-rollup-api/infrastructure/adapters/transaction.controller';
-import { TsRollupService } from '@ts-rollup-api/infrastructure/service/rollup.service';
+// import { TsRollupService } from '@ts-rollup-api/infrastructure/service/rollup.service';
 import { CheckLendOrderGuard } from '@ts-rollup-api/infrastructure/guards/check-lend-order.guard';
 import { L2BalanceRepository } from '@ts-rollup-api/infrastructure/ports/L2Balance.repository';
 // import { L2RealBalanceService } from '@ts-rollup-api/infrastructure/service/L2RealBalance.service';
@@ -23,9 +23,9 @@ const controllers = [
 ];
 
 
-const services: Provider[] = [
-  TsRollupService,
-];
+// const services: Provider[] = [
+//   TsRollupService,
+// ];
 @Module({
   controllers,
   imports: [
@@ -42,7 +42,7 @@ const services: Provider[] = [
   ],
   providers: [
     ...controllers,
-    ...services,
+    // ...services,
     // CheckLendOrderGuard,
     // CheckWithdrawOrderGuard,
     // {
@@ -50,7 +50,7 @@ const services: Provider[] = [
     //   useClass: L2RealBalanceService
     // }
   ],
-  exports: [...controllers, TsRollupService],
+  exports: [...controllers,],
 })
 export class TsRollupApiModule implements OnModuleInit {
   constructor(
