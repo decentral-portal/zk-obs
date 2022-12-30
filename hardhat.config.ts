@@ -4,7 +4,7 @@ import '@nomicfoundation/hardhat-toolbox';
 import '@nomiclabs/hardhat-ethers';
 import '@nomiclabs/hardhat-etherscan';
 import '@openzeppelin/hardhat-upgrades';
-import '@tenderly/hardhat-tenderly';
+// import '@tenderly/hardhat-tenderly';
 import '@typechain/hardhat';
 import 'hardhat-contract-sizer';
 import 'hardhat-docgen';
@@ -39,7 +39,7 @@ const config: HardhatUserConfig = {
         settings: {
           optimizer: {
             enabled: true,
-            runs: 1000,
+            runs: 200,
           },
           outputSelection: {
             '*': {
