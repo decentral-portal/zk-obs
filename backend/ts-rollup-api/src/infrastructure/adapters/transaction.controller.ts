@@ -201,7 +201,6 @@ export class TsTransactionController {
         price: formatPrice,
       });
       const orderId = result.generatedMaps[0].id;
-      console.log(orderId);
       return {
         orderId: orderId.toString()
       };
