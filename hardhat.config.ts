@@ -85,9 +85,8 @@ const config: HardhatUserConfig = {
       },
     },
     goerli: {
-      url: process.env.GOERLI_RPC_URL || '',
-      accounts:
-        process.env.GOERLI_KEY !== undefined ? [process.env.GOERLI_KEY] : [],
+      url: `https://eth-goerli.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
+      accounts: [getString(process.env.PRIVATE_KEY)],
     },
   },
   etherscan: {
@@ -124,4 +123,10 @@ function getNumber(str: string, _default: number) {
     return num;
   }
   throw new Error(`'${str}' is not a number`);
+}
+
+function getString(value: any, defaultValue?: string) {
+  if (typeof value === 'string') return value;
+  if (defaultValue !== undefined) return defaultValue;
+  throw new Error(`Missing environment variable`);
 }
