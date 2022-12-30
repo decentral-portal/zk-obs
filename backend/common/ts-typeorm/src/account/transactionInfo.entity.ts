@@ -69,7 +69,8 @@ export class TransactionInfo extends BaseTimeEntity {
     name: 'amount',
     precision: 86,
     scale: 0,
-    nullable: false
+    nullable: false,
+    default: 0n,
   })
   amount!: bigint;
   @Column({
@@ -82,68 +83,68 @@ export class TransactionInfo extends BaseTimeEntity {
   })
   nonce!: bigint;
   @Column({
-    type: 'decimal',
+    type: 'json',
     name: 'eddsaSig',
-    precision: 86,
-    scale: 0,
     nullable: false,
-    default: 0n,
+    default: () => JSON.stringify({R8:['0','0'],S:'0'}),
   })
-  eddsaSig!: bigint;
+  eddsaSig!: {
+    R8: [string, string];
+    S: string
+  };
   @Column({
-    type: 'decimal',
+    type: 'varchar',
     name: 'ecdsaSig',
-    precision: 86,
-    scale: 0,
+    length: '66',
     nullable: false,
-    default: 0n,
+    default: ''
   })
-  ecdsaSig!: bigint;
+  ecdsaSig!: string;
   @Column({
     type: 'decimal',
     name: 'arg0',
     precision: 86,
     scale: 0,
-    nullable: true,
+    nullable: false,
     default: 0n,
   })
-  arg0!: string | null;
+  arg0!: bigint;
   @Column({
     type: 'decimal',
     name: 'arg1',
     precision: 86,
     scale: 0,
-    nullable: true,
+    nullable: false,
     default: 0n,
   })
-  arg1!: string | null;
+  arg1!: bigint;
   @Column({
     type: 'decimal',
     name: 'arg2',
     precision: 86,
     scale: 0,
-    nullable: true,
+    nullable: false,
     default: 0n,
   })
-  arg2!: string | null;
+  arg2!: bigint;
   @Column({
     type: 'decimal',
     name: 'arg3',
     precision: 86,
     scale: 0,
-    nullable: true,
+    nullable: false,
     default: 0n,
   })
-  arg3!: string | null;
+  arg3!: bigint;
   @Column({
     type: 'decimal',
     name: 'arg4',
     precision: 86,
     scale: 0,
-    nullable: true,
+    nullable: false,
     default: 0n,
   })
-  arg4!: string | null;
+  arg4!: bigint;
   @Column({
     type: 'decimal',
     name: 'fee',

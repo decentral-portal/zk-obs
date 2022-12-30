@@ -443,19 +443,19 @@ export class INIT_1669198902099 implements MigrationInterface {
           isNullable: false,
           default: 0n,
         }, {
-          type: 'decimal',
+          type: 'json',
           name: 'eddsaSig',
-          precision: 86,
-          scale: 0,
           isNullable: false,
-          default: 0n
+          default: `'${JSON.stringify({
+            R8: ['0', '0'],
+            S: '0',
+          })}'`,
         }, {
-          type: 'decimal',
+          type: 'varchar',
           name: 'ecdsaSig',
-          precision: 86,
-          scale: 0,
+          length: '66',
           isNullable: false,
-          default: 0n,
+          default: `''`,
         }, {
           type: 'decimal',
           name: 'arg0',
@@ -468,28 +468,28 @@ export class INIT_1669198902099 implements MigrationInterface {
           name: 'arg1',
           precision: 86,
           scale: 0,
-          isNullable: true,
+          isNullable: false,
           default: 0n,
         }, {
           type: 'decimal',
           name: 'arg2',
           precision: 86,
           scale: 0,
-          isNullable: true,
+          isNullable: false,
           default: 0n,
         }, {
           type: 'decimal',
           name: 'arg3',
           precision: 86,
           scale: 0,
-          isNullable: true,
+          isNullable: false,
           default: 0n
         }, {
           type: 'decimal',
           name: 'arg4',
           precision: 86,
           scale: 0,
-          isNullable: true,
+          isNullable: false,
           default: 0n,
         },{
           type: 'decimal',
@@ -576,7 +576,14 @@ export class INIT_1669198902099 implements MigrationInterface {
           isPrimary: true,
           isGenerated: true,
           generationStrategy: 'increment'
-        }, {
+        },
+        {
+          name: 'reqType',
+          type: 'integer',
+          default: '0',
+          isNullable: false,
+        },
+         {
           name: 'side',
           type: 'enum',
           enumName: 'SIDE',

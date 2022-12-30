@@ -57,7 +57,7 @@ export class ObsOrderEntity {
     nullable: false,
     default: 0n,
   })
-  price!: bigint;
+  price!: string;
   @Column({
     type: 'integer',
     name: 'orderStatus',
@@ -85,22 +85,22 @@ export class ObsOrderEntity {
   baseQty!: bigint;
   @Column({
     type: 'decimal',
-    name: 'remainMainQuantity',
+    name: 'remainMainQty',
     precision: 86,
     scale: 0,
     nullable: false,
     default: 0n,
   })
-  remainMQ!: bigint;
+  remainMainQty!: bigint;
   @Column({
     type: 'decimal',
-    name: 'remainBaseQuantity',
+    name: 'remainBaseQty',
     precision: 86,
     scale: 0,
     nullable: false,
     default: 0n,
   })
-  remainBQ!: bigint;
+  remainBaseQty!: bigint;
   @Column({
     type: 'decimal',
     name: 'accumulatedMainQty',
@@ -122,17 +122,21 @@ export class ObsOrderEntity {
   @Column({
     type: 'decimal',
     name: 'mainTokenId',
+    precision: 86,
+    scale: 0,
     nullable: false,
     default: 0,
   })
-  mainTokenId!: number;
+  mainTokenId!: bigint;
   @Column({
     type: 'decimal',
     name: 'baseTokenId',
+    precision: 86,
+    scale: 0,
     nullable: false,
     default: 0,
   })
-  baseTokenId!: number;
+  baseTokenId!: bigint;
   @Column({
     type: 'timestamp without time zone',
     name: 'timestamp',
