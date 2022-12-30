@@ -4,6 +4,8 @@ import { UpdateAccountTreeDto } from './dto/updateAccountTree.dto';
 import { UpdateTokenTreeDto } from './dto/updateTokenTree.dto';
 import { TsAccountTreeService } from './tsAccountTree.service';
 import { TsTokenTreeService } from './tsTokenTree.service';
+import { MarketSellBuyPair } from '../auctionOrder/dto/MarketPairInfo.dto';
+import { TsSide } from '../auctionOrder/tsSide.enum';
 
 @Controller('merkleTree')
 export class MerkleTreeController {
@@ -42,15 +44,20 @@ export class MerkleTreeController {
     console.timeEnd('controller updateTokenTree');
   }
   @Get('marketPairInfo')
-  async getMarketPairInfo(@Query() obj: any ) {
+  async getMarketPairInfo(@Query() dto: MarketSellBuyPair) {
+    console.log(dto);
     const pair = [{
-      mainTokenId: obj.sellTokenId,
-      baseTokenId: obj.buyTokenId,
+      mainTokenId: dto.sellTokenId,
+      baseTokenId: dto.buyTokenId,
     }, {
-      mainTokenId: obj.buyTokenId,
-      baseTokenId: obj.sellTokenId,
+      mainTokenId: dto.buyTokenId,
+      baseTokenId: dto.sellTokenId,
     }]
     const marketPairInfo = await this.marketPairInfoService.findOneMarketPairInfo({pairs: pair});
-    return marketPairInfo;
+    const side = marketPairInfo.mainTokenId === dto.buyTokenId ?  TsSide.BUY: TsSide.SELL;
+    return {
+      ...marketPairInfo,
+      side,
+    };
   }
 }

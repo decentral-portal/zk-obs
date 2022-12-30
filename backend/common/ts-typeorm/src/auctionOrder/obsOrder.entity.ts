@@ -120,14 +120,14 @@ export class ObsOrderEntity {
   })
   accumulatedBaseQty!: bigint;
   @Column({
-    type: 'integer',
+    type: 'decimal',
     name: 'mainTokenId',
     nullable: false,
     default: 0,
   })
   mainTokenId!: number;
   @Column({
-    type: 'integer',
+    type: 'decimal',
     name: 'baseTokenId',
     nullable: false,
     default: 0,

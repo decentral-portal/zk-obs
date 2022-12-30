@@ -31,6 +31,7 @@ export class TsTransactionController {
         private readonly tsRollupService : TsRollupService,
         private readonly commandBus: CommandBus,
         // private readonly connection: Connection,
+        private readonly marketPairInfoService: MarketPairInfoService
   ) {}
 
     @Post('register')
@@ -168,9 +169,12 @@ export class TsTransactionController {
       }
       // generate MarketPair query Pair
       const queryPair = [
-        { mainTokenId: dto.sellTokenId, subTokenId: dto.buyTokenId },
-        { mainTokenId: dto.buyTokenId, subTokenId: dto.sellTokenId },
+        { mainTokenId: dto.sellTokenId, baseTokenId: dto.buyTokenId },
+        { mainTokenId: dto.buyTokenId, baseTokenId: dto.sellTokenId },
       ];
       // query marketPair by sellTokenId and buyTokenId
+      const marketPairInfo = await this.marketPairInfoService.findOneMarketPairInfo({
+        pairs: queryPair
+      })
     }
 }

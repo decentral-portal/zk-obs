@@ -650,14 +650,18 @@ export class INIT_1669198902099 implements MigrationInterface {
           default: 0n
         }, {
           name: 'mainTokenId',
-          type: 'integer',
+          type: 'decimal',
+          precision: 86,
+          scale: 0,
           isNullable: false,
-          default: 0
+          default: 0n
         },  {
           name: 'baseTokenId',
-          type: 'integer',
+          type: 'decimal',
+          precision: 86,
+          scale: 0,
           isNullable: false,
-          default: 0
+          default: 0n
         },  {
           name: 'timestamp',
           type: 'timestamp without time zone',

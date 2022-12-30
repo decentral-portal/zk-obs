@@ -18,3 +18,10 @@ export class MarketPairInfoRequestDto {
   @ApiProperty()
   pairs!: MarketPair[];
 }
+
+export class MarketSellBuyPair {
+  @ApiProperty()
+  sellTokenId!: string;
+  @ApiProperty()
+  buyTokenId!: string;
+}

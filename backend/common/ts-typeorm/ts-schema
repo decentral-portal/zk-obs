@@ -157,7 +157,7 @@ Table Transaction.List {
   feeToken decimal
   
   metadata json
-  tsStatus enum
+  txStatus enum
   createdAt datetime
   updatedAt datetime
   updatedBy varchar
