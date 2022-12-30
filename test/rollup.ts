@@ -5,9 +5,10 @@ import { BigNumber, Contract, Signer } from 'ethers';
 import { ethers } from 'hardhat';
 import { WETH9 } from '../typechain-types';
 import { ERC20FreeMint } from '../typechain-types';
-import { Operations, ZkOBS } from '../typechain-types/contracts/ZkOBS';
-import { deploy, genTsAddr } from './utils';
-
+import { ZkOBS } from '../typechain-types/contracts/ZkOBS';
+import { deploy } from './utils';
+import initStates from './example/zkobs-p1/initStates.json';
+import inputs from './example/zkobs-p1/0_register-acc1-p5-8-8-4-8-inputs.json';
 
 describe('Unit test of rollup', function () {
   let operator: Signer;
@@ -28,51 +29,44 @@ describe('Unit test of rollup', function () {
     SECONDMARKETORDER,
     SECONDMARKETEXCHANGE,
     SECONDMARKETEND,
-    CANCELORDER
+    CANCELORDER,
   }
 
   describe('Rollup for single register', function () {
-    
-    const l2Addr = genTsAddr(BigNumber.from('3'),BigNumber.from('4'));
-    const amount: BigNumber = BigNumber.from('1000000');
+    const l2Addr = BigNumber.from(inputs.reqData[0][6]).toHexString();
+    const amount: BigNumber = BigNumber.from(inputs.reqData[0][3]);
     before(async function () {
-        before(async function () {
-            const {
-              operator: _operator,
-              user1: _user1,
-              user2: _user2,
-              zkUSDC: _zkUSDC,
-              wETH: _wETH,
-              zkOBS: _zkOBS
-            } = await loadFixture(deploy);
-            operator = _operator;
-            user1 = _user1;
-            user2 = _user2;
-            zkUSDC = _zkUSDC;
-            zkOBS = _zkOBS;
-            wETH = _wETH;
-            // whitelist token
-            await zkOBS.connect(operator).addToken(zkUSDC.address);
-        });
+      const {
+        operator: _operator,
+        user1: _user1,
+        user2: _user2,
+        zkUSDC: _zkUSDC,
+        wETH: _wETH,
+        zkOBS: _zkOBS,
+      } = await loadFixture(deploy);
+      operator = _operator;
+      user1 = _user1;
+      user2 = _user2;
+      zkUSDC = _zkUSDC;
+      zkOBS = _zkOBS;
+      wETH = _wETH;
+      // whitelist token
+      await zkOBS.connect(operator).addToken(zkUSDC.address);
     });
-    it.only('Mimic user register', async function() {
-      console.log('gg');
-      // get user's states first
-      const oriBalance:BigNumber = await zkUSDC.balanceOf(zkOBS.address);
-      const oriAccountNum = await zkOBS.accountNum();
-      const oriTotalPendingRequests =
-        await zkOBS.pendingL1RequestNum();
-      console.log('gg');
-      // call deposit
-      zkUSDC.connect(user2).mint(BigNumber.from('100000000'));
-      
-      await zkUSDC.connect(user2).approve(zkOBS.address, amount);
-      await zkOBS
-        .connect(user2)
-        .registerERC20(l2Addr, zkUSDC.address, amount);
 
+    it('Mimic user register', async function () {
+      // get user's states first
+      const oriBalance: BigNumber = await zkUSDC.balanceOf(zkOBS.address);
+      const oriAccountNum = await zkOBS.accountNum();
+      const oriTotalPendingRequests = await zkOBS.pendingL1RequestNum();
+
+      // call deposit
+      zkUSDC.connect(user1).mint(amount);
+
+      await zkUSDC.connect(user1).approve(zkOBS.address, amount);
+      await zkOBS.connect(user1).registerERC20(l2Addr, zkUSDC.address, amount);
       // check user balance
-      const newBalance:BigNumber = await zkUSDC.balanceOf(zkOBS.address);
+      const newBalance: BigNumber = await zkUSDC.balanceOf(zkOBS.address);
       expect(newBalance.sub(oriBalance)).to.be.eq(amount);
 
       // check accountNum increased
@@ -80,8 +74,7 @@ describe('Unit test of rollup', function () {
       expect(newAccountNum - oriAccountNum).to.be.eq(1);
 
       // check totalPendingRequest increased
-      const newTotalPendingRequests =
-        await zkOBS.pendingL1RequestNum();
+      const newTotalPendingRequests = await zkOBS.pendingL1RequestNum();
       expect(newTotalPendingRequests.sub(oriTotalPendingRequests)).to.be.eq(2);
 
       // check the request is existed in the L1 request queue
@@ -112,11 +105,12 @@ describe('Unit test of rollup', function () {
       zkOBS = zkOBS.connect(operator);
 
       // commit blocks
-      const emptyHash = '0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470';
-      
+      const emptyHash =
+        '0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470';
+
       const lastCommittedBlock: ZkOBS.StoredBlockStruct = {
         blockNumber: BigNumber.from('0'),
-        stateRoot: '0x26e6a948ed1800b8d141872b8fdea03a609482c2eac6410a0c705b79e02012b2',
+        stateRoot: initStates.stateRoots,
         l1RequestNum: BigNumber.from('0'),
         pendingRollupTxHash: emptyHash,
         commitment: ethers.utils.defaultAbiCoder.encode(
@@ -125,11 +119,13 @@ describe('Unit test of rollup', function () {
         ),
         timestamp: BigNumber.from('0'),
       };
-      
+
       const newBlocks: ZkOBS.CommitBlockStruct[] = [];
       const tokenIdUSDC = await zkOBS.tokenIdOf(zkUSDC.address);
-      const newStateRoot = '0x0b99cb4eea47e09d3b6278e59471deaf894ccdd19f96ea9ecc10003e653deee2';
-      const newTsRoot = '0x218aa75509f1dbc6f8aba270fad8212d0e6afa426c7e85eff9f889aae138a278';
+      const newStateRoot =
+        '0x1b8c49f0a6220b650069ab244b5007e7d1c01e1960c234d6dfddcc955e4794f0';
+      const newTsRoot =
+        '0x07c6d6206e0ce5c82855c3f992e6e93ac02940ef84df1c290630c3e6de0a0e5f';
       const accountId = await zkOBS.accountIdOf(await user2.getAddress());
 
       const publicData = ethers.utils
@@ -156,9 +152,11 @@ describe('Unit test of rollup', function () {
       const newTotalCommittedL1Requests = await zkOBS.committedL1RequestNum();
 
       expect(newTotalCommittedBlocks - oriTotalCommittedBlocks).to.be.eq(
-        newBlocks.length
+        newBlocks.length,
       );
-      expect(newTotalCommittedL1Requests.sub(oriTotalCommittedL1Requests)).to.be.eq(2);
+      expect(
+        newTotalCommittedL1Requests.sub(oriTotalCommittedL1Requests),
+      ).to.be.eq(2);
     });
 
     it('Prove single register', async function () {
@@ -166,26 +164,38 @@ describe('Unit test of rollup', function () {
       const oriTotalProvedBlocks = await zkOBS.provedBlockNum();
 
       const committedBlocks: ZkOBS.StoredBlockStruct[] = [];
-      const newStateRoot = '0x0b99cb4eea47e09d3b6278e59471deaf894ccdd19f96ea9ecc10003e653deee2';
-      const emptyHash = '0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470';
+      const newStateRoot =
+        '0x0b99cb4eea47e09d3b6278e59471deaf894ccdd19f96ea9ecc10003e653deee2';
+      const emptyHash =
+        '0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470';
       const commitedBlock: ZkOBS.StoredBlockStruct = {
         blockNumber: 1,
         stateRoot: newStateRoot,
         l1RequestNum: 2,
         pendingRollupTxHash: emptyHash,
-        commitment: '0x102678f8f19721544ca6755f4f900310ad67926c318fb76ea0ff02bd47d9d16d',
+        commitment:
+          '0x00e42f662a7e7586fce075723c668c647db494a53565b9aeb1f4ae06abcd4fce',
         timestamp: 1,
       };
       committedBlocks.push(commitedBlock);
       const proofs: ZkOBS.ProofStruct[] = [];
       const proof: ZkOBS.ProofStruct = {
         a: [BigNumber.from(calldata[0][0]), BigNumber.from(calldata[0][1])],
-        b: [[BigNumber.from(calldata[1][0][0]), BigNumber.from(calldata[1][0][1])],[BigNumber.from(calldata[1][1][0]), BigNumber.from(calldata[1][1][1])]],
+        b: [
+          [
+            BigNumber.from(calldata[1][0][0]),
+            BigNumber.from(calldata[1][0][1]),
+          ],
+          [
+            BigNumber.from(calldata[1][1][0]),
+            BigNumber.from(calldata[1][1][1]),
+          ],
+        ],
         c: [BigNumber.from(calldata[2][0]), BigNumber.from(calldata[2][1])],
-        commitment: [BigNumber.from(calldata[3][0])]
+        commitment: [BigNumber.from(calldata[3][0])],
       };
       proofs.push(proof);
-      
+
       await zkOBS.proveBlocks(committedBlocks, proofs);
 
       const newTotalProvedBlocks = await zkOBS.provedBlockNum();
@@ -203,7 +213,6 @@ describe('Unit test of rollup', function () {
       //   await zkTrueUp.getTotalPendingL1Requests();
       // let provedBlocks: ExecuteBlock[];
       // await zkTrueUp.executeBlocks(provedBlocks);
-
       // const newTotalExecutedBlocks = await zkTrueUp.getTotalExecutedBlocks();
       // const newFirstL1RequestId = await zkTrueUp.getFirstL1RequestId();
       // const newTotalCommittedL1Requests =
@@ -226,7 +235,7 @@ describe('Unit test of rollup', function () {
       // ).to.be.eq(totalL1Requests);
       // expect(oriTotalPendingL1Requests - newTotalPendingL1Requests).to.be.eq(
       //   totalL1Requests,
-      // );   
+      // );
     });
   });
 

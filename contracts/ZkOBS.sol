@@ -8,6 +8,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import "./Operations.sol";
 import "./IWETH.sol";
+import "./IVerifier.sol";
 import "hardhat/console.sol";
 
 /// @title ZkOBS contract
@@ -85,6 +86,8 @@ contract ZkOBS is Ownable {
             timestamp: 0
         });
         storedBlockHashes[0] = keccak256(abi.encode(storedBlock));
+        //! only for test
+        tokenNum = 7;
     }
 
     function addToken(address tokenAddr) external onlyOwner {
@@ -312,11 +315,31 @@ contract ZkOBS is Ownable {
         StoredBlock memory previousBlock,
         CommitBlock memory newBlock,
         bytes memory offsetCommitment
-    ) internal pure returns (bytes32 commitment) {
-        // * circuit = sha256(oriStateRoot, newStateRoot, tsRoot, slot0, slot1, ..., slot255)
-        bytes32 tsRoot = 0x218aa75509f1dbc6f8aba270fad8212d0e6afa426c7e85eff9f889aae138a278;
-
+    ) internal view returns (bytes32 commitment) {
         bytes memory pubdata = abi.encodePacked(offsetCommitment, newBlock.publicData);
-        commitment = sha256(abi.encodePacked(previousBlock.stateRoot, newBlock.newStateRoot, tsRoot, pubdata));
+        commitment = sha256(
+            abi.encodePacked(previousBlock.stateRoot, newBlock.newStateRoot, newBlock.newTsRoot, pubdata)
+        );
+    }
+
+    function proveBlocks(StoredBlock[] memory committedBlocks, Proof[] memory proof) external {
+        uint32 currentProvedBlockNum = provedBlockNum;
+        for (uint256 i = 0; i < committedBlocks.length; i++) {
+            require(keccak256(abi.encode(committedBlocks[i])) == storedBlockHashes[currentProvedBlockNum + 1], "o1");
+            _proveOneBlock(committedBlocks[i], proof[i]);
+            ++currentProvedBlockNum;
+        }
+
+        require(currentProvedBlockNum <= committedBlockNum, "Proved block number exceeds committed block number");
+        provedBlockNum = currentProvedBlockNum;
+    }
+
+    function _proveOneBlock(StoredBlock memory committedBlock, Proof memory proof) internal view {
+        IVerifier verifier = IVerifier(verifierAddr);
+        require(verifier.verifyProof(proof.a, proof.b, proof.c, proof.commitment), "Invalid proof");
+        require(
+            proof.commitment[0] & INPUT_MASK == uint256(committedBlock.commitment) & INPUT_MASK,
+            "commitment inconsistency"
+        );
     }
 }

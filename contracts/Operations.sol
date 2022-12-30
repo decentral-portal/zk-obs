@@ -21,6 +21,7 @@ library Operations {
     uint8 internal constant L2_ADDR_BYTES = 4;
     uint8 internal constant TS_ADDR_BYTES = 20;
     uint8 internal constant L2_TOKEN_ADDR_BYTES = 2;
+    uint8 internal constant TOKEN_LEAF_BYTES = 2;
     uint8 internal constant STATE_AMOUNT_BYTES = 16;
 
     // Register pubdata
@@ -75,7 +76,7 @@ library Operations {
     }
 
     uint256 internal constant REGISTER_PUBDATA_BYTES =
-        OP_TYPE_BYTES + L2_ADDR_BYTES + L2_TOKEN_ADDR_BYTES + STATE_AMOUNT_BYTES + TS_ADDR_BYTES;
+        OP_TYPE_BYTES + L2_ADDR_BYTES + L2_TOKEN_ADDR_BYTES + TOKEN_LEAF_BYTES + STATE_AMOUNT_BYTES + TS_ADDR_BYTES;
 
     function readRegisterPubdata(bytes memory data)
         internal
@@ -85,6 +86,7 @@ library Operations {
         uint256 offset = OP_TYPE_BYTES;
         (offset, register.accountId) = Bytes.readUInt32(data, offset);
         (offset, deposit.tokenId) = Bytes.readUInt16(data, offset);
+        (offset, ) = Bytes.readUInt16(data, offset);
         (offset, deposit.amount) = Bytes.readUInt128(data, offset);
         (offset, register.l2Addr) = Bytes.readBytes20(data, offset);
         deposit.accountId = register.accountId;
