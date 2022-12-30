@@ -53,7 +53,7 @@ export class ObsOrderEntity {
     type: 'decimal',
     name: 'price',
     precision: 86,
-    scale: 0,
+    scale: 8,
     nullable: false,
     default: 0n,
   })
@@ -62,7 +62,7 @@ export class ObsOrderEntity {
     type: 'integer',
     name: 'orderStatus',
     nullable: false,
-    default: 0, // pending=0, canceled=1, matched=2
+    default: 1, // pending=1, canceled=2, matched=3
   })
   orderStatus!: number;
   @Column({

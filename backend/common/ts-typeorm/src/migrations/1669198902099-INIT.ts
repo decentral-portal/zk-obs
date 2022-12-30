@@ -674,6 +674,11 @@ export class INIT_1669198902099 implements MigrationInterface {
           type: 'integer',
           isNullable: true,
           isUnique: true,
+        }, {
+          name: 'orderStatus',
+          type: 'integer',
+          isNullable: false,
+          default: 1,
         }],
         foreignKeys: [{
           name: 'accountInfo',

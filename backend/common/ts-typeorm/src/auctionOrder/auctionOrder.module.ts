@@ -10,6 +10,7 @@ import { MatchObsOrderEntity } from './matchObsOrder.entity';
 import { CandleStickEntity } from './candleStick.entity';
 import { ObsOrderLeafMerkleTreeNode } from './obsOrderLeafMerkleTreeNode.entity';
 import { MarketPairInfoEntity } from './marketPairInfo.entity';
+import { MarketPairInfoService } from './marketPairInfo.service';
 
 @Global()
 @Module({
@@ -24,7 +25,7 @@ import { MarketPairInfoEntity } from './marketPairInfo.entity';
     CandleStickEntity, 
     AuctionBondTokenEntity,
   ])],
-  providers: [ConfigService],
-  exports: [TypeOrmModule]
+  providers: [ConfigService, MarketPairInfoService],
+  exports: [TypeOrmModule, MarketPairInfoService]
 })
 export class AuctionOrderMoudle {}

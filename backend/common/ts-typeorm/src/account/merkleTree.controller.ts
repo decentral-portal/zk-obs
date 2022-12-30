@@ -1,4 +1,5 @@
-import { Body, Controller, Logger, Post } from '@nestjs/common';
+import { Body, Controller, Get, Logger, Post, Query } from '@nestjs/common';
+import { MarketPairInfoService } from '../auctionOrder/marketPairInfo.service';
 import { UpdateAccountTreeDto } from './dto/updateAccountTree.dto';
 import { UpdateTokenTreeDto } from './dto/updateTokenTree.dto';
 import { TsAccountTreeService } from './tsAccountTree.service';
@@ -12,6 +13,7 @@ export class MerkleTreeController {
   constructor(
     private readonly tsAccountTreeService: TsAccountTreeService,  
     private readonly tsTokenTreeService: TsTokenTreeService,
+    private readonly marketPairInfoService: MarketPairInfoService,
   ) {
     this.tsAccountTreeService.getCurrentLeafIdCount().then((id) => {
       this.accountLeafId = BigInt(id)+ 100n;
@@ -38,5 +40,17 @@ export class MerkleTreeController {
       updateTokenTreeDto,
       );
     console.timeEnd('controller updateTokenTree');
+  }
+  @Get('marketPairInfo')
+  async getMarketPairInfo(@Query() obj: any ) {
+    const pair = [{
+      mainTokenId: obj.sellTokenId,
+      baseTokenId: obj.buyTokenId,
+    }, {
+      mainTokenId: obj.buyTokenId,
+      baseTokenId: obj.sellTokenId,
+    }]
+    const marketPairInfo = await this.marketPairInfoService.findOneMarketPairInfo({pairs: pair});
+    return marketPairInfo;
   }
 }

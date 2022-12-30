@@ -16,6 +16,11 @@ import { TsDefaultValue, TsSystemAccountAddress, TsTokenInfo, TsTxType } from '@
 import { TsRollupAccount } from '@ts-sdk/domain/lib/ts-rollup/ts-account';
 import { TsTxDepositRequest, TsTxTransferRequest, TsTxWithdrawRequest } from '@ts-sdk/domain/lib/ts-types/ts-req-types';
 import { RollupCircuitType } from '@ts-sdk/domain/lib/ts-rollup/ts-rollup';
+import { PlaceOrderRequest } from '../dtos/PlaceOrderRequest.dto';
+import { TsTxType as SecondTxType } from '@ts-rollup-api/domain/value-objects/tsTxType.enum';
+import { PlaceOrderResponseDto } from '../dtos/PlaceOrderResponse.dto';
+import { Connection } from 'typeorm';
+import { MarketPairInfoService } from '@common/ts-typeorm/auctionOrder/marketPairInfo.service';
 
 @Controller('v1/ts/transaction')
 @ApiTags('Transaction')
@@ -24,7 +29,8 @@ export class TsTransactionController {
   constructor(
         readonly logger : PinoLogger,
         private readonly tsRollupService : TsRollupService,
-        private readonly commandBus : CommandBus
+        private readonly commandBus: CommandBus,
+        // private readonly connection: Connection,
   ) {}
 
     @Post('register')
@@ -152,4 +158,19 @@ export class TsTransactionController {
       }
     }
 
+    @Post('placeOrder')
+    @ApiOperation({})
+    @ApiCreatedResponse({type: PlaceOrderResponseDto})
+    async placeOrder(@Body()dto : PlaceOrderRequest) {
+      // check reqType TsTxType.MARKET_ORDER buyAmt should be '0'
+      if (dto.reqType === SecondTxType.SecondMarketOrder  && dto.buyAmt !== '0') {
+        throw new BadRequestException('buyAmt should be 0 for market order');
+      }
+      // generate MarketPair query Pair
+      const queryPair = [
+        { mainTokenId: dto.sellTokenId, subTokenId: dto.buyTokenId },
+        { mainTokenId: dto.buyTokenId, subTokenId: dto.sellTokenId },
+      ];
+      // query marketPair by sellTokenId and buyTokenId
+    }
 }
