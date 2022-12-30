@@ -6,6 +6,7 @@ pragma solidity ^0.8.17;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import "./PoseidonLib.sol";
 import "./Operations.sol";
 import "./IWETH.sol";
 import "hardhat/console.sol";
@@ -13,7 +14,9 @@ import "hardhat/console.sol";
 /// @title ZkOBS contract
 /// @author zkManic
 contract ZkOBS is Ownable {
-    event Register(address indexed sender, uint32 accountId, bytes20 l2Addr);
+    PoseidonUnit2 private immutable poseidon2;
+
+    event Register(address indexed sender, uint32 accountId, uint256 tsPubX, uint256 tsPubY, bytes20 l2Addr);
     event Deposit(address indexed sender, uint32 accountId, uint16 tokenId, uint128 amount);
     event NewL1Request(address indexed sender, uint64 requestId, Operations.OpType opType, bytes pubData);
     event BlockCommitted(uint32 indexed blockNumber);
@@ -72,10 +75,12 @@ contract ZkOBS is Ownable {
     constructor(
         address wETHAddr_,
         address verifierAddr_,
-        bytes32 genesisStateRoot
+        bytes32 genesisStateRoot,
+        address poseidon2Addr_
     ) {
         wETHAddr = wETHAddr_;
         verifierAddr = verifierAddr_;
+        poseidon2 = PoseidonUnit2(poseidon2Addr_);
         StoredBlock memory storedBlock = StoredBlock({
             blockNumber: 0,
             stateRoot: genesisStateRoot,
@@ -92,7 +97,8 @@ contract ZkOBS is Ownable {
         ++tokenNum;
     }
 
-    function registerETH(bytes20 l2Addr) external payable {
+    function registerETH(uint256 tsPubX, uint256 tsPubY) external payable {
+        bytes20 tsAddr = bytes20(uint160(poseidon2.poseidon([tsPubX, tsPubY])));
         if (accountIdOf[msg.sender] != 0) {
             revert("Account already registered");
         }
@@ -100,15 +106,17 @@ contract ZkOBS is Ownable {
         uint128 depositAmount = SafeCast.toUint128(msg.value);
         IWETH(wETHAddr).deposit{ value: msg.value }();
 
-        _register(msg.sender, l2Addr);
+        _register(msg.sender, tsPubX, tsPubY, tsAddr);
         _deposit(msg.sender, l2TokenAddr, depositAmount);
     }
 
     function registerERC20(
-        bytes20 l2Addr,
+        uint256 tsPubX,
+        uint256 tsPubY,
         address tokenAddr,
         uint128 amount
     ) external {
+        bytes20 tsAddr = bytes20(uint160(poseidon2.poseidon([tsPubX, tsPubY])));
         if (accountIdOf[msg.sender] != 0) {
             revert("Account already registered");
         }
@@ -122,7 +130,7 @@ contract ZkOBS is Ownable {
 
         // register
         if (accountIdOf[msg.sender] == 0) {
-            _register(msg.sender, l2Addr);
+            _register(msg.sender, tsPubX, tsPubY, tsAddr);
         }
         // deposit
         _deposit(msg.sender, tokenId, depositAmount);
@@ -182,14 +190,19 @@ contract ZkOBS is Ownable {
         return true;
     }
 
-    function _register(address sender, bytes20 l2Addr) internal {
+    function _register(
+        address sender,
+        uint256 tsPubX,
+        uint256 tsPubY,
+        bytes20 l2Addr
+    ) internal {
         uint32 accountId = accountNum;
         ++accountNum;
         accountIdOf[sender] = accountId;
         Operations.Register memory op = Operations.Register({ accountId: accountId, l2Addr: l2Addr });
         bytes memory pubData = Operations.writeRegisterPubData(op);
         _addL1Request(sender, Operations.OpType.REGISTER, pubData);
-        emit Register(sender, accountId, l2Addr);
+        emit Register(sender, accountId, tsPubX, tsPubY, l2Addr);
     }
 
     function _deposit(
