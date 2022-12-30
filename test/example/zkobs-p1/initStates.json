@@ -1,0 +1,32 @@
+{
+  "oriTxNum": "0",
+  "stateRoot": "0x1ca6e27398a62ce9d259652e6770d9023b009cdc46ae547d94ed2aaca5223b9d",
+  "accountTreeRoot": "0x1277731a998c561b39b651657a022764970a5791755d5f99be4a539f420a6963",
+  "defaultAccountLeafData": [
+    "0",
+    "0",
+    "19712377064642672829441595136074946683621277828620209496774504837737984048981"
+  ],
+  "defaultTokenLeaf": [
+    "0",
+    "0"
+  ],
+  "defaultTokenRoot": "19712377064642672829441595136074946683621277828620209496774504837737984048981",
+  "orderTreeRoot": "0x2776e2764beb91357c47e0d711257613732601bf74eb781a5ca0d7ceff1517c7",
+  "defaultOrderLeafData": [
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0"
+  ],
+  "defaultOrderLeaf": "0x6531d729193679b88a6ed82a1952d130d95cb5dfce1ddb1078b7eaebb3aa8ee"
+}

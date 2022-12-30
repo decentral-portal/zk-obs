@@ -1,0 +1,94 @@
+{
+  "mainCircuitName": "main-p5d-8-8-4-8",
+  "config": {
+    "order_tree_height": 8,
+    "l2_acc_addr_size": 8,
+    "token_tree_height": 4,
+    "nullifier_tree_height": 8,
+    "normal_batch_height": 0,
+    "register_batch_size": 1,
+    "l2_token_addr_size": 32,
+    "auction_market_count": 8,
+    "auction_lender_count": 8,
+    "auction_borrower_count": 8
+  },
+  "mainSuffix": "8-8-4-8",
+  "outputPath": "/Users/abner.huang/Tkspring/zk-circom/build/zkobs-p1",
+  "circuitMainPath": "/Users/abner.huang/Tkspring/zk-circom/build/zkobs-p1/main-p5d-8-8-4-8.circom",
+  "fileLogs": [
+    {
+      "circuitName": "main-p5d-8-8-4-8",
+      "name": "0_register-acc1-p5-8-8-4-8",
+      "path": "/Users/abner.huang/Tkspring/zk-circom/build/zkobs-p1/0_register-acc1-p5-8-8-4-8-inputs.json"
+    },
+    {
+      "circuitName": "main-p5d-8-8-4-8",
+      "name": "1_register-acc2-p5-8-8-4-8",
+      "path": "/Users/abner.huang/Tkspring/zk-circom/build/zkobs-p1/1_register-acc2-p5-8-8-4-8-inputs.json"
+    },
+    {
+      "circuitName": "main-p5d-8-8-4-8",
+      "name": "2_deposit-acc1-exist-p5-8-8-4-8",
+      "path": "/Users/abner.huang/Tkspring/zk-circom/build/zkobs-p1/2_deposit-acc1-exist-p5-8-8-4-8-inputs.json"
+    },
+    {
+      "circuitName": "main-p5d-8-8-4-8",
+      "name": "3_deposit-acc2-nonexist-p5-8-8-4-8",
+      "path": "/Users/abner.huang/Tkspring/zk-circom/build/zkobs-p1/3_deposit-acc2-nonexist-p5-8-8-4-8-inputs.json"
+    },
+    {
+      "circuitName": "main-p5d-8-8-4-8",
+      "name": "4_withdraw-p5-8-8-4-8",
+      "path": "/Users/abner.huang/Tkspring/zk-circom/build/zkobs-p1/4_withdraw-p5-8-8-4-8-inputs.json"
+    },
+    {
+      "circuitName": "main-p5d-8-8-4-8",
+      "name": "5_empty-tx-p5-8-8-4-8",
+      "path": "/Users/abner.huang/Tkspring/zk-circom/build/zkobs-p1/5_empty-tx-p5-8-8-4-8-inputs.json"
+    }
+  ],
+  "metadata": {
+    "TsSystemAccountAddress": {
+      "BURN_ADDR": "0",
+      "MINT_ADDR": "0",
+      "WITHDRAW_ADDR": "0",
+      "AUCTION_ADDR": "0"
+    },
+    "TsTokenAddress": {
+      "Unknown": "0",
+      "WETH": "6",
+      "WBTC": "7",
+      "USDT": "8",
+      "USDC": "9",
+      "DAI": "10",
+      "TslETH20221231": "46",
+      "TslBTC20221231": "47",
+      "TslUSDT20221231": "48",
+      "TslUSDC20221231": "49",
+      "TslDAI20221231": "50"
+    },
+    "TsDefaultValue": {
+      "NONCE_ZERO": "0",
+      "BIGINT_DEFAULT_VALUE": "0",
+      "STRING_DEFAULT_VALUE": "0",
+      "ADDRESS_DEFAULT_VALUE": "0x00"
+    },
+    "TsTxType": {
+      "UNKNOWN": "0",
+      "NOOP": "0",
+      "REGISTER": "1",
+      "DEPOSIT": "2",
+      "WITHDRAW": "3",
+      "SecondLimitOrder": "4",
+      "SecondLimitStart": "5",
+      "SecondLimitExchange": "6",
+      "SecondLimitEnd": "7",
+      "SecondMarketOrder": "8",
+      "SecondMarketExchange": "9",
+      "SecondMarketEnd": "10",
+      "AUCTION_LEND": "99",
+      "AUCTION_BORROW": "100",
+      "AUCTION_CANCEL": "101"
+    }
+  }
+}
