@@ -19,15 +19,18 @@ export async function deploy() {
     decimals,
   );
   await zkUSDC.deployed();
+  console.log('Deployed zkUSDC:', zkUSDC.address);
 
   const WETH = await ethers.getContractFactory('WETH9');
   WETH.connect(operator);
   const wETH: WETH9 = await WETH.deploy();
   await wETH.deployed();
+  console.log('Deployed wETH:', wETH.address);
 
   const verifierFactory = await ethers.getContractFactory('Verifier');
   verifierFactory.connect(operator);
   const verifier = await verifierFactory.deploy();
+  console.log('Deployed verifier:', verifier.address);
 
   // Deploy Poseidon contract
   const Poseidon2Factory = new ethers.ContractFactory(
@@ -37,6 +40,7 @@ export async function deploy() {
   );
   const poseidom2Contract = await Poseidon2Factory.deploy();
   await poseidom2Contract.deployed();
+  console.log('Deployed poseidom:', poseidom2Contract.address);
 
   const genesisStateRoot = initStates.stateRoot;
   const ZkOBS = await ethers.getContractFactory('ZkOBS');
@@ -48,6 +52,7 @@ export async function deploy() {
     poseidom2Contract.address,
   );
   await zkOBS.deployed();
+  console.log('Deployed zkOBS:', zkOBS.address);
 
   return { operator, user1, user2, zkUSDC, wETH, zkOBS };
 }
