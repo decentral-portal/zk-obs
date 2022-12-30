@@ -91,7 +91,7 @@ const config: HardhatUserConfig = {
   },
   etherscan: {
     apiKey: {
-      goerli: process.env.ETHERSCAN_API_KEY || '',
+      goerli: getString(process.env.ETHERSCAN_APIKEY),
     },
   },
   docgen: {
