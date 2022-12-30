@@ -45,5 +45,12 @@
   },
   "redhat.telemetry.enabled": false,
   "hardhat.telemetry": false,
-  "cSpell.words": ["typechain"]
+  "cSpell.words": ["typechain"],
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
 }
