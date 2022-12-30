@@ -1,8 +1,18 @@
+export const LEN_OF_REQUEST = 10;
+export const CHUNK_BYTES_SIZE = 12;
+export const CHUNK_BITS_SIZE = CHUNK_BYTES_SIZE * 8;
+export const MIN_CHUNKS_PER_REQ = 3;
+export const MAX_CHUNKS_PER_REQ = 9;
+export const MAX_CHUNKS_BYTES_PER_REQ = MAX_CHUNKS_PER_REQ * CHUNK_BYTES_SIZE;
+export function getOChunksSize(batchSize: number) {
+  return MAX_CHUNKS_PER_REQ * batchSize;
+}
+
 export enum TsSystemAccountAddress {
   BURN_ADDR = '0',
-  MINT_ADDR = '1',
-  WITHDRAW_ADDR = '2',
-  AUCTION_ADDR = '10',
+  MINT_ADDR = '0',
+  WITHDRAW_ADDR = '0',
+  AUCTION_ADDR = '0',
 }
 
 export const TsDefaultValue = {
@@ -12,47 +22,32 @@ export const TsDefaultValue = {
   ADDRESS_DEFAULT_VALUE: '0x00',
 };
 
+
 export enum TsTxType {
-    UNKNOWN = '0',
-    REGISTER = '1',
-    DEPOSIT = '2',
-    TRANSFER = '3',
-    WITHDRAW = '4',
-    AUCTION_LEND = '5',
-    AUCTION_BORROW = '6',
-    AUCTION_CANCEL = '7',
+  UNKNOWN = '0',
+  NOOP = '0',
+  REGISTER = '1',
+  DEPOSIT = '2',
+  // TRANSFER = '3',
+  WITHDRAW = '3',
+  SecondLimitOrder = '4',
+  SecondLimitStart = '5',
+  SecondLimitExchange = '6',
+  SecondLimitEnd = '7',
+  SecondMarketOrder = '8',
+  SecondMarketExchange = '9',
+  SecondMarketEnd = '10',
+  CancelOrder = '11',
+
+  AUCTION_LEND = '99',
+  AUCTION_BORROW = '100',
+  AUCTION_CANCEL = '101'
 }
 
 export const TsDeciaml = {
   TS_TOKEN_AMOUNT_DEC: 18,
   TS_INTEREST_DEC: 6,
 };
-
-export const TsTxTypeLengthMap: {
-    [key in TsTxType]: number;
-} = {
-  // TODO: define the data length for each tx type
-  //! Need to check again
-  [TsTxType.UNKNOWN]: 0,
-  [TsTxType.REGISTER]: 0,
-  [TsTxType.DEPOSIT]: 5,
-  [TsTxType.TRANSFER]: 5,
-  [TsTxType.WITHDRAW]: 5,
-  [TsTxType.AUCTION_LEND]: 7,
-  [TsTxType.AUCTION_BORROW]: 9,
-  [TsTxType.AUCTION_CANCEL]: 6,
-};
-
-export const TsTxCalldataNum = {
-  [TsTxType.REGISTER]: 5,
-  [TsTxType.DEPOSIT]: 6,
-  [TsTxType.TRANSFER]: 6,
-  [TsTxType.WITHDRAW]: 6,
-  [TsTxType.AUCTION_LEND]: 0, // TODO: check
-  [TsTxType.AUCTION_BORROW]: 0, // TODO: check
-  [TsTxType.AUCTION_CANCEL]: 0, // TODO: check
-};
-
 
 export enum TsTokenAddress {
     Unknown = '0',
@@ -71,7 +66,6 @@ export enum TsTokenAddress {
   }
 
 export interface TsTokenInfo {
-    tokenAddr: TsTokenAddress;
     amount: bigint;
     lockAmt: bigint;
 }

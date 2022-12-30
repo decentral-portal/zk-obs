@@ -1,20 +1,28 @@
+import { BigNumber, ethers } from 'ethers';
 import { recursiveToString } from '../helper';
 import { TsRollupCircuitInputType } from '../ts-types/ts-circuit-types';
-import { TsTxAuctionBorrowNonSignatureRequest, TsTxAuctionCancelNonSignatureRequest, TsTxAuctionLendNonSignatureRequest, TsTxDepositNonSignatureRequest, TsTxDepositRequest, TsTxRegisterRequest, TsTxTransferNonSignatureRequest } from '../ts-types/ts-req-types';
-import { TsSystemAccountAddress, TsTokenAddress, TsTxType } from '../ts-types/ts-types';
+import { TsTokenLeafType } from '../ts-types/ts-merkletree.types';
+import { TsTxCancelOrderNonSignatureRequest, TsTxDepositNonSignatureRequest, TsTxDepositRequest, TsTxLimitOrderNonSignatureRequest, TsTxMarketOrderNonSignatureRequest, TsTxRegisterRequest, TsTxEntityRequest, TsTxWithdrawNonSignatureRequest } from '../ts-types/ts-req-types';
+import { MAX_CHUNKS_BYTES_PER_REQ, TsSystemAccountAddress, TsTokenAddress, TsTokenInfo, TsTxType } from '../ts-types/ts-types';
 import { txToCircuitInput } from './ts-helper';
 
 // [L2AddrFrom, L2AddrTo, L2TokenAddr, tokenAmt, nonce, arg0, arg1, arg2, arg3, arg4]
 export type TsTxRequestDatasType = [
-  bigint,
   bigint, bigint, bigint, bigint, bigint,
-  bigint, bigint, bigint, bigint, bigint ]; 
+  bigint, bigint, bigint, bigint, bigint 
+]; 
 
-export function exportTransferCircuitInput(txLogs: any[], oriTxId: bigint, accountRootFlow: bigint[], orderRootFlow: bigint[]): TsRollupCircuitInputType {
+export type TsTxAuctionRequestDatasType = [
+  bigint, bigint, bigint, bigint, bigint,
+  bigint, bigint, bigint, bigint, bigint, 
+  bigint,
+]; 
+
+export function exportTransferCircuitInput(txLogs: any[], oriTxNum: bigint, accountRootFlow: bigint[], orderRootFlow: bigint[]): TsRollupCircuitInputType {
   const inputs = txsToRollupCircuitInput(txLogs) as any;
 
   // TODO: type check
-  inputs['oriTxId'] = oriTxId.toString();
+  inputs['oriTxNum'] = oriTxNum.toString();
   inputs['accountRootFlow'] = accountRootFlow.map(x => recursiveToString(x));
   inputs['orderRootFlow'] = orderRootFlow.map(x => recursiveToString(x));
   return inputs;
@@ -32,90 +40,46 @@ export function txsToRollupCircuitInput<T, B>(obj: any[], initData: any = {}): T
 export function encodeTxDepositMessage(txDepositReq: TsTxDepositNonSignatureRequest): TsTxRequestDatasType {
   return [
     BigInt(TsTxType.DEPOSIT),
-    BigInt(txDepositReq.L2AddrFrom),
-    BigInt(txDepositReq.L2AddrTo),
-    BigInt(txDepositReq.L2TokenAddr),
-    BigInt(txDepositReq.amount),
+    BigInt(txDepositReq.sender),
+    BigInt(txDepositReq.tokenId),
+    BigInt(txDepositReq.stateAmt),
     0n,
     0n, 0n, 0n, 0n, 0n, 
   ];
 }
 
-export function encodeTxTransferMessage(txTransferReq: TsTxTransferNonSignatureRequest): TsTxRequestDatasType {
-  return [
-    BigInt(TsTxType.TRANSFER),
-    BigInt(txTransferReq.L2AddrFrom),
-    BigInt(txTransferReq.L2AddrTo),
-    BigInt(txTransferReq.L2TokenAddr),
-    BigInt(txTransferReq.amount),
-    BigInt(txTransferReq.nonce),
-    0n, 0n, 0n, 0n, 0n,
-  ];
-}
+// export function encodeTxTransferMessage(txTransferReq: TsTxTransferNonSignatureRequest): TsTxRequestDatasType {
+//   return [
+//     BigInt(TsTxType.TRANSFER),
+//     BigInt(txTransferReq.L2AddrFrom),
+//     BigInt(txTransferReq.L2TokenAddr),
+//     BigInt(txTransferReq.txAmount || 0),
+//     BigInt(txTransferReq.nonce),
+//     BigInt(txTransferReq.L2AddrTo),
+//     0n, 0n, 0n, 0n,
+//   ];
+// }
 
-export function encodeTxWithdrawMessage(txTransferReq: TsTxTransferNonSignatureRequest): TsTxRequestDatasType {
+export function encodeTxWithdrawMessage(txTransferReq: TsTxWithdrawNonSignatureRequest): TsTxRequestDatasType {
   return [
     BigInt(TsTxType.WITHDRAW),
-    BigInt(txTransferReq.L2AddrFrom),
-    BigInt(txTransferReq.L2AddrTo),
-    BigInt(txTransferReq.L2TokenAddr),
-    BigInt(txTransferReq.amount),
+    BigInt(txTransferReq.sender),
+    BigInt(txTransferReq.tokenId),
+    BigInt(txTransferReq.stateAmt),
     BigInt(txTransferReq.nonce),
     0n, 0n, 0n, 0n, 0n,
-  ];
-}
-
-export function encodeTxAuctionLendMessage(txAuctionLendReq: TsTxAuctionLendNonSignatureRequest): TsTxRequestDatasType {
-  return [
-    BigInt(TsTxType.AUCTION_LEND),
-    BigInt(txAuctionLendReq.L2AddrFrom),
-    BigInt(TsSystemAccountAddress.AUCTION_ADDR),
-    BigInt(txAuctionLendReq.L2TokenAddrLending),
-    BigInt(txAuctionLendReq.lendingAmt),
-    BigInt(txAuctionLendReq.nonce),
-    BigInt(txAuctionLendReq.maturityDate),
-    BigInt(txAuctionLendReq.expiredTime),
-    BigInt(txAuctionLendReq.interest),
-    0n, 0n,
-  ];
-}
-
-export function encodeTxAuctionBorrowMessage(txAuctionBorrowReq: TsTxAuctionBorrowNonSignatureRequest): TsTxRequestDatasType {
-  return [
-    BigInt(TsTxType.AUCTION_BORROW),
-    BigInt(txAuctionBorrowReq.L2AddrFrom),
-    BigInt(TsSystemAccountAddress.AUCTION_ADDR),
-    BigInt(txAuctionBorrowReq.L2TokenAddrCollateral),
-    BigInt(txAuctionBorrowReq.collateralAmt),
-    BigInt(txAuctionBorrowReq.nonce),
-    BigInt(txAuctionBorrowReq.maturityDate),
-    BigInt(txAuctionBorrowReq.expiredTime),
-    BigInt(txAuctionBorrowReq.interest),
-    BigInt(txAuctionBorrowReq.L2TokenAddrBorrowing),
-    BigInt(txAuctionBorrowReq.borrowingAmt),
-  ];
-}
-
-export function encodeTxAuctionCancelMessage(txAuctionCancelReq: TsTxAuctionCancelNonSignatureRequest): TsTxRequestDatasType {
-  return [
-    BigInt(TsTxType.AUCTION_CANCEL),
-    BigInt(TsSystemAccountAddress.AUCTION_ADDR),
-    BigInt(txAuctionCancelReq.L2AddrTo),
-    BigInt(txAuctionCancelReq.L2TokenAddrRefunded),
-    BigInt(txAuctionCancelReq.amount),
-    BigInt(txAuctionCancelReq.nonce),
-    BigInt(txAuctionCancelReq.orderLeafId),
-    0n, 0n, 0n, 0n,
   ];
 }
 
 export function getEmptyRegisterTx() {
   const req: TsTxRegisterRequest = {
+    sender: '0',
     reqType: TsTxType.REGISTER,
-    L2AddrFrom: TsSystemAccountAddress.BURN_ADDR,
-    L2TokenAddr: TsTokenAddress.Unknown,
-    tsPubKey: [ '0', '0' ],
-    amount: '0',
+    tokenId: TsTokenAddress.Unknown,
+    tsAddr: '0',
+    stateAmt: '0',
+    L1Addr: '0x00',
+    tsPubKey: ['0', '0']
   };
   return req;
 }
@@ -123,10 +87,9 @@ export function getEmptyRegisterTx() {
 export function getEmptyMainTx() {
   const req: TsTxDepositRequest = {
     reqType: TsTxType.DEPOSIT,
-    L2AddrFrom: TsSystemAccountAddress.MINT_ADDR,
-    L2AddrTo: TsSystemAccountAddress.WITHDRAW_ADDR,
-    L2TokenAddr: TsTokenAddress.Unknown,
-    amount: '0',
+    sender: TsSystemAccountAddress.BURN_ADDR,
+    tokenId: TsTokenAddress.Unknown,
+    stateAmt: '0',
     nonce: '0',
     eddsaSig: {
       R8: ['0', '0'],
@@ -135,3 +98,215 @@ export function getEmptyMainTx() {
   };
   return req;
 }
+
+
+export function encodeTsTxLimitOrderMessage(txLimitOrderReq: TsTxLimitOrderNonSignatureRequest): TsTxRequestDatasType {
+  return [
+    BigInt(TsTxType.SecondLimitOrder),
+    BigInt(txLimitOrderReq.sender),
+    BigInt(txLimitOrderReq.sellTokenId),
+    BigInt(txLimitOrderReq.sellAmt),
+    BigInt(txLimitOrderReq.nonce),
+    0n, 0n, // arg0, arg1,
+    BigInt(txLimitOrderReq.buyTokenId), // arg2
+    BigInt(txLimitOrderReq.buyAmt), // arg3
+    0n, // arg4
+  ];
+}
+
+export function encodeTsTxMarketOrderMessage(txMarketOrderReq: TsTxMarketOrderNonSignatureRequest): TsTxRequestDatasType {
+  return [
+    BigInt(TsTxType.SecondMarketOrder),
+    BigInt(txMarketOrderReq.sender),
+    BigInt(txMarketOrderReq.sellTokenId),
+    BigInt(txMarketOrderReq.sellAmt),
+    BigInt(txMarketOrderReq.nonce),
+    0n, 0n, // arg0, arg1,
+    BigInt(txMarketOrderReq.buyTokenId), // arg2
+    0n, // arg3
+    0n, // arg4
+  ];
+}
+
+export function encodeTxCancelOrderMessage(txCancelOrderReq: TsTxCancelOrderNonSignatureRequest): TsTxRequestDatasType {
+  return [
+    BigInt(TsTxType.CancelOrder),
+    0n,
+    0n,
+    0n,
+    0n,
+    0n, 0n, // arg0, arg1,
+    0n, // arg2
+    0n, // arg3
+    BigInt(txCancelOrderReq.orderLeafId), // arg4
+  ];
+}
+
+export function encodeTokenLeaf(token: TsTokenInfo): TsTokenLeafType {
+  return [
+    BigInt(token.amount),
+    BigInt(token.lockAmt),
+  ];
+}
+
+export function encodeRChunkBuffer(txTransferReq: TsTxEntityRequest) {
+  
+  switch (txTransferReq.reqType) {
+    case TsTxType.REGISTER:
+      if(!txTransferReq.arg0) {
+        throw new Error('arg0 is required');
+      }
+      if(!txTransferReq.arg1) {
+        throw new Error('hashedTsPubKey is required');
+      }
+      const out_r = ethers.utils.solidityPack(
+        ['uint8', 'uint32', 'uint16', 'uint128', 'uint160',],
+        [
+          BigNumber.from(txTransferReq.reqType),
+          BigNumber.from(txTransferReq.arg0),
+          BigNumber.from(txTransferReq.tokenId),
+          BigNumber.from(txTransferReq.amount),
+          BigNumber.from(txTransferReq.arg1),
+        ]
+      ).replaceAll('0x', '');
+      return {
+        r_chunks: Buffer.concat([Buffer.from(out_r, 'hex')], MAX_CHUNKS_BYTES_PER_REQ),
+        o_chunks: Buffer.from(out_r, 'hex'),
+        isCritical: true,
+      };
+    case TsTxType.DEPOSIT:
+      if(!txTransferReq.arg0) {
+        throw new Error('arg0 is required');
+      }
+      const out_d = ethers.utils.solidityPack(
+        ['uint8', 'uint32', 'uint16', 'uint128',],
+        [
+          BigNumber.from(txTransferReq.reqType),
+          BigNumber.from(txTransferReq.arg0),
+          BigNumber.from(txTransferReq.tokenId),
+          BigNumber.from(txTransferReq.amount),
+        ]
+      ).replaceAll('0x', '');
+      return {
+        r_chunks: Buffer.concat([Buffer.from(out_d, 'hex')], MAX_CHUNKS_BYTES_PER_REQ),
+        o_chunks: Buffer.from(out_d, 'hex'),
+        isCritical: true,
+      };
+    case TsTxType.WITHDRAW:
+      const out_w = ethers.utils.solidityPack(
+        ['uint8', 'uint32', 'uint16', 'uint128',],
+        [
+          BigNumber.from(txTransferReq.reqType),
+          BigNumber.from(txTransferReq.accountId),
+          BigNumber.from(txTransferReq.tokenId),
+          BigNumber.from(txTransferReq.amount),
+        ]
+      ).replaceAll('0x', '');
+      return {
+        r_chunks: Buffer.concat([Buffer.from(out_w, 'hex')], MAX_CHUNKS_BYTES_PER_REQ),
+        o_chunks: Buffer.from(out_w, 'hex'),
+        isCritical: true,
+      };
+    // case TsTxType.TRANSFER:
+    //   if(!txTransferReq.L2TokenLeafIdTo) {
+    //     throw new Error('L2TokenLeafIdTo is required');
+    //   }
+    //   const out_t = ethers.utils.solidityPack(
+    //     ['uint8', 'uint32', 'uint16', 'uint16', 'uint48', 'uint32', 'uint16',],
+    //     [
+    //       BigNumber.from(txTransferReq.reqType),
+    //       BigNumber.from(txTransferReq.L2AddrFrom),
+    //       BigNumber.from(txTransferReq.L2TokenAddr),
+    //       BigNumber.from(txTransferReq.L2TokenLeafIdFrom),
+    //       BigNumber.from(txTransferReq.txAmount),
+    //       BigNumber.from(txTransferReq.L2AddrTo),
+    //       BigNumber.from(txTransferReq.L2TokenLeafIdTo),
+    //     ]
+    //   ).replaceAll('0x', '');
+    //   return {
+    //     r_chunks: Buffer.concat([Buffer.from(out_t, 'hex')], MAX_CHUNKS_BYTES_PER_REQ),
+    //     o_chunks: Buffer.from(out_t, 'hex'),
+    //     isCritical: false,
+    //   };
+    case TsTxType.NOOP:      
+    case TsTxType.UNKNOWN:
+      return {
+        r_chunks: Buffer.alloc(MAX_CHUNKS_BYTES_PER_REQ),
+        o_chunks: Buffer.from('0x00', 'hex'),
+        isCritical: false,
+      };
+    default:
+      throw new Error('unknown reqType');
+  }
+  
+}
+
+function padHexByBytes(hex: string, bytes: number): string {
+  // hex = hex.slice(2);
+  if(hex.length % 2 !== 0) throw new Error('hex should be even length');
+  if(hex.length / 2 > bytes) throw new Error('hex should be less than bytes');
+  const padding = '0'.repeat(bytes * 2 - hex.length);
+  return padding + hex;
+}
+
+export function toHexString(value: string | bigint | number | Buffer | Uint8Array) {
+  if(typeof value === 'string') {
+    if(/^0x/.test(value)) return value;
+    return BigInt(value).toString(16);
+  }
+  if(typeof value === 'number') {
+    return value.toString(16);
+  }
+  if(typeof value === 'bigint') {
+    return value.toString(16);
+  }
+  if(value instanceof Buffer) {
+    return value.toString('hex');
+  }
+  if(value instanceof Uint8Array) {
+    return Buffer.from(value).toString('hex');
+  }
+  throw new Error('value should be string, number, bigint, Buffer or Uint8Array');
+}
+
+export function padAndToBuffer(value: string, bytes: number): Buffer {
+  const hexString = toHexString(value);
+  const buffer = Buffer.from(/^0x/.test(hexString) ? hexString.slice(2) : hexString, 'hex');
+  return Buffer.concat([buffer], bytes);
+}
+
+export function toBigIntChunkArray(data: Buffer, chunkBytesSize: number): bigint[] {
+  const result: bigint[] = [];
+  const uint8arr = new Uint8Array(data);
+  for (let i = 0; i < uint8arr.length; i += chunkBytesSize) {
+    const chunk = uint8arr.slice(i, i + chunkBytesSize);
+    result.push(BigInt('0x' + Buffer.from(chunk).toString('hex')));
+  }
+  return result;
+}
+
+export function bigint_to_chunk_arrayV2(x: Buffer, chunkBytes: number): bigint[] {
+  const ret: bigint[] = [];
+  for(let i = x.length - 1; i >= 0; i -= chunkBytes) {
+    let val = 0n;
+    for (let offset = 0; offset < chunkBytes; offset++) {
+      const element = x[i - offset];
+      val += BigInt(element) << BigInt(offset * 8);
+    }
+    ret.push(val);
+  }
+  return ret;
+}
+export function bigint_to_chunk_array(x: bigint, chunkBits: bigint): bigint[] {
+  const mod = 2n ** BigInt(chunkBits);
+
+  const ret: bigint[] = [];
+  let x_temp: bigint = x;
+  while(x_temp > 0n) {
+    ret.push(x_temp % mod);
+    x_temp = x_temp >> chunkBits;
+  }
+  return ret.reverse();
+}
+// 12345 6789abcdef
+// => [6789abcdef, 12345]

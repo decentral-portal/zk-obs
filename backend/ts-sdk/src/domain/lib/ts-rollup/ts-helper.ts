@@ -1,8 +1,6 @@
 import { BytesLike } from 'ethers';
 import { recursiveToString, bigint_to_hex } from '../helper';
 import { dpPoseidonHash } from '../poseidon-hash-dp';
-import { TsRollupCircuitInputType } from '../ts-types/ts-circuit-types';
-import { TsTxType, TsTxTypeLengthMap } from '../ts-types/ts-types';
 
 const exclude: any = {};
 export const tsHashFunc = poseidonHash;
@@ -27,10 +25,6 @@ export function txToCircuitInput(obj: any, initData: any = {}) {
 
 export function toTreeLeaf(inputs: bigint[]) {
   return bigint_to_hex(dpPoseidonHash(inputs));
-}
-
-export function txTypeToDataLength(type: TsTxType) {
-  return TsTxTypeLengthMap[type];
 }
 
 function poseidonHash(val : BytesLike | BytesLike[]): string {

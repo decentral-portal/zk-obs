@@ -1,57 +1,71 @@
+import assert from 'assert';
 import { EddsaSigner } from '../eddsa';
 import { TsMerkleTree } from '../merkle-tree-dp';
 import { dpPoseidonHash } from '../poseidon-hash-dp';
 import { EdDSASignaturePayload } from '../ts-types/eddsa-types';
-import { TsTxWithdrawRequest, TsTxWithdrawNonSignatureRequest, TsTxTransferRequest, TsTxDepositRequest, TsTxDepositNonSignatureRequest, TsTxAuctionLendNonSignatureRequest, TsTxAuctionBorrowNonSignatureRequest, TsTxAuctionBorrowRequest, TsTxAuctionLendRequest, TsTxAuctionCancelNonSignatureRequest, TsTxAuctionCancelRequest } from '../ts-types/ts-req-types';
+import { TsTxWithdrawRequest, TsTxWithdrawNonSignatureRequest, TsTxDepositRequest, TsTxDepositNonSignatureRequest } from '../ts-types/ts-req-types';
 import { TsTokenInfo, TsTokenAddress, TsSystemAccountAddress, TsTxType } from '../ts-types/ts-types';
 import { toTreeLeaf, tsHashFunc } from './ts-helper';
-import { encodeTxDepositMessage, encodeTxTransferMessage, encodeTxAuctionLendMessage, encodeTxAuctionBorrowMessage, encodeTxWithdrawMessage, encodeTxAuctionCancelMessage } from './ts-tx-helper';
+import { encodeTxDepositMessage, encodeTxWithdrawMessage } from './ts-tx-helper';
 import { RESERVED_ACCOUNTS } from './ts-env';
-import assert from 'assert';
+import { TsAccountLeafType, TsTokenLeafType } from '../ts-types/ts-merkletree.types';
 
+type TokenLeafInfoType = {
+  [key in TsTokenAddress]?: TsTokenInfo;
+}
 export class TsRollupAccount {
-  accountId = -1n;
+  L2Address = -1n;
 
   
-  private eddsaPubKey: [bigint, bigint];
-  get tsPubKey(): [bigint, bigint] {
-    return this.eddsaPubKey;
-  }
+  // private eddsaPubKey: [bigint, bigint];
+  // get tsPubKey(): [bigint, bigint] {
+  //   return this.eddsaPubKey;
+  // }
+  tsAddr!: bigint;
   nonce: bigint;
-  tokenLeafs: TsTokenInfo[];
+  tokenLeafs: TokenLeafInfoType;
   tokenTree: TsMerkleTree;
   
   tokenTreeSize: number;
   get isNormalAccount() {
-    return TsRollupAccount.checkIsNormalAccount(this.accountId);
+    return TsRollupAccount.checkIsNormalAccount(this.L2Address);
   }
   static checkIsNormalAccount(l2Addr: bigint) {
-    return l2Addr >= RESERVED_ACCOUNTS;
+    return l2Addr >= 2;
   }
 
+  public get hashedTsPubKey() {
+    // const raw = BigInt(tsHashFunc(this.tsPubKey.map(v => v.toString())));
+    // const hash = raw % BigInt(2 ** 160);
+    return `0x${this.tsAddr.toString(16)}`;
+  }
 
   constructor(
-    tokenLeafs : TsTokenInfo[],
+    tokenLeafs: TokenLeafInfoType,
     tokenTreeSize: number,
-    eddsaPubKey: [bigint, bigint],
+    tsAddr: bigint,
+    // eddsaPubKey: [bigint, bigint],
     nonce = 0n,
   ) {
     this.tokenTreeSize = tokenTreeSize;
-    const defaultTokenLeaf = toTreeLeaf([0n, 0n, 0n]);
     this.nonce = nonce;
     this.tokenLeafs = tokenLeafs;
-    this.eddsaPubKey = eddsaPubKey;
+
+    this.tsAddr = tsAddr;
    
     this.tokenTree = new TsMerkleTree(
       this.encodeTokenLeafs(),
       this.tokenTreeSize, tsHashFunc,
-      defaultTokenLeaf
+      this.encodeTokenLeaf({
+        amount: 0n,
+        lockAmt: 0n,
+      })
     );
 
   }
 
   setAccountAddress(l2Addr: bigint) {
-    this.accountId = l2Addr;
+    this.L2Address = l2Addr;
   }
     
   updateNonce(newNonce: bigint) {
@@ -64,148 +78,95 @@ export class TsRollupAccount {
     return this.nonce;
   }
 
-  encodeTokenLeaf(tokenAddr: TsTokenAddress) {
-    const idx = this.tokenLeafs.findIndex(t => t.tokenAddr === tokenAddr);
-    if(idx === -1) {
-      throw new Error('Token not found');
+  encodeTokenLeaf(tokenInfo: TsTokenInfo) {
+    if(!tokenInfo) {
+      return toTreeLeaf([0n, 0n]);
     }
-    const t = this.tokenLeafs[idx];
-    return toTreeLeaf([BigInt(t.tokenAddr), BigInt(t.amount), BigInt(t.lockAmt)]);
+    return toTreeLeaf([BigInt(tokenInfo.amount), BigInt(tokenInfo.lockAmt)]);
   }
   encodeTokenLeafs() {
-    return this
-      .tokenLeafs
-      .map(t => toTreeLeaf([
-        BigInt(t.tokenAddr),
-        BigInt(t.amount),
-        BigInt(t.lockAmt)
-      ]));
+    const arr: TsTokenInfo[] = [];
+    const total = 2 ** this.tokenTreeSize;
+    for(let i = 0; i < total; i++) {      
+      arr.push(this.getTokenLeaf(i.toString() as TsTokenAddress).leaf);
+    }
+    return arr.map(t => toTreeLeaf([
+      t.amount,
+      t.lockAmt
+    ]));
   }
 
   getTokenRoot() {
     return this.tokenTree.getRoot();
   }
 
-  getTokenLeaf(tokenAddr: TsTokenAddress): {leafId: number, leaf: TsTokenInfo} {
-    if(!this.isNormalAccount) {
+  getTokenLeaf(tokenAddr: TsTokenAddress): {leafId: bigint, leaf: TsTokenInfo} {
+    const leafId = BigInt(tokenAddr);
+    const tokenInfo = this.tokenLeafs[tokenAddr];
+
+    if(tokenInfo) {
       return {
-        leafId: 0,
-        leaf: {
-          tokenAddr: TsTokenAddress.Unknown,
-          amount: 0n,
-          lockAmt: 0n,
-        }
-      };
-    }
-    const idx = this.tokenLeafs.findIndex(t => t.tokenAddr === tokenAddr);
-    if(idx === -1) {
-      return {
-        // If token not found, return curernt new token slot id
-        leafId: this.tokenLeafs.length,
-        leaf: {
-          tokenAddr: TsTokenAddress.Unknown,
-          amount: 0n,
-          lockAmt: 0n,
-        }
+        leafId,
+        leaf: tokenInfo
       };
     }
     return {
-      leafId: idx,
-      leaf: this.tokenLeafs[idx],
+      leafId,
+      leaf: {
+        amount: 0n,
+        lockAmt: 0n,
+      }
     };
-    
   }
 
   getTokenLeafId(tokenAddr: TsTokenAddress) {
-    return this.getTokenLeaf(tokenAddr).leafId;
+    return BigInt(tokenAddr);
   }
 
   getTokenProof(tokenAddr: TsTokenAddress) {
-    const { leafId } = this.getTokenLeaf(tokenAddr);
-    return this.tokenTree.getProof(leafId);
+    const leafId = this.getTokenLeafId(tokenAddr);
+    return this.tokenTree.getProof(Number(leafId));
   }
   
-  updateTokenNew(tokenAddr: TsTokenAddress, addAmt: bigint, addLockAmt: bigint) {
+  updateToken(tokenAddr: TsTokenAddress, addAmt: bigint, addLockAmt: bigint) {
     if(!this.isNormalAccount) {
       return this.tokenTree.getRoot();
     }
-    let idx = this.tokenLeafs.findIndex(t => t.tokenAddr === tokenAddr);
-    if(idx === -1) {
-      this.tokenLeafs.push({
-        tokenAddr,
-        amount: 0n,
-        lockAmt: 0n,
-      });
-      idx = this.tokenLeafs.length - 1;
-    }
-    const newAmt = this.tokenLeafs[idx].amount + addAmt;
-    assert(newAmt >= 0n, 'new token amount must >= 0');
-    const newLockAmt = this.tokenLeafs[idx].lockAmt + addLockAmt;
-    assert(newLockAmt >= 0n, 'new token lock amount must >= 0');
-    this.tokenLeafs[idx].amount = newAmt;
-    this.tokenLeafs[idx].lockAmt = newLockAmt;
-    this.tokenTree.updateLeafNode(idx, this.encodeTokenLeaf(tokenAddr));
-    return this.tokenTree.getRoot();
-  }
-
-  updateToken(tokenAddr: TsTokenAddress, addAmt: bigint, isAuctionOrder = false) {
-    if(!this.isNormalAccount) {
-      return this.tokenTree.getRoot();
-    }
-    const idx = this.tokenLeafs.findIndex(t => t.tokenAddr === tokenAddr);
-    if(idx === -1) {
-      if(addAmt < 0n) {
-        throw new Error('Token insufficient');
-      }
-      this.tokenLeafs.push({tokenAddr, amount: addAmt, lockAmt: 0n});
-      this.tokenTree.updateLeafNode(this.tokenLeafs.length - 1, this.encodeTokenLeaf(tokenAddr));
-    } else {
+    const leafId = this.getTokenLeafId(tokenAddr);
+    let tokenInfo!: TsTokenInfo;
+    if(!!this.tokenLeafs[tokenAddr]) {
+      const _tokenInfo = this.tokenLeafs[tokenAddr] as TsTokenInfo;
+      tokenInfo = {
+        amount: _tokenInfo.amount + addAmt,
+        lockAmt: _tokenInfo.lockAmt + addLockAmt,
+      };
       
-      this.tokenLeafs[idx].amount += addAmt;
-      if(this.tokenLeafs[idx].amount < 0) {
-        throw new Error('Token insufficient');
-      }
-      if(isAuctionOrder) {
-        this.tokenLeafs[idx].lockAmt -= addAmt;
-      }
-      if(this.tokenLeafs[idx].amount < 0 || this.tokenLeafs[idx].lockAmt < 0) {
-        throw new Error(`Token insufficient: tokenAddr=${tokenAddr} amount=${this.tokenLeafs[idx].amount} ,lockAmt=${this.tokenLeafs[idx].lockAmt}`);
-      }
-      this.tokenTree.updateLeafNode(idx, this.encodeTokenLeaf(tokenAddr));
+    } else {
+      tokenInfo = {
+        amount: addAmt,
+        lockAmt: addLockAmt,
+      };
+      assert(tokenInfo.amount >= 0n, 'new token amount must >= 0');
+      assert(tokenInfo.lockAmt >= 0n, 'new token lock amount must >= 0');
     }
-
-    return this.tokenTree.getRoot();
+    assert(tokenInfo.amount >= 0n, 'new token amount must >= 0');
+    assert(tokenInfo.lockAmt >= 0n, 'new token lock amount must >= 0');
+    this.tokenTree.updateLeafNode(Number(leafId), this.encodeTokenLeaf(tokenInfo));
+    this.tokenLeafs[tokenAddr] = tokenInfo;
   }
-
 
   getTokenAmount(tokenAddr: TsTokenAddress) {
-    if(!this.isNormalAccount) {
-      return 0n;
-    }
-    for (let i = 0; i < this.tokenLeafs.length; i++) {
-      if (this.tokenLeafs[i].tokenAddr === tokenAddr) {
-        return this.tokenLeafs[i].amount;
-      }
-    }
-    return 0n;
+    return this.getTokenLeaf(tokenAddr).leaf.amount;
   }
 
   getTokenLockedAmount(tokenAddr: TsTokenAddress) {
-    if(!this.isNormalAccount) {
-      return 0n;
-    }
-    for (let i = 0; i < this.tokenLeafs.length; i++) {
-      if (this.tokenLeafs[i].tokenAddr === tokenAddr) {
-        return this.tokenLeafs[i].lockAmt;
-      }
-    }
-    return 0n;
+    return this.getTokenLeaf(tokenAddr).leaf.lockAmt;
   }
 
-  encodeAccountLeaf(): [bigint, bigint, bigint, bigint]{
-    const pub = this.tsPubKey;
+  encodeAccountLeaf(): TsAccountLeafType {
+    const pub = this.hashedTsPubKey;
     return [
-      pub[0], pub[1],
+      BigInt(pub),
       this.nonce,
       BigInt(this.getTokenRoot()),
     ];
@@ -226,6 +187,12 @@ export class TsRollupSigner {
     this.signer = new EddsaSigner(priv);
   }
 
+  public get hashedTsPubKey() {
+    const raw = BigInt(tsHashFunc(this.tsPubKey.map(v => v.toString())));
+    const hash = raw % BigInt(2 ** 160);
+    return `0x${hash.toString(16).padStart(40, '0')}`;
+  }
+
   signPoseidonMessageHash(msgHash: bigint) {
     return this.signer.signPoseidon(msgHash);
   }
@@ -238,13 +205,12 @@ export class TsRollupSigner {
     return EddsaSigner.verify(EddsaSigner.toE(msgHash), signature, tsPubKey);
   }
 
-  prepareTxWithdraw(nonce: bigint, accountId: bigint, tokenAddr: TsTokenAddress, amount: bigint): TsTxWithdrawRequest {
+  prepareTxWithdraw(nonce: bigint, L2Address: bigint, tokenAddr: TsTokenAddress, amount: bigint): TsTxWithdrawRequest {
     const req: TsTxWithdrawNonSignatureRequest = {
       reqType: TsTxType.WITHDRAW,
-      L2AddrFrom: accountId.toString(),
-      L2AddrTo: TsSystemAccountAddress.WITHDRAW_ADDR,
-      L2TokenAddr: tokenAddr,
-      amount: amount.toString(),
+      sender: L2Address.toString(),
+      tokenId: tokenAddr,
+      stateAmt: amount.toString(),
       nonce: nonce.toString(),
     };
     const msgHash = dpPoseidonHash(encodeTxWithdrawMessage(req));
@@ -252,109 +218,49 @@ export class TsRollupSigner {
     return {
       ...req,
       eddsaSig: {
-        S: eddsaSig.S.toString(),
         R8: [
           EddsaSigner.toObject(eddsaSig.R8[0]).toString(),
           EddsaSigner.toObject(eddsaSig.R8[1]).toString(),
-        ]
+        ],
+        S: eddsaSig.S.toString(),
       },
     };
   }
 
-  prepareTxTransfer(nonce: bigint | number, fromAddr: bigint, toAddr: bigint, tokenAddr: TsTokenAddress, amount: bigint): TsTxTransferRequest {
-    const req = {
-      reqType: TsTxType.TRANSFER,
-      L2AddrFrom: fromAddr.toString(),
-      L2AddrTo: toAddr.toString(),
-      L2TokenAddr: tokenAddr,
-      amount: amount.toString(),
-      nonce: nonce.toString(),
-    };
-    const msgHash = dpPoseidonHash(encodeTxTransferMessage(req));
-    const eddsaSig = this.signPoseidonMessageHash(msgHash);
+  // prepareTxTransfer(nonce: bigint | number, fromAddr: bigint, toAddr: bigint, tokenAddr: TsTokenAddress, amount: bigint): TsTxTransferRequest {
+  //   const req = {
+  //     reqType: TsTxType.TRANSFER,
+  //     L2AddrFrom: fromAddr.toString(),
+  //     L2AddrTo: toAddr.toString(),
+  //     L2TokenAddr: tokenAddr,
+  //     amount: amount.toString(),
+  //     nonce: nonce.toString(),
+  //     txAmount: amountToTxAmountV2(amount).toString(),
+  //   };
+  //   const msgHash = dpPoseidonHash(encodeTxTransferMessage(req));
+  //   const eddsaSig = this.signPoseidonMessageHash(msgHash);
 
-    return {
-      ...req,
-      eddsaSig: {
-        S: eddsaSig.S.toString(),
-        R8: [
-          EddsaSigner.toObject(eddsaSig.R8[0]).toString(),
-          EddsaSigner.toObject(eddsaSig.R8[1]).toString(),
-        ]
-      },
-    };
-  }
+  //   return {
+  //     ...req,
+  //     eddsaSig: {
+  //       S: eddsaSig.S.toString(),
+  //       R8: [
+  //         EddsaSigner.toObject(eddsaSig.R8[0]).toString(),
+  //         EddsaSigner.toObject(eddsaSig.R8[1]).toString(),
+  //       ]
+  //     },
+  //   };
+  // }
 
   prepareTxDeposit(toAddr: bigint, tokenAddr: TsTokenAddress, amount: bigint): TsTxDepositRequest {
     const req: TsTxDepositNonSignatureRequest = {
       reqType: TsTxType.DEPOSIT,
-      L2AddrFrom: TsSystemAccountAddress.MINT_ADDR,
-      L2AddrTo: toAddr.toString(),
-      L2TokenAddr: tokenAddr,
-      amount: amount.toString(),
+      sender: toAddr.toString(),
+      tokenId: tokenAddr,
+      stateAmt: amount.toString(),
       nonce: '0',
     };
     const msgHash = dpPoseidonHash(encodeTxDepositMessage(req));
-    const eddsaSig = this.signPoseidonMessageHash(msgHash);
-
-    return {
-      ...req,
-      eddsaSig: {
-        S: eddsaSig.S.toString(),
-        R8: [
-          EddsaSigner.toObject(eddsaSig.R8[0]).toString(),
-          EddsaSigner.toObject(eddsaSig.R8[1]).toString(),
-        ]
-      },
-    };
-  }
-
-  prepareTxAuctionPlaceLend(data: Exclude<TsTxAuctionLendNonSignatureRequest, 'L2AddrTo'>): TsTxAuctionLendRequest {
-    const req: TsTxAuctionLendNonSignatureRequest = {
-      ...data,
-      L2AddrTo: TsSystemAccountAddress.AUCTION_ADDR
-    };
-    const msgHash = dpPoseidonHash(encodeTxAuctionLendMessage(req));
-    const eddsaSig = this.signPoseidonMessageHash(msgHash);
-
-    return {
-      ...req,
-      eddsaSig: {
-        S: eddsaSig.S.toString(),
-        R8: [
-          EddsaSigner.toObject(eddsaSig.R8[0]).toString(),
-          EddsaSigner.toObject(eddsaSig.R8[1]).toString(),
-        ]
-      },
-    };
-  }
-
-  prepareTxAuctionPlaceBorrow(data: Exclude<TsTxAuctionBorrowNonSignatureRequest,  'L2AddrTo'>): TsTxAuctionBorrowRequest {
-    const req: TsTxAuctionBorrowNonSignatureRequest = {
-      ...data,
-      L2AddrTo: TsSystemAccountAddress.AUCTION_ADDR
-    };
-    const msgHash = dpPoseidonHash(encodeTxAuctionBorrowMessage(req));
-    const eddsaSig = this.signPoseidonMessageHash(msgHash);
-
-    return {
-      ...req,
-      eddsaSig: {
-        S: eddsaSig.S.toString(),
-        R8: [
-          EddsaSigner.toObject(eddsaSig.R8[0]).toString(),
-          EddsaSigner.toObject(eddsaSig.R8[1]).toString(),
-        ]
-      },
-    };
-  }
-
-  prepareTxAuctionCancel(data: Exclude<TsTxAuctionCancelNonSignatureRequest,  'L2AddrFrom'>): TsTxAuctionCancelRequest {
-    const req: TsTxAuctionCancelNonSignatureRequest = {
-      ...data,
-      L2AddrFrom: TsSystemAccountAddress.AUCTION_ADDR
-    };
-    const msgHash = dpPoseidonHash(encodeTxAuctionCancelMessage(req));
     const eddsaSig = this.signPoseidonMessageHash(msgHash);
 
     return {

@@ -1,11 +1,9 @@
 import { TsMerkleTree } from '../merkle-tree-dp';
-import { dpPoseidonHash } from '../poseidon-hash-dp';
 import { TsRollupRegisterType } from '../ts-types/ts-circuit-types';
 import { EdDSASignatureRequestType } from '../ts-types/ts-req-types';
 import { TsTxType, TsTokenAddress } from '../ts-types/ts-types';
 import { TsRollupAccount } from './ts-account';
 import { TX_REQDATAS_SIZE } from './ts-env';
-import { txTypeToDataLength } from './ts-helper';
 import { TsTxRequestDatasType } from './ts-tx-helper';
 
 export interface TsRollupTxInterface {
@@ -15,7 +13,6 @@ export interface TsRollupTxInterface {
 }
 export class RollupTxRegister implements TsRollupTxInterface {
   txType = TsTxType.REGISTER;
-  TX_DATASIZE = txTypeToDataLength(TsTxType.REGISTER);
   tsPubKey: [bigint, bigint];
   l2Addr: bigint;
   L2TokenAddr: TsTokenAddress;
@@ -85,11 +82,11 @@ export class RollupTxTransfer implements TsRollupTxInterface {
 
     this.txL2TokenAddr = txL2TokenAddr;
     this.txAmount = txAmount;
-    this.txL2AddrFrom = fromAccount.accountId;
-    this.txL2AddrTo = toAccount.accountId;
+    this.txL2AddrFrom = fromAccount.L2Address;
+    this.txL2AddrTo = toAccount.L2Address;
     // TODO: Validaion Tx nonce in here ?
     // const newNonce = this.fromAccount.isNormalAccount ? this.fromAccount.nonce + 1n : 0n;
-    // assert(txNonce >= newNonce, `Tx nonce should be larger than account nonce. L2Addr=${fromAccount.accountId}, txNonce=${txNonce}, correctNonce=${newNonce}`);
+    // assert(txNonce >= newNonce, `Tx nonce should be larger than account nonce. L2Addr=${fromAccount.L2Address}, txNonce=${txNonce}, correctNonce=${newNonce}`);
     this.txNonce = txNonce;
 
     this.reqSigS = BigInt(_sig.S);
@@ -123,26 +120,27 @@ export class RollupTxTransfer implements TsRollupTxInterface {
     const newNonceFrom = this.fromAccount.isNormalAccount ? this.txNonce + 1n : 0n;
         
     const reqDatas = this.encodeReqDatas();
-    const reqSigMsg = dpPoseidonHash(reqDatas);
-    // TODO: validate signature
-    // const isValidSig = EddsaSigner.verify(
-    //   EddsaSigner.toE(reqSigMsg),
-    //   {
-    //     R8: [EddsaSigner.toE(this.reqSigR8[0]), EddsaSigner.toE(this.reqSigR8[1])],
-    //     S: this.reqSigS,
-    //   },
-    //   [EddsaSigner.toE(this.fromAccount.tsPubKey[0]), EddsaSigner.toE(this.fromAccount.tsPubKey[1])],
-    // );
-    // assert(isValidSig, 'Invalid signature');
 
     const fromTokenInfo = this.fromAccount.getTokenLeaf(this.txL2TokenAddr);
     const toTokenInfo = this.toAccount.getTokenLeaf(this.txL2TokenAddr);
     const datas = {
-      // reqType: this.txType,
       reqDatas,
-      reqSigMsg,
+      tsPubKey: this.fromAccount.tsPubKey,
+      reqSigR: this.reqSigR8,
       reqSigS: this.reqSigS,
-      reqSigR8: this.reqSigR8,
+
+      r_accountLeafId: [
+        // from, to
+        this.fromAccount.L2Address, this.toAccount.L2Address,
+      ],
+      r_oriAccountLeaf: [
+        
+      ],
+      r_newAccountLeaf: [
+
+      ],
+      r_accountRootFlow: [],
+      r_accountMkPrf: [],
 
       tokenLeafIdFrom: fromTokenInfo.leafId,
       tokenLeafIdTo: toTokenInfo.leafId,

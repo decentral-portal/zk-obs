@@ -31,6 +31,9 @@ export interface TsRollupBaseType {
 
     oriL2TokenAddrTo: string,
     newL2TokenAddrTo: string,
+
+    isCriticalChunk: string[],
+    o_chunks: string[],
 }
 
 export interface TsRollupAuctionBaseType {
