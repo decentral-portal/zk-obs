@@ -7,6 +7,8 @@ import * as crypto from 'crypto';
 import { TsTransactionController } from '@ts-rollup-api/infrastructure/adapters/transaction.controller';
 import { AuctionBondTokenEntity } from '@common/ts-typeorm/auctionOrder/auctionBondToken.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { Connection } from 'typeorm';
+import { MarketPairInfoService } from '@common/ts-typeorm/auctionOrder/marketPairInfo.service';
 let rawX: string;
 let rawY: string;
 const generatePublicKey = (() => {
@@ -52,6 +54,12 @@ describe('[Unit] auction-market.controller', () => {
           useValue: () =>({
 
           })
+        },
+        {
+          provide: Connection, useValue: null,
+        },
+        {
+          provide: MarketPairInfoService, useValue: null,
         }
       ]
     }).compile();

@@ -32,8 +32,8 @@ export class TsTransactionController {
         readonly logger : PinoLogger,
         private readonly tsRollupService : TsRollupService,
         private readonly commandBus: CommandBus,
-        // private readonly marketPairInfoService: MarketPairInfoService,
-        // private readonly connection: Connection,
+        private readonly marketPairInfoService: MarketPairInfoService,
+        private readonly connection: Connection,
   ) {}
 
     @Post('register')
@@ -161,53 +161,57 @@ export class TsTransactionController {
       }
     }
 
-    // @Post('placeOrder')
-    // @ApiOperation({})
-    // @ApiCreatedResponse({type: PlaceOrderResponseDto})
-    // async placeOrder(@Body()dto : PlaceOrderRequest) {
-    //   // check reqType TsTxType.MARKET_ORDER buyAmt should be '0'
-    //   if (dto.reqType === SecondTxType.SecondMarketOrder  && dto.buyAmt !== '0') {
-    //     throw new BadRequestException('buyAmt should be 0 for market order');
-    //   }
-    //   // generate MarketPair query Pair
-    //   const queryPair = [
-    //     { mainTokenId: dto.sellTokenId, baseTokenId: dto.buyTokenId },
-    //     { mainTokenId: dto.buyTokenId, baseTokenId: dto.sellTokenId },
-    //   ];
-    //   // query marketPair by sellTokenId and buyTokenId
-    //   const marketPairInfo = await this.marketPairInfoService.findOneMarketPairInfo({
-    //     pairs: queryPair
-    //   });
-    //   const side = marketPairInfo.mainTokenId === dto.buyTokenId ? TsSide.BUY : TsSide.SELL;
-    //   const mainQty = side === TsSide.BUY ? dto.buyAmt : dto.sellAmt;
-    //   const baseQty = side === TsSide.BUY ? dto.sellAmt : dto.buyAmt;
-    //   const remainMainQty = mainQty;  
-    //   const remainBaseQty = baseQty;
-    //   const mainTokenId = marketPairInfo.mainTokenId;
-    //   const baseTokenId = marketPairInfo.baseTokenId;
-    //   const price = (dto.reqType === SecondTxType.SecondMarketOrder)?
-    //     '0': (Number(mainQty)/Number(baseQty)).toString();
-    //   const formatPrice = this.toFixed8(price);
-    //   const result = await this.connection.getRepository(ObsOrderEntity).insert({
-    //     reqType: Number(dto.reqType),
-    //     accountId: BigInt(dto.sender),
-    //     side,
-    //     mainTokenId: BigInt(mainTokenId),
-    //     baseTokenId: BigInt(baseTokenId),
-    //     mainQty: BigInt(mainQty),
-    //     baseQty: BigInt(baseQty),
-    //     remainMainQty: BigInt(remainMainQty),
-    //     remainBaseQty: BigInt(remainBaseQty),
-    //     price: formatPrice,
-    //   });
-    //   const orderId = result.raw.insertId;
-    // }
-    // toFixed8(num: string) {
-    //   let s = '' + num;
-    //   if (s.indexOf('.') === -1) {
-    //     s += '.';
-    //   }
-    //   s += '00000000';
-    //   return s.substring(0, s.indexOf('.') + 9);
-    // };
+    @Post('placeOrder')
+    @ApiOperation({})
+    @ApiCreatedResponse({type: PlaceOrderResponseDto})
+    async placeOrder(@Body()dto : PlaceOrderRequest) {
+      // check reqType TsTxType.MARKET_ORDER buyAmt should be '0'
+      if (dto.reqType === SecondTxType.SecondMarketOrder  && dto.buyAmt !== '0') {
+        throw new BadRequestException('buyAmt should be 0 for market order');
+      }
+      // generate MarketPair query Pair
+      const queryPair = [
+        { mainTokenId: dto.sellTokenId, baseTokenId: dto.buyTokenId },
+        { mainTokenId: dto.buyTokenId, baseTokenId: dto.sellTokenId },
+      ];
+      // query marketPair by sellTokenId and buyTokenId
+      const marketPairInfo = await this.marketPairInfoService.findOneMarketPairInfo({
+        pairs: queryPair
+      });
+      const side = marketPairInfo.mainTokenId === dto.buyTokenId ? TsSide.BUY : TsSide.SELL;
+      const mainQty = side === TsSide.BUY ? dto.buyAmt : dto.sellAmt;
+      const baseQty = side === TsSide.BUY ? dto.sellAmt : dto.buyAmt;
+      const remainMainQty = mainQty;  
+      const remainBaseQty = baseQty;
+      const mainTokenId = marketPairInfo.mainTokenId;
+      const baseTokenId = marketPairInfo.baseTokenId;
+      const price = (dto.reqType === SecondTxType.SecondMarketOrder)?
+        '0': (Number(mainQty)/Number(baseQty)).toString();
+      const formatPrice = this.toFixed8(price);
+      const result = await this.connection.getRepository(ObsOrderEntity).insert({
+        reqType: Number(dto.reqType),
+        accountId: BigInt(dto.sender),
+        side,
+        mainTokenId: BigInt(mainTokenId),
+        baseTokenId: BigInt(baseTokenId),
+        mainQty: BigInt(mainQty),
+        baseQty: BigInt(baseQty),
+        remainMainQty: BigInt(remainMainQty),
+        remainBaseQty: BigInt(remainBaseQty),
+        price: formatPrice,
+      });
+      const orderId = result.generatedMaps[0].id;
+      console.log(orderId);
+      return {
+        orderId: orderId.toString()
+      };
+    }
+    toFixed8(num: string) {
+      let s = '' + num;
+      if (s.indexOf('.') === -1) {
+        s += '.';
+      }
+      s += '00000000';
+      return s.substring(0, s.indexOf('.') + 9);
+    };
 }

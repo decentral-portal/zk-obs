@@ -1,6 +1,7 @@
 import { FakeLoggerService } from '@common/logger/adapters/fake/FakeLogger.service';
 import { PinoLoggerService } from '@common/logger/adapters/real/pinoLogger.service';
 import { LoggerModule } from '@common/logger/logger.module';
+import { MarketPairInfoService } from '@common/ts-typeorm/auctionOrder/marketPairInfo.service';
 import { CommandBus } from '@nestjs/cqrs';
 import { Test } from '@nestjs/testing';
 import { TsAccountController } from '@ts-rollup-api/infrastructure/adapters/account.controller';
@@ -8,6 +9,7 @@ import { TsTransactionController } from '@ts-rollup-api/infrastructure/adapters/
 import { TsRollupService } from '@ts-rollup-api/infrastructure/service/rollup.service';
 import { TsTokenAddress, TsTxType } from '@ts-sdk/domain/lib/ts-types/ts-types';
 import * as crypto from 'crypto';
+import { Connection } from 'typeorm';
 let rawX: string;
 let rawY: string;
 const generatePublicKey = (() => {
@@ -56,6 +58,12 @@ describe('[UnitTest] account.controller test', () => {
         },
         {
           provide: CommandBus, useClass: CommandBus
+        },
+        {
+          provide: Connection, useValue: null,
+        },
+        {
+          provide: MarketPairInfoService, useValue: null,
         }
       ]
     }).compile();
