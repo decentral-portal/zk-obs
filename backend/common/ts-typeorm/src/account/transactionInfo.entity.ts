@@ -146,6 +146,22 @@ export class TransactionInfo extends BaseTimeEntity {
   })
   arg4!: bigint;
   @Column({
+    type: 'varchar',
+    name: 'txPubKeyX',
+    length: '100',
+    nullable: false,
+    default: `'0'`
+  })
+  txPubKeyX!: string;
+  @Column({
+    type: 'varchar',
+    name: 'txPubKeyY',
+    length: '100',
+    nullable: false,
+    default: `'0'`
+  })
+  txPubKeyY!: string;
+  @Column({
     type: 'decimal',
     name: 'fee',
     precision: 86,

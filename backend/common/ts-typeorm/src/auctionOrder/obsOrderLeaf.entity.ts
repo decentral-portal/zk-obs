@@ -6,12 +6,12 @@ import { ObsOrderLeafMerkleTreeNode } from './obsOrderLeafMerkleTreeNode.entity'
 @Entity('ObsOrderLeaf', { schema: 'public'})
 export class ObsOrderLeafEntity {
   @PrimaryGeneratedColumn({
-    type: 'integer',
+    type: 'int8',
     name: 'orderLeafId',
   })
   orderLeafId!: number;
   @Column({
-    type: 'integer',
+    type: 'int8',
     name: 'txId',
     nullable: true,
   })
@@ -87,7 +87,7 @@ export class ObsOrderLeafEntity {
   })
   accumulatedBuyAmt!: bigint;
   @Column({
-    type: 'integer',
+    type: 'int8',
     name: 'orderId',
     nullable: false,
     default: 0,

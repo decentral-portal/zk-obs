@@ -492,6 +492,18 @@ export class INIT_1669198902099 implements MigrationInterface {
           isNullable: false,
           default: 0n,
         },{
+          type: 'varchar',
+          name: 'txPubKeyX',
+          length: '100',
+          isNullable: false,
+          default: `'0'`
+        },{
+          type: 'varchar',
+          name: 'txPubKeyY',
+          length: '100',
+          isNullable: false,
+          default: `'0'`
+        },{
           type: 'decimal',
           name: 'fee',
           precision: 86,
@@ -572,10 +584,16 @@ export class INIT_1669198902099 implements MigrationInterface {
         schema: 'public',
         columns: [{
           name: 'id',
-          type: 'integer',
+          type: 'int8',
           isPrimary: true,
           isGenerated: true,
           generationStrategy: 'increment'
+        },
+        {
+          type: 'int8',
+          name: 'txId',
+          isNullable: false,
+          default: 0,
         },
         {
           name: 'reqType',
@@ -748,17 +766,13 @@ export class INIT_1669198902099 implements MigrationInterface {
         schema: 'public',
         columns: [{
           name: 'orderLeafId',
-          type: 'integer',
+          type: 'int8',
           isPrimary: true,
           isGenerated: true,
           generationStrategy: 'increment',
         }, {
           name: 'txId',
-          type: 'integer',
-          isNullable: true,
-        }, {
-          name: 'txId2',
-          type: 'integer',
+          type: 'int8',
           isNullable: true,
         }, {
           name: 'reqType',
@@ -823,7 +837,7 @@ export class INIT_1669198902099 implements MigrationInterface {
           default: 0n,
         }, {
           name: 'orderId',
-          type: 'integer',
+          type: 'int8',
           isNullable: false,
           default: 0
         }],
@@ -850,7 +864,7 @@ export class INIT_1669198902099 implements MigrationInterface {
         schema: 'public',
         columns: [{
           name: 'id',
-          type: 'integer',
+          type: 'int8',
           isGenerated: true,
           generationStrategy: 'increment'
         }, {
@@ -865,15 +879,15 @@ export class INIT_1669198902099 implements MigrationInterface {
           isNullable: false,
         }, {
           name: 'txId',
-          type: 'integer',
+          type: 'int8',
           isNullable: true,
         }, {
           name: 'txId2',
-          type: 'integer',
+          type: 'int8',
           isNullable: true,
         }, {
           name: 'referenceOrder',
-          type: 'integer',
+          type: 'int8',
           isNullable: false,
         }, {
           name: 'reqType',
@@ -893,7 +907,7 @@ export class INIT_1669198902099 implements MigrationInterface {
           scale: 0,
           default: 0n,
         }, {
-          name: 'baseMQ',
+          name: 'matchedBQ',
           type: 'decimal',
           precision: 86,
           scale: 0,
@@ -909,6 +923,14 @@ export class INIT_1669198902099 implements MigrationInterface {
           type: 'integer',
           default: 1,
           isNullable: false,
+        }, {
+          name: 'isVoid',
+          type: 'boolean',
+          default: false,
+        }, {
+          name: 'isCancell',
+          type: 'boolean',
+          default: false,
         }],
         foreignKeys: [{
           name: 'mainOrder',

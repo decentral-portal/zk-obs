@@ -7,7 +7,7 @@ import { TsSide } from './tsSide.enum';
 @Entity('MatchObsOrder', { schema: 'public'})
 export class MatchObsOrderEntity {
   @PrimaryGeneratedColumn({
-    type: 'integer',
+    type: 'int8',
     name: 'id'
   })
   id!: number;
@@ -24,19 +24,19 @@ export class MatchObsOrderEntity {
   })
   side!: TsSide;
   @Column({
-    type: 'integer',
+    type: 'int8',
     name: 'txId',
     nullable: true,
   })
   txId!: number | null;
   @Column({
-    type: 'integer',
+    type: 'int8',
     name: 'txId2',
     nullable: true,
   })
   txId2!: number | null;
   @Column({
-    type: 'integer',
+    type: 'int8',
     name: 'referenceOrder',
     nullable: false,
   })
@@ -89,13 +89,13 @@ export class MatchObsOrderEntity {
   @Column({
     type: 'boolean',
     name: 'isVoid',
-    default: 1,
+    default: false,
   }) 
   isVoid!: boolean;
   @Column({
     type: 'boolean',
     name: 'isCancel',
-    default: 1,
+    default: false,
   }) 
   isCancel!: boolean;
   @ManyToOne(

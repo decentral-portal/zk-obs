@@ -9,7 +9,7 @@ import { TsSide } from './tsSide.enum';
 @Entity('ObsOrder', { schema: 'public'})
 export class ObsOrderEntity {
   @PrimaryGeneratedColumn({
-    type: 'integer',
+    type: 'int8',
     name: 'id',
   })
   id!: number;
@@ -25,6 +25,13 @@ export class ObsOrderEntity {
     default: () => `\'${TsSide.BUY}\'`,
   })
   side!: TsSide;
+  @Column({
+    type: 'int8',
+    name: 'txId',
+    nullable: false,
+    default: 0,
+  })
+  txId!: number;
   @Column({
     type: 'integer',
     name: 'reqType',
@@ -153,7 +160,7 @@ export class ObsOrderEntity {
   })
   isMaker!: boolean;
   @Column({
-    type: 'integer',
+    type: 'int8',
     name: 'orderLeafId',
     nullable: true,
     unique: true,
