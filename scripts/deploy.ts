@@ -21,9 +21,7 @@ async function main() {
     operator,
   );
   const poseidom2Contract = await Poseidon2Factory.deploy();
-  console.log({
-    poseidom2Contract: poseidom2Contract.address,
-  });
+  await poseidom2Contract.deployed();
 
   const WETH = await ethers.getContractFactory('WETH9');
   WETH.connect(operator);

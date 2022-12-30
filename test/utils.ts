@@ -5,6 +5,8 @@ import { ZkOBS } from '../typechain-types/contracts/ZkOBS';
 import { BigNumber } from 'ethers';
 import { poseidon } from '@big-whale-labs/poseidon';
 import initStates from './example/zkobs-p1/initStates.json';
+const circomlibjs = require('circomlibjs');
+const { createCode, generateABI } = circomlibjs.poseidonContract;
 
 export async function deploy() {
   const [operator, user1, user2] = await ethers.getSigners();
@@ -27,6 +29,15 @@ export async function deploy() {
   verifierFactory.connect(operator);
   const verifier = await verifierFactory.deploy();
 
+  // Deploy Poseidon contract
+  const Poseidon2Factory = new ethers.ContractFactory(
+    generateABI(2),
+    createCode(2),
+    operator,
+  );
+  const poseidom2Contract = await Poseidon2Factory.deploy();
+  await poseidom2Contract.deployed();
+
   const genesisStateRoot = initStates.stateRoot;
   const ZkOBS = await ethers.getContractFactory('ZkOBS');
 
@@ -34,6 +45,7 @@ export async function deploy() {
     wETH.address,
     verifier.address,
     genesisStateRoot,
+    poseidom2Contract.address,
   );
   await zkOBS.deployed();
 

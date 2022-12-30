@@ -15,8 +15,6 @@ import "hardhat/console.sol";
 /// @title ZkOBS contract
 /// @author zkManic
 contract ZkOBS is Ownable {
-    PoseidonUnit2 private immutable poseidon2;
-
     event Register(address indexed sender, uint32 accountId, uint256 tsPubX, uint256 tsPubY, bytes20 l2Addr);
     event Deposit(address indexed sender, uint32 accountId, uint16 tokenId, uint128 amount);
     event NewL1Request(address indexed sender, uint64 requestId, Operations.OpType opType, bytes pubData);
@@ -52,6 +50,7 @@ contract ZkOBS is Ownable {
     uint256 internal constant REGISTER_BYTES = 9 * CHUNK_BYTES;
     uint256 internal constant INPUT_MASK = (~uint256(0) >> 3);
 
+    PoseidonUnit2 private immutable poseidon2;
     address public immutable wETHAddr;
     address public immutable verifierAddr;
 
@@ -101,7 +100,6 @@ contract ZkOBS is Ownable {
     }
 
     function registerETH(uint256 tsPubX, uint256 tsPubY) external payable {
-        bytes20 tsAddr = bytes20(uint160(poseidon2.poseidon([tsPubX, tsPubY])));
         if (accountIdOf[msg.sender] != 0) {
             revert("Account already registered");
         }
@@ -109,7 +107,7 @@ contract ZkOBS is Ownable {
         uint128 depositAmount = SafeCast.toUint128(msg.value);
         IWETH(wETHAddr).deposit{ value: msg.value }();
 
-        _register(msg.sender, tsPubX, tsPubY, tsAddr);
+        _register(msg.sender, tsPubX, tsPubY);
         _deposit(msg.sender, l2TokenAddr, depositAmount);
     }
 
@@ -119,7 +117,6 @@ contract ZkOBS is Ownable {
         address tokenAddr,
         uint128 amount
     ) external {
-        bytes20 tsAddr = bytes20(uint160(poseidon2.poseidon([tsPubX, tsPubY])));
         if (accountIdOf[msg.sender] != 0) {
             revert("Account already registered");
         }
@@ -133,7 +130,7 @@ contract ZkOBS is Ownable {
 
         // register
         if (accountIdOf[msg.sender] == 0) {
-            _register(msg.sender, tsPubX, tsPubY, tsAddr);
+            _register(msg.sender, tsPubX, tsPubY);
         }
         // deposit
         _deposit(msg.sender, tokenId, depositAmount);
@@ -196,9 +193,9 @@ contract ZkOBS is Ownable {
     function _register(
         address sender,
         uint256 tsPubX,
-        uint256 tsPubY,
-        bytes20 l2Addr
+        uint256 tsPubY
     ) internal {
+        bytes20 l2Addr = bytes20(uint160(poseidon2.poseidon([tsPubX, tsPubY])));
         uint32 accountId = accountNum;
         ++accountNum;
         accountIdOf[sender] = accountId;
