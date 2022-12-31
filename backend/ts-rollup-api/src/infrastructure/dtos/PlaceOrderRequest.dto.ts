@@ -8,7 +8,7 @@ export class EdDSASignatureRequestType {
     maxLength: 2,
     minLength: 2,
   })
-  R8!: string[2];
+  R8!: [string, string];
   @ApiProperty()
   S!: string;
 }
