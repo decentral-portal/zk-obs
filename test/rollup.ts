@@ -9,9 +9,9 @@ import { Operations, ZkOBS } from '../typechain-types/contracts/ZkOBS';
 import { deploy, genTsAddr } from './utils';
 import initStates from './example/zkobs-p1/initStates.json';
 import inputs from './example/zkobs-p1/0_register-acc1-p5-8-8-4-8-inputs.json';
-import root from '../test/example/zkobs-p1/0_register-acc1-p5-commitment.json';
-import calldata from '../test/example/zkobs-p1/0_register-acc1-p5-8-8-4-8-calldata-raw.json';
-import publicData from '../test/example/zkobs-p1/0_register-acc1-p5-8-8-4-8-public.json';
+import root from '/Users/aaronliang/Documents/TKspring/zk-obs/test/example/zkobs-p1/0_register-acc1-p5-commitment.json';
+import calldata from '/Users/aaronliang/Documents/TKspring/zk-obs/test/example/zkobs-p1/0_register-acc1-p5-8-8-4-8-calldata-raw.json';
+
 describe('Unit test of rollup', function () {
   let operator: Signer;
   let user1: Signer;
@@ -117,7 +117,7 @@ describe('Unit test of rollup', function () {
 
       const lastCommittedBlock: ZkOBS.StoredBlockStruct = {
         blockNumber: BigNumber.from('0'),
-        stateRoot: initStates.stateRoot,
+        stateRoot: root.oriStateRoot,
         l1RequestNum: BigNumber.from('0'),
         pendingRollupTxHash: emptyHash,
         commitment: ethers.utils.defaultAbiCoder.encode(
@@ -173,12 +173,7 @@ describe('Unit test of rollup', function () {
 
       const commitment = ethers.utils.solidityPack(
         ['bytes32', 'bytes32', 'bytes32', 'bytes'],
-        [
-          root.oriStateRoot,
-          root.newStateRoot,
-          root.newTsRoot,
-          '0x0100000000000000000100000064000700000000000000000000000000989680db3b49d1bdd96586f6c1d06cedc7946f0064f34a0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
-        ],
+        [root.oriStateRoot, root.newStateRoot, root.newTsRoot, root.pubdata],
       );
       const commitmentHash = ethers.utils.sha256(commitment);
       console.log('commitmentHash:', commitmentHash);
