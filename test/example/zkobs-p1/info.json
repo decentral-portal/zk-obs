@@ -28,23 +28,8 @@
     },
     {
       "circuitName": "main-p5d-8-8-4-8",
-      "name": "2_deposit-acc1-exist-p5-8-8-4-8",
-      "path": "/Users/abner.huang/Tkspring/zk-circom/build/zkobs-p1/2_deposit-acc1-exist-p5-8-8-4-8-inputs.json"
-    },
-    {
-      "circuitName": "main-p5d-8-8-4-8",
-      "name": "3_deposit-acc2-nonexist-p5-8-8-4-8",
-      "path": "/Users/abner.huang/Tkspring/zk-circom/build/zkobs-p1/3_deposit-acc2-nonexist-p5-8-8-4-8-inputs.json"
-    },
-    {
-      "circuitName": "main-p5d-8-8-4-8",
-      "name": "4_withdraw-p5-8-8-4-8",
-      "path": "/Users/abner.huang/Tkspring/zk-circom/build/zkobs-p1/4_withdraw-p5-8-8-4-8-inputs.json"
-    },
-    {
-      "circuitName": "main-p5d-8-8-4-8",
-      "name": "5_empty-tx-p5-8-8-4-8",
-      "path": "/Users/abner.huang/Tkspring/zk-circom/build/zkobs-p1/5_empty-tx-p5-8-8-4-8-inputs.json"
+      "name": "2_empty-tx-p5-8-8-4-8",
+      "path": "/Users/abner.huang/Tkspring/zk-circom/build/zkobs-p1/2_empty-tx-p5-8-8-4-8-inputs.json"
     }
   ],
   "metadata": {
