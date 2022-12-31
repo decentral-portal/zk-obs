@@ -246,9 +246,10 @@ template Normal(){
     signal input r_chunks[NumOfReqs()][MaxChunksPerReq()];// chunks calc from req. dynamic arr is not allowed in circom
     signal input o_chunks[NumOfChunks()];// chunks used to calc commitment
 
-    signal oriStateRoot <== Poseidon(3)([orderRootFlow[0], accountRootFlow[0], oriTxNum]);
-    signal newStateRoot <== Poseidon(3)([orderRootFlow[NumOfReqs()], accountRootFlow[NumOfReqs()], oriTxNum + NumOfReqs()]);
-    signal newTsRoot <== Poseidon(2)([oriTxNum + NumOfReqs(), orderRootFlow[NumOfReqs()]]);
+    signal oriTsRoot <== Poseidon(2)([orderRootFlow[0], oriTxNum]);
+    signal newTsRoot <== Poseidon(2)([orderRootFlow[NumOfReqs()], oriTxNum + NumOfReqs()]);
+    signal oriStateRoot <== Poseidon(2)([oriTsRoot, accountRootFlow[0]]);
+    signal newStateRoot <== Poseidon(2)([newTsRoot, accountRootFlow[NumOfReqs()]]);
     
     signal chunkCount[NumOfReqs()];
     signal chunkCounter[NumOfReqs() + 1];
