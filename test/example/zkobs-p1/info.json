@@ -86,6 +86,7 @@
       "SecondMarketOrder": "8",
       "SecondMarketExchange": "9",
       "SecondMarketEnd": "10",
+      "CancelOrder": "11",
       "AUCTION_LEND": "99",
       "AUCTION_BORROW": "100",
       "AUCTION_CANCEL": "101"
