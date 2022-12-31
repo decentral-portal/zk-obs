@@ -5,11 +5,13 @@ import { BigNumber, Contract, Signer } from 'ethers';
 import { ethers } from 'hardhat';
 import { WETH9 } from '../typechain-types';
 import { ERC20FreeMint } from '../typechain-types';
-import { ZkOBS } from '../typechain-types/contracts/ZkOBS';
-import { deploy } from './utils';
+import { Operations, ZkOBS } from '../typechain-types/contracts/ZkOBS';
+import { deploy, genTsAddr } from './utils';
 import initStates from './example/zkobs-p1/initStates.json';
 import inputs from './example/zkobs-p1/0_register-acc1-p5-8-8-4-8-inputs.json';
-
+import root from '/Users/aaronliang/Documents/TKspring/zk-obs/test/example/zkobs-p1/0_register-acc1-p5-commitment.json';
+import calldata from '/Users/aaronliang/Documents/TKspring/zk-obs/test/example/zkobs-p1/0_register-acc1-p5-8-8-4-8-calldata-raw.json';
+import publicData from '/Users/aaronliang/Documents/TKspring/zk-obs/test/example/zkobs-p1/0_register-acc1-p5-8-8-4-8-public.json';
 describe('Unit test of rollup', function () {
   let operator: Signer;
   let user1: Signer;
@@ -33,8 +35,11 @@ describe('Unit test of rollup', function () {
   }
 
   describe('Rollup for single register', function () {
-    const l2Addr = BigNumber.from(inputs.reqData[0][6]).toHexString();
+    const pubKeyX = BigNumber.from(inputs.tsPubKey[0][0]);
+    const pubKeyY = BigNumber.from(inputs.tsPubKey[0][1]);
+    const l2Addr = genTsAddr(pubKeyX, pubKeyY);
     const amount: BigNumber = BigNumber.from(inputs.reqData[0][3]);
+    const CALLDATA_CHUNK = 9;
     before(async function () {
       const {
         operator: _operator,
@@ -64,7 +69,9 @@ describe('Unit test of rollup', function () {
       zkUSDC.connect(user1).mint(amount);
 
       await zkUSDC.connect(user1).approve(zkOBS.address, amount);
-      await zkOBS.connect(user1).registerERC20(l2Addr, zkUSDC.address, amount);
+      await zkOBS
+        .connect(user1)
+        .registerERC20(pubKeyX, pubKeyY, zkUSDC.address, amount);
       // check user balance
       const newBalance: BigNumber = await zkUSDC.balanceOf(zkOBS.address);
       expect(newBalance.sub(oriBalance)).to.be.eq(amount);
@@ -80,9 +87,9 @@ describe('Unit test of rollup', function () {
       // check the request is existed in the L1 request queue
       const firstL1RequestId = await zkOBS.firstL1RequestId();
       const totalPendingL1Requests = await zkOBS.pendingL1RequestNum();
-      const accountId = await zkOBS.accountIdOf(await user2.getAddress());
+      const accountId = await zkOBS.accountIdOf(await user1.getAddress());
       const tokenId = await zkOBS.tokenIdOf(zkUSDC.address);
-      const register = {
+      const register: Operations.RegisterStruct = {
         accountId: accountId,
         l2Addr: l2Addr,
       };
@@ -91,7 +98,7 @@ describe('Unit test of rollup', function () {
       let success = await zkOBS.checkRegisterL1Request(register, requestId);
       expect(success).to.be.true;
 
-      const deposit = {
+      const deposit: Operations.DepositStruct = {
         accountId: accountId,
         tokenId: tokenId,
         amount: amount,
@@ -110,7 +117,7 @@ describe('Unit test of rollup', function () {
 
       const lastCommittedBlock: ZkOBS.StoredBlockStruct = {
         blockNumber: BigNumber.from('0'),
-        stateRoot: initStates.stateRoots,
+        stateRoot: initStates.stateRoot,
         l1RequestNum: BigNumber.from('0'),
         pendingRollupTxHash: emptyHash,
         commitment: ethers.utils.defaultAbiCoder.encode(
@@ -122,18 +129,15 @@ describe('Unit test of rollup', function () {
 
       const newBlocks: ZkOBS.CommitBlockStruct[] = [];
       const tokenIdUSDC = await zkOBS.tokenIdOf(zkUSDC.address);
-      const newStateRoot =
-        '0x1b8c49f0a6220b650069ab244b5007e7d1c01e1960c234d6dfddcc955e4794f0';
-      const newTsRoot =
-        '0x07c6d6206e0ce5c82855c3f992e6e93ac02940ef84df1c290630c3e6de0a0e5f';
-      const accountId = await zkOBS.accountIdOf(await user2.getAddress());
-
+      const newStateRoot = root.newStateRoot;
+      const newTsRoot = root.newTsRoot;
+      const accountId = await zkOBS.accountIdOf(await user1.getAddress());
       const publicData = ethers.utils
         .solidityPack(
-          ['uint8', 'uint32', 'uint16', 'uint16', 'uint128', 'bytes20'],
-          [OpType.REGISTER, accountId, tokenIdUSDC, 0, amount, l2Addr],
+          ['uint8', 'uint32', 'uint16', 'uint128', 'bytes20'],
+          [OpType.REGISTER, accountId, tokenIdUSDC, amount, l2Addr],
         )
-        .padEnd(90, '0');
+        .padEnd((CALLDATA_CHUNK * 12 * 8) / 4 + 2, '0');
 
       const commitBlock: ZkOBS.CommitBlockStruct = {
         blockNumber: BigNumber.from('1'),
@@ -150,7 +154,6 @@ describe('Unit test of rollup', function () {
       await zkOBS.commitBlocks(lastCommittedBlock, newBlocks);
       const newTotalCommittedBlocks = await zkOBS.committedBlockNum();
       const newTotalCommittedL1Requests = await zkOBS.committedL1RequestNum();
-
       expect(newTotalCommittedBlocks - oriTotalCommittedBlocks).to.be.eq(
         newBlocks.length,
       );
@@ -164,17 +167,27 @@ describe('Unit test of rollup', function () {
       const oriTotalProvedBlocks = await zkOBS.provedBlockNum();
 
       const committedBlocks: ZkOBS.StoredBlockStruct[] = [];
-      const newStateRoot =
-        '0x0b99cb4eea47e09d3b6278e59471deaf894ccdd19f96ea9ecc10003e653deee2';
+      const newStateRoot = root.newStateRoot;
       const emptyHash =
         '0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470';
+
+      const commitment = ethers.utils.solidityPack(
+        ['bytes32', 'bytes32', 'bytes32', 'bytes'],
+        [
+          root.oriStateRoot,
+          root.newStateRoot,
+          root.newTsRoot,
+          '0x0100000000000000000100000064000700000000000000000000000000989680db3b49d1bdd96586f6c1d06cedc7946f0064f34a0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
+        ],
+      );
+      const commitmentHash = ethers.utils.sha256(commitment);
+      console.log('commitmentHash:', commitmentHash);
       const commitedBlock: ZkOBS.StoredBlockStruct = {
         blockNumber: 1,
         stateRoot: newStateRoot,
         l1RequestNum: 2,
         pendingRollupTxHash: emptyHash,
-        commitment:
-          '0x00e42f662a7e7586fce075723c668c647db494a53565b9aeb1f4ae06abcd4fce',
+        commitment: commitmentHash,
         timestamp: 1,
       };
       committedBlocks.push(commitedBlock);

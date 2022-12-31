@@ -46,8 +46,8 @@ contract ZkOBS is Ownable {
     }
 
     bytes32 internal constant EMPTY_STRING_KECCAK = 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470;
-    uint8 internal constant CHUNK_BYTES = 5;
-    uint256 internal constant REGISTER_BYTES = 9 * CHUNK_BYTES;
+    uint8 internal constant CHUNK_BYTES = 12;
+    uint256 internal constant REGISTER_BYTES = 4 * CHUNK_BYTES;
     uint256 internal constant INPUT_MASK = (~uint256(0) >> 3);
 
     PoseidonUnit2 private immutable poseidon2;
@@ -230,6 +230,7 @@ contract ZkOBS is Ownable {
     }
 
     function commitBlocks(StoredBlock memory lastCommittedBlock, CommitBlock[] memory newBlocks) external {
+        console.log("commit blocks");
         require(
             storedBlockHashes[committedBlockNum] == keccak256(abi.encode(lastCommittedBlock)),
             "Commited block inconsistency"
@@ -327,14 +328,37 @@ contract ZkOBS is Ownable {
         bytes memory offsetCommitment
     ) internal view returns (bytes32 commitment) {
         bytes memory pubdata = abi.encodePacked(offsetCommitment, newBlock.publicData);
+        console.log("create block commitment");
+        //console.logBytes(abi.encodePacked(previousBlock.stateRoot, newBlock.newStateRoot, newBlock.newTsRoot, pubdata));
+        console.log("oriStateRoot:");
+        console.logBytes32(previousBlock.stateRoot);
+        console.log("newStateRoot:");
+        console.logBytes32(newBlock.newStateRoot);
+        console.log("newTsRoot:");
+        console.logBytes32(newBlock.newTsRoot);
+        console.log("isCriticalChunk:");
+        console.logBytes(pubdata);
         commitment = sha256(
             abi.encodePacked(previousBlock.stateRoot, newBlock.newStateRoot, newBlock.newTsRoot, pubdata)
         );
+        console.log("calculated commitment:");
+        console.logBytes32(commitment);
+        console.log("uint256(commitment):");
+        console.log(uint256(commitment));
+        console.log("uint256(commitment) & INPUT_MASK:");
+        console.log(uint256(commitment) & INPUT_MASK);
     }
 
     function proveBlocks(StoredBlock[] memory committedBlocks, Proof[] memory proof) external {
+        console.log("in prove blocks");
         uint32 currentProvedBlockNum = provedBlockNum;
         for (uint256 i = 0; i < committedBlocks.length; i++) {
+            console.log(committedBlocks[i].blockNumber);
+            console.logBytes32(committedBlocks[i].commitment);
+            console.log(committedBlocks[i].l1RequestNum);
+            console.logBytes32(committedBlocks[i].pendingRollupTxHash);
+            console.logBytes32(committedBlocks[i].stateRoot);
+            console.log(committedBlocks[i].timestamp);
             require(keccak256(abi.encode(committedBlocks[i])) == storedBlockHashes[currentProvedBlockNum + 1], "o1");
             _proveOneBlock(committedBlocks[i], proof[i]);
             ++currentProvedBlockNum;
@@ -347,6 +371,11 @@ contract ZkOBS is Ownable {
     function _proveOneBlock(StoredBlock memory committedBlock, Proof memory proof) internal view {
         IVerifier verifier = IVerifier(verifierAddr);
         require(verifier.verifyProof(proof.a, proof.b, proof.c, proof.commitment), "Invalid proof");
+        console.log("in prove one block");
+        console.log("proof commitment:");
+        console.log(proof.commitment[0] & INPUT_MASK);
+        console.log("committed block commitment:");
+        console.log(uint256(committedBlock.commitment) & INPUT_MASK);
         require(
             proof.commitment[0] & INPUT_MASK == uint256(committedBlock.commitment) & INPUT_MASK,
             "commitment inconsistency"
