@@ -9,9 +9,9 @@ import { Operations, ZkOBS } from '../typechain-types/contracts/ZkOBS';
 import { deploy, genTsAddr } from './utils';
 import initStates from './example/zkobs-p1/initStates.json';
 import inputs from './example/zkobs-p1/0_register-acc1-p5-8-8-4-8-inputs.json';
-import root from '/Users/aaronliang/Documents/TKspring/zk-obs/test/example/zkobs-p1/0_register-acc1-p5-commitment.json';
-import calldata from '/Users/aaronliang/Documents/TKspring/zk-obs/test/example/zkobs-p1/0_register-acc1-p5-8-8-4-8-calldata-raw.json';
-import publicData from '/Users/aaronliang/Documents/TKspring/zk-obs/test/example/zkobs-p1/0_register-acc1-p5-8-8-4-8-public.json';
+import root from '../test/example/zkobs-p1/0_register-acc1-p5-commitment.json';
+import calldata from '../test/example/zkobs-p1/0_register-acc1-p5-8-8-4-8-calldata-raw.json';
+import publicData from '../test/example/zkobs-p1/0_register-acc1-p5-8-8-4-8-public.json';
 describe('Unit test of rollup', function () {
   let operator: Signer;
   let user1: Signer;
