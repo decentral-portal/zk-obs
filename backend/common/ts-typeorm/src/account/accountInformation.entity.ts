@@ -9,48 +9,48 @@ import { TransactionInfo } from './transactionInfo.entity';
 @Entity('AccountInformation', { schema: 'public' })
 export class AccountInformation extends BaseTimeEntity {
   @PrimaryColumn({
-    type: 'varchar', 
-    name: 'L1Address', 
-    length: 256, 
-    primary: true, 
+    type: 'varchar',
+    name: 'L1Address',
+    length: 256,
+    primary: true,
   })
   L1Address!: string;
 
   @Column({
-    type: 'decimal', 
+    type: 'decimal',
     name: 'accountId',
-    precision: 86, 
+    precision: 86,
     scale: 0,
-    nullable: false, 
+    nullable: false,
   })
   accountId!: string;
   @Column({
-    type: 'varchar', 
+    type: 'varchar',
     name: 'email',
     length: 256,
-    nullable: false, 
+    nullable: false,
     unique: true,
   })
   email!: string;
   @Column({
-    type: 'varchar', 
+    type: 'varchar',
     name: 'lastedLoginIp',
-    length: 256, 
+    length: 256,
     nullable: true,
     default: null,
   })
   lastedLoginIp!: string | null;
   @Column({
-    type: 'timestamp without time zone', 
+    type: 'timestamp without time zone',
     name: 'lastLoginTime',
     nullable: true,
   })
   lastLoginTime!: Date | null;
-  @Column({ 
-    type: 'enum', 
+  @Column({
+    type: 'enum',
     name: 'role',
     enumName: 'Role',
-    enum: [Role.ADMIN, Role.MEMBER, Role.OPERATOR] ,
+    enum: [Role.ADMIN, Role.MEMBER, Role.OPERATOR],
     nullable: false,
     default: Role.MEMBER,
   })
@@ -68,7 +68,7 @@ export class AccountInformation extends BaseTimeEntity {
     length: 400,
     nullable: true,
   })
-  refreshToken!: string|null;
+  refreshToken!: string | null;
   @Column({
     type: 'jsonb',
     name: 'label',
@@ -83,11 +83,25 @@ export class AccountInformation extends BaseTimeEntity {
     nullable: true,
   })
   labelBy!: string | null;
+
+  @Column({
+    type: 'varchar',
+    name: 'tsPubKeyX',
+    length: '100',
+    nullable: false,
+    default: '\'0\'',
+  })
+  tsPubKeyX!: string;
+  @Column({
+    type: 'varchar',
+    name: 'tsPubKeyY',
+    length: '100',
+    nullable: false,
+    default: '\'0\'',
+  })
+  tsPubKeyY!: string;
   // relations
-  @OneToOne(
-    () => AccountMerkleTreeNode,
-    (accountMerkleTreeNode: AccountMerkleTreeNode) => accountMerkleTreeNode.leaf
-  )
+  @OneToOne(() => AccountMerkleTreeNode, (accountMerkleTreeNode: AccountMerkleTreeNode) => accountMerkleTreeNode.leaf)
   accountMerkleTreeNode!: AccountMerkleTreeNode;
   // @OneToMany(
   //   () => AuctionOrderLeafNode,
@@ -99,18 +113,12 @@ export class AccountInformation extends BaseTimeEntity {
   //   (auctionOrderLeafNode:AuctionOrderLeafNode) => auctionOrderLeafNode.L2AddrToAccount
   // )
   // toAuctionOrderLeafNodes!: AuctionOrderLeafNode[];
-  @OneToMany(
-    () => TransactionInfo,
-    (transactionInfo: TransactionInfo) => transactionInfo.L2AccountInfo
-  )
+  @OneToMany(() => TransactionInfo, (transactionInfo: TransactionInfo) => transactionInfo.L2AccountInfo)
   transactionInfos!: TransactionInfo[];
-  @OneToMany(
-    () => ObsOrderEntity,
-    (obsOrder: ObsOrderEntity) => obsOrder.accountInfo
-  )
+  @OneToMany(() => ObsOrderEntity, (obsOrder: ObsOrderEntity) => obsOrder.accountInfo)
   @JoinColumn({
     name: 'accountId',
     referencedColumnName: 'accountId',
   })
-  obsOrders!: ObsOrderEntity[] | null; 
+  obsOrders!: ObsOrderEntity[] | null;
 }

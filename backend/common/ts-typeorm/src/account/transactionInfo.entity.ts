@@ -12,7 +12,7 @@ export class TransactionInfo extends BaseTimeEntity {
     name: 'txId',
     primary: true,
     nullable: false,
-    generated: 'increment'
+    generated: 'increment',
   })
   txId!: number;
   @Column({
@@ -25,7 +25,7 @@ export class TransactionInfo extends BaseTimeEntity {
     type: 'integer',
     name: 'reqType',
     nullable: false,
-    default: 0
+    default: 0,
   })
   reqType!: number;
   @Column({
@@ -86,18 +86,18 @@ export class TransactionInfo extends BaseTimeEntity {
     type: 'json',
     name: 'eddsaSig',
     nullable: false,
-    default: () => JSON.stringify({R8:['0','0'],S:'0'}),
+    default: () => JSON.stringify({ R8: ['0', '0'], S: '0' }),
   })
   eddsaSig!: {
     R8: [string, string];
-    S: string
+    S: string;
   };
   @Column({
     type: 'varchar',
     name: 'ecdsaSig',
     length: '66',
     nullable: false,
-    default: ''
+    default: '',
   })
   ecdsaSig!: string;
   @Column({
@@ -147,27 +147,27 @@ export class TransactionInfo extends BaseTimeEntity {
   arg4!: bigint;
   @Column({
     type: 'varchar',
-    name: 'txPubKeyX',
+    name: 'tsPubKeyX',
     length: '100',
     nullable: false,
-    default: `'0'`
+    default: `'0'`,
   })
-  txPubKeyX!: string;
+  tsPubKeyX!: string;
   @Column({
     type: 'varchar',
-    name: 'txPubKeyY',
+    name: 'tsPubKeyY',
     length: '100',
     nullable: false,
-    default: `'0'`
+    default: `'0'`,
   })
-  txPubKeyY!: string;
+  tsPubKeyY!: string;
   @Column({
     type: 'decimal',
     name: 'fee',
     precision: 86,
     scale: 0,
     nullable: false,
-    default: 0n
+    default: 0n,
   })
   fee!: bigint;
   @Column({
@@ -176,14 +176,14 @@ export class TransactionInfo extends BaseTimeEntity {
     precision: 86,
     scale: 0,
     nullable: false,
-    default: 0n
+    default: 0n,
   })
   feeToken!: bigint;
   @Column({
     type: 'json',
     name: 'metadata',
     nullable: true,
-    default: () => '\'{}\''
+    default: () => "'{}'",
   })
   metadata!: object | null;
   @Column({
@@ -196,48 +196,40 @@ export class TransactionInfo extends BaseTimeEntity {
       TS_STATUS.L2CONFIRMED,
       TS_STATUS.L1CONFIRMED,
       TS_STATUS.FAILED,
-      TS_STATUS.REJECTED
+      TS_STATUS.REJECTED,
     ],
     nullable: false,
-    default: `'${TS_STATUS.PENDING}'`
+    default: `'${TS_STATUS.PENDING}'`,
   })
   txStatus!: TS_STATUS;
-  @ManyToOne(
-    () => AccountInformation,
-    (accountInformation: AccountInformation) => accountInformation.transactionInfos,
-    { onDelete: 'RESTRICT', onUpdate: 'CASCADE' }
-  )
+  @ManyToOne(() => AccountInformation, (accountInformation: AccountInformation) => accountInformation.transactionInfos, {
+    onDelete: 'RESTRICT',
+    onUpdate: 'CASCADE',
+  })
   @JoinColumn({
     name: 'accountId',
-    referencedColumnName: 'accountId'
+    referencedColumnName: 'accountId',
   })
   L2AccountInfo!: AccountInformation;
-  @ManyToOne(
-    () => BlockInformation,
-    (blockInformation: BlockInformation) => blockInformation.transactionInfos,
-    { onDelete: 'RESTRICT', onUpdate: 'CASCADE' } 
-  )
+  @ManyToOne(() => BlockInformation, (blockInformation: BlockInformation) => blockInformation.transactionInfos, {
+    onDelete: 'RESTRICT',
+    onUpdate: 'CASCADE',
+  })
   @JoinColumn({
     name: 'blockNumber',
-    referencedColumnName: 'blockNumber'
+    referencedColumnName: 'blockNumber',
   })
   blockInfo!: BlockInformation;
-  @OneToOne(
-    () => MatchObsOrderEntity,
-    (matchedObsOrder: MatchObsOrderEntity) => matchedObsOrder.matchedTx
-  )
+  @OneToOne(() => MatchObsOrderEntity, (matchedObsOrder: MatchObsOrderEntity) => matchedObsOrder.matchedTx)
   @JoinColumn({
     name: 'txId',
-    referencedColumnName: 'txId'
+    referencedColumnName: 'txId',
   })
   matchedOrder!: MatchObsOrderEntity | null;
-  @OneToOne(
-    () => MatchObsOrderEntity,
-    (matchedObsOrder: MatchObsOrderEntity) => matchedObsOrder.matchedTx2
-  )
+  @OneToOne(() => MatchObsOrderEntity, (matchedObsOrder: MatchObsOrderEntity) => matchedObsOrder.matchedTx2)
   @JoinColumn({
     name: 'txId',
-    referencedColumnName: 'txId2'
+    referencedColumnName: 'txId2',
   })
   matchedOrder2!: MatchObsOrderEntity | null;
 }
