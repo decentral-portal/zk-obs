@@ -79,6 +79,7 @@ export class OperatorProducer {
       arg0: BigInt(l2Addr.toString()),
       arg1: BigInt(tsAddr.toString()),
     });
+    this.rollupInfoRepository.update({ id: 1 }, { lastSyncBlocknumberForRegisterEvent: blockNumber });
     this.logger.log(`OperatorProducer.listenRegisterEvent ${l1Addr} ${l2Addr} ${tsPubKey}`);
   }
 }
