@@ -27,18 +27,17 @@ export class MerkleTreeController {
   async updateAccountTree(@Body() updateAccountTreeDto: UpdateAccountTreeDto) {
     console.time('controller updateAccountTree');
     await this.tsAccountTreeService.updateLeaf(
-      this.accountLeafId,
+      BigInt(updateAccountTreeDto.leafId),
       updateAccountTreeDto
       );
-    this.accountLeafId++;
     console.timeEnd('controller updateAccountTree');
   }
   @Post('updateTokenTree')
   async updateTokenTree(@Body() updateTokenTreeDto: UpdateTokenTreeDto) {
     console.time('controller updateTokenTree');
-    const tokeneLeafId = await this.tsTokenTreeService.getCurrentLeafIdCount(BigInt(updateTokenTreeDto.accountId));
+    // const tokeneLeafId = await this.tsTokenTreeService.getCurrentLeafIdCount(BigInt(updateTokenTreeDto.accountId));
     await this.tsTokenTreeService.updateLeaf(
-      BigInt(tokeneLeafId),
+      BigInt(updateTokenTreeDto.leafId),
       updateTokenTreeDto,
       );
     console.timeEnd('controller updateTokenTree');
