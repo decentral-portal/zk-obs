@@ -16,10 +16,12 @@ import { L2BalanceRepository } from '@ts-rollup-api/infrastructure/ports/L2Balan
 // import { L2RealBalanceService } from '@ts-rollup-api/infrastructure/service/L2RealBalance.service';
 import { CheckWithdrawOrderGuard } from '@ts-rollup-api/infrastructure/guards/check-withdraw-order.guard';
 import { WebSocketModule } from '@common/websocket/websocket.module';
+import { BlockInformationController } from './infrastructure/adapters/blockInformation.controller';
 
 const controllers = [
   TsAccountController,
-  TsTransactionController
+  TsTransactionController,
+  BlockInformationController
 ];
 
 

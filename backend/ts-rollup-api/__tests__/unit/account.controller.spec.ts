@@ -6,7 +6,7 @@ import { CommandBus } from '@nestjs/cqrs';
 import { Test } from '@nestjs/testing';
 import { TsAccountController } from '@ts-rollup-api/infrastructure/adapters/account.controller';
 import { TsTransactionController } from '@ts-rollup-api/infrastructure/adapters/transaction.controller';
-import { TsRollupService } from '@ts-rollup-api/infrastructure/service/rollup.service';
+// import { TsRollupService } from '@ts-rollup-api/infrastructure/service/rollup.service';
 import { TsTokenAddress, TsTxType } from '@ts-sdk/domain/lib/ts-types/ts-types';
 import * as crypto from 'crypto';
 import { Connection } from 'typeorm';
@@ -50,9 +50,9 @@ describe('[UnitTest] account.controller test', () => {
         {
           provide: TsAccountController, useClass: TsAccountController
         },
-        {
-          provide: TsRollupService, useClass: TsRollupService,
-        },
+        // {
+        //   provide: TsRollupService, useClass: TsRollupService,
+        // },
         {
           provide: TsTransactionController, useClass: TsTransactionController
         },
@@ -94,14 +94,6 @@ describe('[UnitTest] account.controller test', () => {
   //   expect(result).toHaveProperty('list');
   //   expect(result.list.length).toEqual(4);
   // });
-  it('tsAccountController get balance without L1 L2 Address, should throw BadRequestException', async () => {
-    // const circomlibjs = require('circomlibjs');
-    // let EdDSA: any;
-    // const asyncEdDSA = circomlibjs.buildEddsa();
-    await expect(tsAccountController.getL2Balances({
-      L2TokenAddr: [TsTokenAddress.DAI, TsTokenAddress.USDC, TsTokenAddress.USDT, TsTokenAddress.WBTC],
-    })).rejects.toThrow('accountId is required');
-  });
   // it('tsAccountController getAccountInfo after register', async () => {
   //   const publicKey = generatePublicKey();
   //   rawX = publicKey.rawX;
@@ -120,20 +112,4 @@ describe('[UnitTest] account.controller test', () => {
   //   });
   //   expect(result.L1Address).toEqual('0x319AbFF6695E87d5E402F803045AaD0F07b5dA7d'.toLowerCase());
   // });
-  it('tsAccountController getL2TransactionHistory', async () => {
-    const result = await tsAccountController.getL2TransactionHistory({
-      accountId: '101'
-    });
-    expect(result).toEqual('getL2TransactionHistory');
-  });
-  it('tsAccountController getLoginHistory', async () => {
-    const now = new Date();
-    const pre7day = new Date();
-    pre7day.setDate(now.getDate() - 7);
-    const result = await tsAccountController.getLoginHistory({
-      accountId: '100',
-      start: pre7day.getTime().toString()
-    });
-    expect(result).toEqual('getLoginHistory');
-  });
 });

@@ -13,10 +13,8 @@ export class EdDSASignatureRequestType {
   S!: string;
 }
 export class PlaceOrderRequest {
-  @ApiProperty({
-    enum: TsTxType,
-  })
-  reqType!: TsTxType;
+  @ApiProperty()
+  reqType!: string;
   @ApiProperty()
   sender!: string;
   @ApiProperty()

@@ -18,6 +18,7 @@ export class BlockInformationController {
 
   @Get('history')
   @ApiOperation({
+    summary: 'TODO: get block history'
   })
   @ApiCreatedResponse({
     type: BlockInformationPagination,
@@ -40,6 +41,7 @@ export class BlockInformationController {
 
   @Get('latest')
   @ApiOperation({
+    summary: 'TODO: get latest block info'
   })
   @ApiCreatedResponse({
     type: BlockInformationWithTxDto,
@@ -50,6 +52,7 @@ export class BlockInformationController {
 
   @Get(':blockNumber')
   @ApiOperation({
+    summary: 'TODO: get specific block info'
   })
   @ApiCreatedResponse({
     type: BlockInformationWithTxDto,

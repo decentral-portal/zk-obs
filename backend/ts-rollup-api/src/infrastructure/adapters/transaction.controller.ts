@@ -2,7 +2,10 @@ import {
   Body,
   Controller,
   Post,
-  BadRequestException
+  BadRequestException,
+  Get,
+  Query,
+  Param
 } from '@nestjs/common';
 import {CommandBus} from '@nestjs/cqrs';
 import {
@@ -25,6 +28,7 @@ import { TsSide } from '@common/ts-typeorm/auctionOrder/tsSide.enum';
 import { ObsOrderEntity } from '@common/ts-typeorm/auctionOrder/obsOrder.entity';
 import { RegisterRequestDto } from '../dtos/RegisterRequest.dto';
 import { TransactionInfo } from '@common/ts-typeorm/account/transactionInfo.entity';
+import { GetTransactionRequestDto, GetTransactionResponseDto } from '../dtos/transactionInfo.dto';
 
 @Controller('v1/ts/transaction')
 @ApiTags('Transaction')
@@ -149,4 +153,12 @@ export class TsTransactionController {
       s += '00000000';
       return s.substring(0, s.indexOf('.') + 9);
     };
+  @Get(':txId')
+  @ApiOperation({
+    summary: 'TODO: get transaction Info by txId'
+  })
+  @ApiCreatedResponse({ type: GetTransactionResponseDto})
+  async getTransactionInfoByTxId(@Param('txId') dto: GetTransactionRequestDto) {
+
+  }
 }
