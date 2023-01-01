@@ -45,7 +45,7 @@ export class TsAccountController {
 
     @Get('available')
     @ApiOperation({
-      summary: 'TODO: get L2 available list',
+      summary: 'get L2 available list',
     })
     @ApiCreatedResponse({
       type: GetAvailableResponseDto,
@@ -56,7 +56,7 @@ export class TsAccountController {
 
     @Get('profile')
     @ApiOperation({
-      summary: 'get personal profile'
+      summary: 'TODO: get personal profile'
     })
     @ApiCreatedResponse({
       type: AccountInfoResponse,
