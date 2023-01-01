@@ -10,7 +10,7 @@ export class AccountLeafNode {
     precision: 86,
     scale: 0
   })
-  leafId!: bigint; 
+  leafId!: string; 
   @Column({
     type: 'decimal',
     name: 'tsAddr',

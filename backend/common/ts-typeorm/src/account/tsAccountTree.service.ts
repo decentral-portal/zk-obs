@@ -48,7 +48,7 @@ export class TsAccountTreeService extends TsMerkleTree<AccountLeafNode>{
         tsAddr: BigInt(value.tsAddr),
         nonce: BigInt(value.nonce),
         tokenRoot: BigInt(value.tokenRoot),
-        leafId: leafId,
+        leafId: leafId.toString(),
       }, ['leafId']);
       // update tree
       for (let i = id, j = 0; i > 1n; i = i >> 1n) {
@@ -90,7 +90,7 @@ export class TsAccountTreeService extends TsMerkleTree<AccountLeafNode>{
     console.timeEnd('updateLeaf for account tree');
   }
   async getLeaf(leaf_id: bigint, otherPayload: any): Promise<AccountLeafNode | null> {
-    const result = await this.accountLeafNodeRepository.findOneBy({leafId: leaf_id});
+    const result = await this.accountLeafNodeRepository.findOneBy({leafId: leaf_id.toString()});
     if (result == null) {
       // check level
       const id = this.getLeafIdInTree(leaf_id);
@@ -105,12 +105,12 @@ export class TsAccountTreeService extends TsMerkleTree<AccountLeafNode>{
           hash: BigInt(hash)
         });
         await manager.insert(AccountLeafNode, {
-          leafId: leaf_id,
+          leafId: leaf_id.toString(),
           tsAddr: 0n,
           nonce: 0n,
         });
       });
-      return await this.accountLeafNodeRepository.findOneBy({leafId: leaf_id});   
+      return await this.accountLeafNodeRepository.findOneBy({leafId: leaf_id.toString()});   
     }
     return result;  
   }

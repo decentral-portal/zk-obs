@@ -1,8 +1,8 @@
-import { BadRequestException, Body, Controller, Get, Post, Query } from '@nestjs/common';
-import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { TsTokenAddress } from '@ts-sdk/domain/lib/ts-types/ts-types';
-import { AccountBalanceQueryDto, AccountQueryDto, AccountLoginDto, AccountLoginHistoryQueryDto, AccountPreLoginDto, AccountPreLoginResponse, AccountUpdateDto, AccountTxHistoryDto, AccountLoginResponse, AccountBalanceResponse, AccountInfoResponse, L2TransactionHistoryResponse, AccountLoginHistoryResponse } from '../dtos/accounts.dto';
+import { Controller, Get, Query } from '@nestjs/common';
+import { ApiCreatedResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { AccountQueryDto, AccountInfoResponse } from '../dtos/accounts.dto';
 import { GetAvailableRequestDto, GetAvailableResponseDto } from '../dtos/getAvailable.dto';
+import { AccountInfoService } from '../service/accountInfo.service';
 import { AvailableService } from '../service/available.service';
 // import { TsRollupService } from '../service/rollup.service';
 
@@ -10,7 +10,8 @@ import { AvailableService } from '../service/available.service';
 @ApiTags('Account')
 export class TsAccountController {
   constructor(
-    private readonly availableService: AvailableService
+    private readonly availableService: AvailableService,
+    private readonly accountInfoService: AccountInfoService
   ) {}
   // constructor(
   //   // private readonly tsRollupService: TsRollupService,
@@ -56,12 +57,36 @@ export class TsAccountController {
 
     @Get('profile')
     @ApiOperation({
-      summary: 'TODO: get personal profile'
+      summary: 'get personal profile'
     })
     @ApiCreatedResponse({
       type: AccountInfoResponse,
     })
-    async getAccountInfo(@Query() dto: AccountQueryDto) {
+    async getAccountInfo(@Query() dto: AccountQueryDto): Promise<AccountInfoResponse> {
+      let queryInfo: {
+        L1Address: string,
+        accountId: string
+        L2TokenAddrs: string[]
+      } = {
+        L1Address: '',
+        accountId: '', 
+        L2TokenAddrs: []
+      }
+      console.log(dto);
+      if (dto.L1Address) {
+        queryInfo.L1Address = dto.L1Address
+      }
+      if (dto.accountId) {
+        queryInfo.accountId = dto.accountId    
+      }
+      const [accountInfo, tokenInfo] = await Promise.all([
+        this.accountInfoService.getAccountInfo(dto),
+        this.availableService.getAvailableByAccountInfo(queryInfo)
+      ]);
+      return {
+        ...accountInfo,
+        tokenLeafs: tokenInfo.list
+      }
     //   if(dto.accountId || dto.L1Address) {
     //     try {
     //       const acc = dto.accountId

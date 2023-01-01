@@ -6,6 +6,7 @@ import { CommandBus } from '@nestjs/cqrs';
 import { Test } from '@nestjs/testing';
 import { TsAccountController } from '@ts-rollup-api/infrastructure/adapters/account.controller';
 import { TsTransactionController } from '@ts-rollup-api/infrastructure/adapters/transaction.controller';
+import { AccountInfoService } from '@ts-rollup-api/infrastructure/service/accountInfo.service';
 import { AvailableService } from '@ts-rollup-api/infrastructure/service/available.service';
 // import { TsRollupService } from '@ts-rollup-api/infrastructure/service/rollup.service';
 import { TsTokenAddress, TsTxType } from '@ts-sdk/domain/lib/ts-types/ts-types';
@@ -53,6 +54,9 @@ describe('[UnitTest] account.controller test', () => {
         },
         {
           provide: AvailableService, useValue: null,
+        },
+        {
+          provide: AccountInfoService, useValue: null,
         },
         {
           provide: TsTransactionController, useClass: TsTransactionController

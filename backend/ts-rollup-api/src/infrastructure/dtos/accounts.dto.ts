@@ -60,19 +60,17 @@ export class AccountBalanceQueryDto {
   accountId?: string;
 }
 
-export class AccountBalanceResponse {
-  @ApiProperty({
-    isArray: true,
-    type: TokenInfoType, // TODO: fix this
-  })
-  list!: TsTokenInfo[];
-}
+
 
 export class AccountQueryDto {
-  @ApiPropertyOptional()
-  L1Address?: string | null;
-  @ApiPropertyOptional()
-  accountId?: string | null;
+  @ApiPropertyOptional({
+    type: 'string'
+  })
+  L1Address!: string | null;
+  @ApiPropertyOptional({
+    type: 'string'
+  })
+  accountId!: string | null;
 }
 
 // TODO: Account Infomation
@@ -88,19 +86,36 @@ export class AccountInformation {
   @ApiProperty({ required: false})
   updatedTime!: number;
 }
-
+export class AccountInfoDto {
+  @ApiProperty()
+  L1Address!: string;
+  @ApiProperty()
+  accountId!: string;
+  @ApiProperty()
+  nonce!: string;
+  @ApiPropertyOptional({ required: false})
+  name!: string;
+  @ApiPropertyOptional({ required: false})
+  mail!: string;
+  @ApiPropertyOptional({ required: false})
+  socialId!: string | null;
+  @ApiProperty({ required: false})
+  createdTime!: number;
+  @ApiProperty({ required: false})
+  updatedTime!: number;
+}
 export class AccountInfoResponse extends AccountInformation {
-    @ApiProperty()
-      L1Address!: string;
-    @ApiProperty()
-      accountId!: string;
-    @ApiProperty()
-      nonce!: string;
-    @ApiProperty({
-      isArray: true,
-      type: TokenInfoType,
-    })
-    tokenLeafs!: TsTokenInfo[];
+  @ApiProperty()
+    L1Address!: string;
+  @ApiProperty()
+    accountId!: string;
+  @ApiProperty()
+    nonce!: string;
+  @ApiProperty({
+    isArray: true,
+    type: TokenInfoType,
+  })
+  tokenLeafs!: TokenInfoType[];
 }
 
 export class AccountLoginHistoryQueryDto {
