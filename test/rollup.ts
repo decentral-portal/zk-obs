@@ -9,8 +9,9 @@ import { Operations, ZkOBS } from '../typechain-types/contracts/ZkOBS';
 import { deploy, genTsAddr } from './utils';
 import initStates from './example/zkobs-p1/initStates.json';
 import inputs from './example/zkobs-p1/0_register-acc1-p5-8-8-4-8-inputs.json';
-import root from '/Users/aaronliang/Documents/TKspring/zk-obs/test/example/zkobs-p1/0_register-acc1-p5-commitment.json';
-import calldata from '/Users/aaronliang/Documents/TKspring/zk-obs/test/example/zkobs-p1/0_register-acc1-p5-8-8-4-8-calldata-raw.json';
+import root from './example/zkobs-p1/0_register-acc1-p5-commitment.json';
+import calldata from './example/zkobs-p1/0_register-acc1-p5-8-8-4-8-calldata-raw.json';
+import { stateToCommitment } from './helper/helper';
 
 describe('Unit test of rollup', function () {
   let operator: Signer;
@@ -170,20 +171,20 @@ describe('Unit test of rollup', function () {
       const newStateRoot = root.newStateRoot;
       const emptyHash =
         '0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470';
+      const { commitment, commitmentMessage, commitmentHashOrigin } =
+        stateToCommitment(root);
 
-      const commitment = ethers.utils.solidityPack(
-        ['bytes32', 'bytes32', 'bytes32', 'bytes'],
-        [root.oriStateRoot, root.newStateRoot, root.newTsRoot, root.pubdata],
-      );
-      
-      const commitmentHash = ethers.utils.sha256(commitment);
-      console.log('commitmentHash:', commitmentHash);
+      console.log({
+        commitment,
+        commitmentMessage,
+        commitmentHashOrigin,
+      });
       const commitedBlock: ZkOBS.StoredBlockStruct = {
         blockNumber: 1,
         stateRoot: newStateRoot,
         l1RequestNum: 2,
         pendingRollupTxHash: emptyHash,
-        commitment: commitmentHash,
+        commitment: commitment,
         timestamp: 1,
       };
       committedBlocks.push(commitedBlock);
