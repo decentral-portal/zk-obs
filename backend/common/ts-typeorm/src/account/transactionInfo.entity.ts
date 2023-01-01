@@ -19,8 +19,9 @@ export class TransactionInfo extends BaseTimeEntity {
     type: 'integer',
     name: 'blockNumber',
     nullable: true,
+    default: 0
   })
-  blockNumber!: number;
+  blockNumber!: number| null;
   @Column({
     type: 'integer',
     name: 'reqType',
@@ -97,7 +98,7 @@ export class TransactionInfo extends BaseTimeEntity {
     name: 'ecdsaSig',
     length: '66',
     nullable: false,
-    default: '',
+    default: `''`,
   })
   ecdsaSig!: string;
   @Column({
@@ -182,7 +183,7 @@ export class TransactionInfo extends BaseTimeEntity {
   @Column({
     type: 'json',
     name: 'metadata',
-    nullable: true,
+    nullable: false,
     default: () => "'{}'",
   })
   metadata!: object | null;

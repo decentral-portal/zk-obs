@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { TsTokenAddress, TsTokenInfo, TsTxType } from '@ts-sdk/domain/lib/ts-types/ts-types';
 
-class TokenInfoType {
+export class TokenInfoType {
   @ApiProperty()
   tokenAddr!: string;
   @ApiProperty()
@@ -51,13 +51,13 @@ export class AccountBalanceQueryDto {
     @ApiProperty({
       required: false,
       isArray: true,
-      type: TsTokenAddress,
+      type: [String],
     })
-    L2TokenAddr?: TsTokenAddress[];
+    L2TokenAddr?: string[];
     @ApiProperty({ required: false})
-      L1Address?: string;
+    L1Address?: string;
     @ApiProperty({ required: false})
-      accountId?: string;
+    accountId?: string;
 }
 
 export class AccountBalanceResponse {

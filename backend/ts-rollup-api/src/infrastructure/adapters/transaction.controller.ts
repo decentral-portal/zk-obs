@@ -5,7 +5,8 @@ import {
   BadRequestException,
   Get,
   Query,
-  Param
+  Param,
+  NotFoundException
 } from '@nestjs/common';
 import {CommandBus} from '@nestjs/cqrs';
 import {
@@ -155,10 +156,39 @@ export class TsTransactionController {
     };
   @Get(':txId')
   @ApiOperation({
-    summary: 'TODO: get transaction Info by txId'
+    summary: 'get transaction Info by txId'
   })
   @ApiCreatedResponse({ type: GetTransactionResponseDto})
-  async getTransactionInfoByTxId(@Param('txId') dto: GetTransactionRequestDto) {
-
+  async getTransactionInfoByTxId(@Param('txId') txId: string): Promise<GetTransactionResponseDto> {
+    console.log(txId);
+    if (Number.isNaN(txId)|| txId.length == 0 || txId == undefined) {
+      throw new BadRequestException(`txId is not provide`);
+    }
+    const result = await this.connection.getRepository(TransactionInfo).findOne({
+      where: {
+        txId: Number(txId)
+      }
+    });
+    if (result == null) {
+      throw new NotFoundException(`transaction with ${txId} not found`);
+    }
+    return {
+      txId: result.txId.toString(),
+      blockNumber: (result.blockNumber == null)? null : result.blockNumber.toString(), 
+      accountId: result.accountId.toString(),
+      accumulatedBuyAmt: result.accumulatedBuyAmt.toString(),
+      accumulatedSellAmt: result.accumulatedSellAmt.toString(),
+      amount: result.amount.toString(),
+      arg0: result.arg0.toString(),
+      arg1: result.arg1.toString(),
+      arg2: result.arg2.toString(),
+      arg3: result.arg3.toString(),
+      arg4: result.arg4.toString(),
+      tokenId: result.tokenId.toString(),
+      fee: result.fee.toString(),
+      feeToken: result.feeToken.toString(),
+      nonce: result.nonce.toString(),
+      txStatus: result.txStatus.toString()
+    };
   }
 }

@@ -549,14 +549,14 @@ export class INIT_1669198902099 implements MigrationInterface {
             name: 'tsPubKeyX',
             length: '100',
             isNullable: false,
-            default: "'0'",
+            default: `'0'`,
           },
           {
             type: 'varchar',
             name: 'tsPubKeyY',
             length: '100',
             isNullable: false,
-            default: "'0'",
+            default: `'0'`,
           },
           {
             type: 'decimal',

@@ -8,7 +8,7 @@ export class GetTransactionResponseDto {
   @ApiProperty()
   txId!: string;
   @ApiPropertyOptional()
-  blockNumber!: string;
+  blockNumber!: string|null;
   @ApiProperty()
   accountId!: string;
   @ApiProperty()
