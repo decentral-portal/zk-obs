@@ -327,7 +327,7 @@ contract ZkOBS is Ownable {
         CommitBlock memory newBlock,
         bytes memory offsetCommitment
     ) internal view returns (bytes32 commitment) {
-        bytes memory pubdata = abi.encodePacked(offsetCommitment, newBlock.publicData);
+        bytes memory pubdata = abi.encodePacked(newBlock.publicData, offsetCommitment);
         console.log("create block commitment");
         //console.logBytes(abi.encodePacked(previousBlock.stateRoot, newBlock.newStateRoot, newBlock.newTsRoot, pubdata));
         console.log("oriStateRoot:");
@@ -336,6 +336,7 @@ contract ZkOBS is Ownable {
         console.logBytes32(newBlock.newStateRoot);
         console.log("newTsRoot:");
         console.logBytes32(newBlock.newTsRoot);
+        console.log("");
         console.log("isCriticalChunk:");
         console.logBytes(pubdata);
         commitment = sha256(

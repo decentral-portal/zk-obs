@@ -175,6 +175,7 @@ describe('Unit test of rollup', function () {
         ['bytes32', 'bytes32', 'bytes32', 'bytes'],
         [root.oriStateRoot, root.newStateRoot, root.newTsRoot, root.pubdata],
       );
+      
       const commitmentHash = ethers.utils.sha256(commitment);
       console.log('commitmentHash:', commitmentHash);
       const commitedBlock: ZkOBS.StoredBlockStruct = {
