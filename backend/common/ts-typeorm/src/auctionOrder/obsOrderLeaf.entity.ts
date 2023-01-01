@@ -3,7 +3,7 @@ import { TsTxType } from '../account/dto/ts-type';
 import { ObsOrderEntity } from './obsOrder.entity';
 import { ObsOrderLeafMerkleTreeNode } from './obsOrderLeafMerkleTreeNode.entity';
 
-@Entity('ObsOrderLeaf', { schema: 'public'})
+@Entity('ObsOrderLeaf', { schema: 'public' })
 export class ObsOrderLeafEntity {
   @PrimaryGeneratedColumn({
     type: 'int8',
@@ -52,11 +52,20 @@ export class ObsOrderLeafEntity {
   sellAmt!: bigint;
   @Column({
     type: 'decimal',
+    name: 'nonce',
+    precision: 86,
+    scale: 0,
+    nullable: false,
+    default: 0n,
+  })
+  nonce!: bigint;
+  @Column({
+    type: 'decimal',
     name: 'buyTokenId',
     precision: 86,
     scale: 0,
     nullable: false,
-    default: 0n,  
+    default: 0n,
   })
   buyTokenId!: bigint;
   @Column({
@@ -93,30 +102,22 @@ export class ObsOrderLeafEntity {
     default: 0,
   })
   orderId!: number;
-  @OneToOne(
-    () => ObsOrderEntity,
-    obsOrder => obsOrder.obsOrderLeaf,
-    {
-      onDelete: 'RESTRICT',
-      onUpdate: 'CASCADE',
-    }
-  )
+  @OneToOne(() => ObsOrderEntity, (obsOrder) => obsOrder.obsOrderLeaf, {
+    onDelete: 'RESTRICT',
+    onUpdate: 'CASCADE',
+  })
   @JoinColumn({
     name: 'orderId',
     referencedColumnName: 'id',
   })
   obsOrder!: ObsOrderEntity;
-  @OneToOne(
-    () => ObsOrderLeafMerkleTreeNode,
-    (obsOrderLeafMerkleTreeNode: ObsOrderLeafMerkleTreeNode) => obsOrderLeafMerkleTreeNode.leaf,
-    {
-      onDelete: 'RESTRICT',
-      onUpdate: 'CASCADE'
-    }
-  )
+  @OneToOne(() => ObsOrderLeafMerkleTreeNode, (obsOrderLeafMerkleTreeNode: ObsOrderLeafMerkleTreeNode) => obsOrderLeafMerkleTreeNode.leaf, {
+    onDelete: 'RESTRICT',
+    onUpdate: 'CASCADE',
+  })
   @JoinColumn({
     name: 'orderLeafId',
-    referencedColumnName: 'leafId'
+    referencedColumnName: 'leafId',
   })
   merkleTreeNode!: ObsOrderLeafMerkleTreeNode;
 }

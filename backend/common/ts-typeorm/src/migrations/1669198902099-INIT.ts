@@ -907,6 +907,14 @@ export class INIT_1669198902099 implements MigrationInterface {
             default: 0n,
           },
           {
+            name: 'nonce',
+            type: 'decimal',
+            precision: 86,
+            scale: 0,
+            isNullable: false,
+            default: 0n,
+          },
+          {
             name: 'buyTokenId',
             type: 'decimal',
             precision: 86,
