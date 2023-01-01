@@ -2,12 +2,16 @@ import { BadRequestException, Body, Controller, Get, Post, Query } from '@nestjs
 import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { TsTokenAddress } from '@ts-sdk/domain/lib/ts-types/ts-types';
 import { AccountBalanceQueryDto, AccountQueryDto, AccountLoginDto, AccountLoginHistoryQueryDto, AccountPreLoginDto, AccountPreLoginResponse, AccountUpdateDto, AccountTxHistoryDto, AccountLoginResponse, AccountBalanceResponse, AccountInfoResponse, L2TransactionHistoryResponse, AccountLoginHistoryResponse } from '../dtos/accounts.dto';
+import { GetAvailableRequestDto, GetAvailableResponseDto } from '../dtos/getAvailable.dto';
+import { AvailableService } from '../service/available.service';
 // import { TsRollupService } from '../service/rollup.service';
 
 @Controller('v1/ts/account')
 @ApiTags('Account')
 export class TsAccountController {
-
+  constructor(
+    private readonly availableService: AvailableService
+  ) {}
   // constructor(
   //   // private readonly tsRollupService: TsRollupService,
   // ) { }
@@ -44,39 +48,15 @@ export class TsAccountController {
       summary: 'TODO: get L2 available list',
     })
     @ApiCreatedResponse({
-      type: AccountBalanceResponse,
+      type: GetAvailableResponseDto,
     })
-    async getL2Balances(@Query() dto: AccountBalanceQueryDto) {
-    //   if(dto.accountId || dto.L1Address) {
-    //     try {
-    //       const acc = dto.accountId
-    //         ? this.tsRollupService.rollup.getAccount(BigInt(dto.accountId))
-    //         : this.tsRollupService.getAccountFromL1Address(dto.L1Address!);
-    //       let tokens: any[] = [];
-    //       // if(dto.L2TokenAddr?.length) {
-    //       //   for(let i = 0; i < dto.L2TokenAddr.length; i++) {
-    //       //     const token = acc?.getTokenLeaf(dto.L2TokenAddr[i] as TsTokenAddress);
-    //       //     tokens.push(token);
-    //       //   }
-    //       // } else {
-    //       //   tokens = acc?.tokenLeafs.map(t => ({
-    //       //     tokenAddr: t.tokenAddr.toString(),
-    //       //     amount: t.amount.toString(),
-    //       //   }));
-    //       // }
-    //       return {
-    //         list: tokens
-    //       };
-    //     } catch(error: any) {
-    //       throw new BadRequestException(error.message);
-    //     }
-    //   } 
-    //   throw new BadRequestException('accountId is required');
+    async getAvailable(@Query() dto: GetAvailableRequestDto) {
+      return await this.availableService.getAvailableByAccountInfo(dto);
     }
 
     @Get('profile')
     @ApiOperation({
-      summary: 'TODO: get personal profile'
+      summary: 'get personal profile'
     })
     @ApiCreatedResponse({
       type: AccountInfoResponse,
