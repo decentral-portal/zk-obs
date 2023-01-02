@@ -22,9 +22,9 @@ export class TokenInfo {
 }
 export class GetAvailableResponseDto {
   @ApiProperty({
-    name: 'list',
+    // name: 'list',
     isArray: true,
-    type: [TokenInfo],
+    type: TokenInfo,
   })
   list!: TokenInfo[];
 }

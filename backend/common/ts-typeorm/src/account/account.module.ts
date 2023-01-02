@@ -1,6 +1,7 @@
 import { Global, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ObsOrderTreeService } from '../auctionOrder/obsOrderTree.service';
 import { AccountInformation } from './accountInformation.entity';
 import { AccountLeafNode } from './accountLeafNode.entity';
 import { AccountMerkleTreeNode } from './accountMerkleTreeNode.entity';
@@ -26,7 +27,7 @@ import { TsTokenTreeService } from './tsTokenTree.service';
       BlockInformation
     ])
   ],
-  providers: [TsAccountTreeService, TsTokenTreeService],
+  providers: [TsAccountTreeService, TsTokenTreeService, ObsOrderTreeService],
   controllers: [MerkleTreeController],
   exports: [TypeOrmModule]
 })

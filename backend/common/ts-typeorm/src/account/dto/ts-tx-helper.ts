@@ -21,17 +21,17 @@ export function encodeTxDepositMessage(txDepositReq: TsTxDepositNonSignatureRequ
   ];
 }
 
-export function encodeTxTransferMessage(txTransferReq: TsTxTransferNonSignatureRequest): TsTxRequestDatasType {
-  return [
-    BigInt(TsTxType.TRANSFER),
-    BigInt(txTransferReq.L2AddrFrom),
-    BigInt(txTransferReq.L2AddrTo),
-    BigInt(txTransferReq.L2TokenAddr),
-    BigInt(txTransferReq.amount),
-    BigInt(txTransferReq.nonce),
-    0n, 0n, 0n, 0n, 0n,
-  ];
-}
+// export function encodeTxTransferMessage(txTransferReq: TsTxTransferNonSignatureRequest): TsTxRequestDatasType {
+//   return [
+//     BigInt(TsTxType.TRANSFER),
+//     BigInt(txTransferReq.L2AddrFrom),
+//     BigInt(txTransferReq.L2AddrTo),
+//     BigInt(txTransferReq.L2TokenAddr),
+//     BigInt(txTransferReq.amount),
+//     BigInt(txTransferReq.nonce),
+//     0n, 0n, 0n, 0n, 0n,
+//   ];
+// }
 
 export function encodeTxWithdrawMessage(txTransferReq: TsTxTransferNonSignatureRequest): TsTxRequestDatasType {
   return [
@@ -45,40 +45,40 @@ export function encodeTxWithdrawMessage(txTransferReq: TsTxTransferNonSignatureR
   ];
 }
 
-export function encodeTxAuctionLendMessage(txAuctionLendReq: TsTxAuctionLendNonSignatureRequest): TsTxRequestDatasType {
-  return [
-    BigInt(TsTxType.AUCTION_LEND),
-    BigInt(txAuctionLendReq.L2AddrFrom),
-    BigInt(TsSystemAccountAddress.AUCTION_ADDR),
-    BigInt(txAuctionLendReq.L2TokenAddrLending),
-    BigInt(txAuctionLendReq.lendingAmt),
-    BigInt(txAuctionLendReq.nonce),
-    BigInt(txAuctionLendReq.maturityDate),
-    BigInt(txAuctionLendReq.expiredTime),
-    BigInt(txAuctionLendReq.interest),
-    0n, 0n,
-  ];
-}
+// export function encodeTxAuctionLendMessage(txAuctionLendReq: TsTxAuctionLendNonSignatureRequest): TsTxRequestDatasType {
+//   return [
+//     BigInt(TsTxType.AUCTION_LEND),
+//     BigInt(txAuctionLendReq.L2AddrFrom),
+//     BigInt(TsSystemAccountAddress.AUCTION_ADDR),
+//     BigInt(txAuctionLendReq.L2TokenAddrLending),
+//     BigInt(txAuctionLendReq.lendingAmt),
+//     BigInt(txAuctionLendReq.nonce),
+//     BigInt(txAuctionLendReq.maturityDate),
+//     BigInt(txAuctionLendReq.expiredTime),
+//     BigInt(txAuctionLendReq.interest),
+//     0n, 0n,
+//   ];
+// }
 
-export function encodeTxAuctionBorrowMessage(txAuctionBorrowReq: TsTxAuctionBorrowNonSignatureRequest): TsTxRequestDatasType {
-  return [
-    BigInt(TsTxType.AUCTION_BORROW),
-    BigInt(txAuctionBorrowReq.L2AddrFrom),
-    BigInt(TsSystemAccountAddress.AUCTION_ADDR),
-    BigInt(txAuctionBorrowReq.L2TokenAddrCollateral),
-    BigInt(txAuctionBorrowReq.collateralAmt),
-    BigInt(txAuctionBorrowReq.nonce),
-    BigInt(txAuctionBorrowReq.maturityDate),
-    BigInt(txAuctionBorrowReq.expiredTime),
-    BigInt(txAuctionBorrowReq.interest),
-    BigInt(txAuctionBorrowReq.L2TokenAddrBorrowing),
-    BigInt(txAuctionBorrowReq.borrowingAmt),
-  ];
-}
+// export function encodeTxAuctionBorrowMessage(txAuctionBorrowReq: TsTxAuctionBorrowNonSignatureRequest): TsTxRequestDatasType {
+//   return [
+//     BigInt(TsTxType.AUCTION_BORROW),
+//     BigInt(txAuctionBorrowReq.L2AddrFrom),
+//     BigInt(TsSystemAccountAddress.AUCTION_ADDR),
+//     BigInt(txAuctionBorrowReq.L2TokenAddrCollateral),
+//     BigInt(txAuctionBorrowReq.collateralAmt),
+//     BigInt(txAuctionBorrowReq.nonce),
+//     BigInt(txAuctionBorrowReq.maturityDate),
+//     BigInt(txAuctionBorrowReq.expiredTime),
+//     BigInt(txAuctionBorrowReq.interest),
+//     BigInt(txAuctionBorrowReq.L2TokenAddrBorrowing),
+//     BigInt(txAuctionBorrowReq.borrowingAmt),
+//   ];
+// }
 
 export function encodeTxAuctionCancelMessage(txAuctionCancelReq: TsTxAuctionCancelNonSignatureRequest): TsTxRequestDatasType {
   return [
-    BigInt(TsTxType.AUCTION_CANCEL),
+    BigInt(TsTxType.CancelOrder),
     BigInt(TsSystemAccountAddress.AUCTION_ADDR),
     BigInt(txAuctionCancelReq.L2AddrTo),
     BigInt(txAuctionCancelReq.L2TokenAddrRefunded),

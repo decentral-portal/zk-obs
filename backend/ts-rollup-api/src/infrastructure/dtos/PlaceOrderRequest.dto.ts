@@ -4,11 +4,11 @@ import { TsTxType } from '@ts-rollup-api/domain/value-objects/tsTxType.enum';
 export class EdDSASignatureRequestType {
   @ApiProperty({
     isArray: true,
-    type: [String],
-    maxLength: 2,
-    minLength: 2,
+    type: String,
+    maxItems: 2,
+    minItems: 2
   })
-  R8!: [string, string];
+  R8!: String[];
   @ApiProperty()
   S!: string;
 }
