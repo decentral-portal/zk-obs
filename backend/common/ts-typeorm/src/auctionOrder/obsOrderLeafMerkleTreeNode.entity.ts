@@ -11,7 +11,7 @@ export class ObsOrderLeafMerkleTreeNode {
     scale: 0,
     primary: true,
   })
-  id!: bigint;
+  id!: string;
   @Column({
     type: 'decimal',
     name: 'hash',

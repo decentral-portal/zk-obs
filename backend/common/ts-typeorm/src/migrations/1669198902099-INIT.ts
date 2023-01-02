@@ -858,10 +858,11 @@ export class INIT_1669198902099 implements MigrationInterface {
         columns: [
           {
             name: 'orderLeafId',
-            type: 'int8',
+            type: 'decimal',
             isPrimary: true,
-            isGenerated: true,
-            generationStrategy: 'increment',
+            scale: 0,
+            isNullable: false,
+            default: 0n,
           },
           {
             name: 'txId',

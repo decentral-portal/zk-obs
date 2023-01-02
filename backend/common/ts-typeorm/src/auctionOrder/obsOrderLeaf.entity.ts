@@ -1,15 +1,19 @@
-import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
 import { TsTxType } from '../account/dto/ts-type';
 import { ObsOrderEntity } from './obsOrder.entity';
 import { ObsOrderLeafMerkleTreeNode } from './obsOrderLeafMerkleTreeNode.entity';
 
 @Entity('ObsOrderLeaf', { schema: 'public' })
 export class ObsOrderLeafEntity {
-  @PrimaryGeneratedColumn({
-    type: 'int8',
+  @PrimaryColumn({
+    type: 'decimal',
     name: 'orderLeafId',
+    precision: 86,
+    scale: 0,
+    nullable: false,
+    default: 0n,
   })
-  orderLeafId!: number;
+  orderLeafId!: bigint;
   @Column({
     type: 'int8',
     name: 'txId',
