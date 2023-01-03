@@ -1,6 +1,16 @@
 import { now } from 'lodash';
 import { getProcessName } from '../../../../ts-sdk/src/helper';
-import { BeforeInsert, BeforeRemove, BeforeUpdate, Column, CreateDateColumn, DeleteDateColumn, Entity, PrimaryColumn, UpdateDateColumn } from 'typeorm';
+import {
+  BeforeInsert,
+  BeforeRemove,
+  BeforeUpdate,
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  PrimaryColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity('RollupInformation', { schema: 'public' })
 export class RollupInformation {
@@ -9,7 +19,7 @@ export class RollupInformation {
     name: 'id',
     primary: true,
     nullable: false,
-    generated: 'increment'
+    generated: 'increment',
   })
   id!: number;
 
@@ -27,6 +37,16 @@ export class RollupInformation {
   })
   lastSyncBlocknumberForDepositEvent!: number;
 
+  @Column({
+    type: 'decimal',
+    name: 'accountId',
+    precision: 86,
+    scale: 0,
+    nullable: false,
+    default: '0',
+  })
+  currentOrderId!: bigint;
+
   @CreateDateColumn({
     type: 'timestamp without time zone',
     name: 'createdAt',
@@ -38,13 +58,13 @@ export class RollupInformation {
     type: 'timestamp without time zone',
     name: 'updatedAt',
     nullable: false,
-    default: now()
+    default: now(),
   })
   updatedAt!: Date;
   @DeleteDateColumn({
     type: 'timestamp without time zone',
     name: 'deletedAt',
-    nullable: true
+    nullable: true,
   })
   deletedAt!: Date;
   @Column({

@@ -22,6 +22,13 @@ export class migrations1669796786249 implements MigrationInterface {
           name: 'lastSyncBlocknumberForDepositEvent',
           isNullable: false,
         }, {
+          type: 'decimal',
+          name: 'currentOrderId',
+          precision: 86,
+          scale: 0,
+          isNullable: false,
+          default: '0',
+        }, {
           type: 'timestamp without time zone',
           name: 'createdAt',
           isNullable: false,
