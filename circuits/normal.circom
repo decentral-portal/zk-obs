@@ -72,6 +72,9 @@ template Chunkify(){
         for(var j = 0; j < BitsChunk(); j++)
             t[j] = bit_arr[BitsChunk() * (i + 1) - 1 - j];
         Temp2[i] <== Bits2Num(BitsChunk())(t);
+        log(r_chunks[i]);
+        log(Temp2[i]);
+        log("===========");
         r_chunks[i] === Temp2[i];
     }
 }
@@ -205,6 +208,7 @@ template CalcCommitment(){
     for(var i = 0; i < 253; i++)
         b2n_commitment.in[i] <== sha256.out[255 - i];
     commitment <== b2n_commitment.out;
+    log("commitment", commitment);
 }
 template Normal(){
     /* the main circuits */
@@ -286,6 +290,7 @@ template Normal(){
             chunkCounter[i + 1] <== chunkCounter[i] + chunkCount[i];
         for(var j = 0; j < MaxChunksPerReq(); j++){
             chunkMasks[i][j] <== LessThan(MaxChunksPerReq())([j, chunkCount[i]]);
+            log(chunkCounter[i] + j);
             Indexer(NumOfChunks())(chunkMasks[i][j], r_chunks[i][j], chunkCounter[i] + j, o_chunks);
             if(j == 0)
                 Indexer(NumOfChunks())(chunkMasks[i][j], Mux(ReqTypeCount())([0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0], reqData[i][ReqIdxReqType()]), chunkCounter[i] + j, isCriticalChunk);
