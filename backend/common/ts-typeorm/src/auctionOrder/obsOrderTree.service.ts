@@ -1,7 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Connection, Repository } from 'typeorm';
+import { Connection, Repository, In } from 'typeorm';
+import { getDefaultObsOrderLeaf, getDefaultObsOrderTreeRoot } from '../account/helper/mkAccount.helper';
 import { toTreeLeaf, tsHashFunc } from '../common/ts-helper';
 import { TsMerkleTree } from '../common/tsMerkleTree';
 import { UpdateObsOrderTreeDto } from './dto/updateObsOrderTree.dto';
@@ -10,6 +11,7 @@ import { ObsOrderLeafMerkleTreeNode } from './obsOrderLeafMerkleTreeNode.entity'
 
 @Injectable()
 export class ObsOrderTreeService extends TsMerkleTree<ObsOrderLeafEntity> {
+
   private logger: Logger = new Logger(ObsOrderTreeService.name);
   constructor(
     @InjectRepository(ObsOrderLeafEntity)
@@ -98,7 +100,7 @@ export class ObsOrderTreeService extends TsMerkleTree<ObsOrderLeafEntity> {
     });
     console.timeEnd('updateLeaf for obsOrder tree');
   }
-  async getLeaf(leaf_id: bigint, otherPayload: any): Promise<ObsOrderLeafEntity | null> {
+  async getLeaf(leaf_id: bigint): Promise<ObsOrderLeafEntity | null> {
     const result = this.obsOrderLeafRepository.findOneBy({
       orderLeafId: leaf_id
     });
@@ -147,20 +149,25 @@ export class ObsOrderTreeService extends TsMerkleTree<ObsOrderLeafEntity> {
       hash: result.hash.toString()
     };
   }
+  getDefaultRoot(): string {
+    return getDefaultObsOrderTreeRoot(this.treeHeigt);
+  }
   getLeafDefaultVavlue(): string {
     // TODO: @abner please help me to check is the order is right?
-    return toTreeLeaf([
-      0n, // txId
-      0n, // reqType
-      0n, // sender
-      0n, // sellTokenId
-      0n, // sellAmt
-      0n, // nonce
-      0n, // buyTokenId
-      0n, // buyAmt
-      0n, // accumulatedSellAmt
-      0n, // accumulatedBuyAmt
-      0n, // orderId
-    ]);
+    return getDefaultObsOrderLeaf();
+  }
+
+
+  async getMerklerProof(leafId: bigint): Promise<bigint[]> {
+    const ids = this.getProofIds(leafId);
+    const r = await this.obsOrderMerkleTreeRepository.find({
+      where: {
+        id: In(ids)
+      },
+      order: {
+        id: 'ASC'
+      }
+    });
+    return r.map(item => item.hash);
   }
 }

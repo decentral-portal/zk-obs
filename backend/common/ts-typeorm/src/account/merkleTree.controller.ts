@@ -19,8 +19,8 @@ export class MerkleTreeController {
   constructor(
     private readonly tsAccountTreeService: TsAccountTreeService,  
     private readonly tsTokenTreeService: TsTokenTreeService,
-    private readonly marketPairInfoService: MarketPairInfoService,
     private readonly obsOrderTreeService: ObsOrderTreeService,
+    private readonly marketPairInfoService: MarketPairInfoService,
     private readonly obsStateTreeService: ObsMerkleTreeService,
   ) {
     this.tsAccountTreeService.getCurrentLeafIdCount().then((id) => {

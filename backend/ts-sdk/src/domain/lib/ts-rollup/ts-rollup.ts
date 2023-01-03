@@ -20,12 +20,12 @@ export interface CircuitAccountTxPayload {
   r_oriAccountLeaf: Array<TsAccountLeafType>;
   r_newAccountLeaf: Array<TsAccountLeafType>;
   r_accountRootFlow: any[];
-  r_accountMkPrf: Array<string[]>;
+  r_accountMkPrf: Array<string[]| bigint[]>;
   r_tokenLeafId: Array<string[]>;
   r_oriTokenLeaf: TsTokenLeafType[];
   r_newTokenLeaf: TsTokenLeafType[];
   r_tokenRootFlow: Array<string[]>;
-  r_tokenMkPrf: Array<string[]>;
+  r_tokenMkPrf: Array<string[] | bigint[]>;
 }
 export interface CircuitOrderTxPayload {
   r_orderLeafId: Array<[string]>;

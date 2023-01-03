@@ -1,4 +1,6 @@
+import { AccountLeafEncodeType } from '@ts-sdk/domain/lib/ts-types/ts-types';
 import { Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, OneToOne, PrimaryColumn, UpdateDateColumn } from 'typeorm';
+import { toTreeLeaf } from '../common/ts-helper';
 import { AccountMerkleTreeNode } from './accountMerkleTreeNode.entity';
 
 @Entity('AccountLeafNode', { schema: 'public'})
@@ -49,4 +51,15 @@ export class AccountLeafNode {
     referencedColumnName: 'leafId'
   })
   accountMerkleTreeNode!: AccountMerkleTreeNode;
+
+
+  encode(): AccountLeafEncodeType {
+    return [
+      this.tsAddr, this.nonce, this.tokenRoot
+    ];
+  }
+
+  encodeHash(): string {
+    return toTreeLeaf(this.encode());
+  }
 }

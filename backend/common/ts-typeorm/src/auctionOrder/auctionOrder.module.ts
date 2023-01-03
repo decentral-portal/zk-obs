@@ -12,6 +12,7 @@ import { ObsOrderLeafMerkleTreeNode } from './obsOrderLeafMerkleTreeNode.entity'
 import { MarketPairInfoEntity } from './marketPairInfo.entity';
 import { MarketPairInfoService } from './marketPairInfo.service';
 import { AvailableViewEntity } from './availableView.entity';
+import { ObsOrderTreeService } from './obsOrderTree.service';
 
 @Global()
 @Module({
@@ -27,7 +28,7 @@ import { AvailableViewEntity } from './availableView.entity';
     AuctionBondTokenEntity,
     AvailableViewEntity
   ])],
-  providers: [ConfigService, MarketPairInfoService],
-  exports: [TypeOrmModule, MarketPairInfoService]
+  providers: [ConfigService, ObsOrderTreeService, MarketPairInfoService],
+  exports: [MarketPairInfoService, ObsOrderTreeService]
 })
 export class AuctionOrderMoudle {}

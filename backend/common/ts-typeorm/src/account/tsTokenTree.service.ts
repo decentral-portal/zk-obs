@@ -2,13 +2,15 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { Connection, IsNull, Not, Repository } from 'typeorm';
+import { Connection, IsNull, Not, Repository, In } from 'typeorm';
 import { toTreeLeaf, tsHashFunc } from '../common/ts-helper';
 import { TsMerkleTree } from '../common/tsMerkleTree';
 import { TokenTreeResponseDto } from './dto/tokenTreeResponse.dto';
 import { UpdateTokenTreeDto } from './dto/updateTokenTree.dto';
+import { getDefaultTokenLeaf, getDefaultTokenTreeRoot } from './helper/mkAccount.helper';
 import { TokenLeafNode } from './tokenLeafNode.entity';
 import { TokenMerkleTreeNode } from './tokenMerkleTreeNode.entity';
+import { TsAccountTreeService } from './tsAccountTree.service';
 @Injectable()
 export class TsTokenTreeService extends TsMerkleTree<TokenLeafNode> {
   private logger: Logger = new Logger(TsTokenTreeService.name);
@@ -18,6 +20,7 @@ export class TsTokenTreeService extends TsMerkleTree<TokenLeafNode> {
     @InjectRepository(TokenMerkleTreeNode)
     private readonly tokenMerkleTreeRepository: Repository<TokenMerkleTreeNode>,
     private readonly connection: Connection,
+    private readonly accountTreeService: TsAccountTreeService,
     private configService: ConfigService,
   ) {
     console.time('init token tree');
@@ -35,8 +38,12 @@ export class TsTokenTreeService extends TsMerkleTree<TokenLeafNode> {
     );
     return leafIdCount;
   }
+  getDefaultRoot(): string {
+    return getDefaultTokenTreeRoot(this.treeHeigt);
+  }
+
   getLeafDefaultVavlue(): string {
-    return toTreeLeaf([0n, 0n, 0n]);
+    return getDefaultTokenLeaf();
   }
   async updateLeaf(leafId: bigint, value: UpdateTokenTreeDto) {
     console.time('updateLeaf for token tree');
@@ -90,10 +97,16 @@ export class TsTokenTreeService extends TsMerkleTree<TokenLeafNode> {
         await Promise.all(jobs);
         j++;
       }
+
+      const root = await this.getRoot(accountId);
+      await this.accountTreeService._updateLeaf(manager, BigInt(accountId), {
+        leafId: accountId,
+        tokenRoot: root.hash,
+      });
     });
     console.timeEnd('updateLeaf for token tree');
   }
-  async getLeaf(leaf_id: bigint, accountId: string): Promise<TokenLeafNode | null> {
+  async getLeaf(leaf_id: bigint, accountId: string): Promise<TokenLeafNode> {
     const result =  await this.tokenLeafRepository.findOneBy({leafId: leaf_id.toString()
       , accountId: accountId});
     if (result == null) {
@@ -115,7 +128,7 @@ export class TsTokenTreeService extends TsMerkleTree<TokenLeafNode> {
           accountId: accountId,
         });
       });
-      return  await this.tokenLeafRepository.findOneBy({leafId: leaf_id.toString(), accountId: accountId});
+      return await this.tokenLeafRepository.findOneByOrFail({leafId: leaf_id.toString(), accountId: accountId});
     }
     return result;
   }
@@ -142,6 +155,22 @@ export class TsTokenTreeService extends TsMerkleTree<TokenLeafNode> {
       leafId: null,
       hash: resultHash,
     };
+  }
+  async getMerklerProof(leafId: bigint): Promise<bigint[]> {
+    throw new Error('canot use getMerklerProof in TokenTree');
+  }
+  async getMerklerProofByAccountId(leafId: bigint, accountId: string): Promise<bigint[]> {
+    const ids = this.getProofIds(leafId);
+    const r = await this.tokenMerkleTreeRepository.find({
+      where: {
+        accountId: accountId,
+        id: In(ids)
+      },
+      order: {
+        id: 'ASC'
+      }
+    });
+    return r.map(item => item.hash);
   }
   
 }

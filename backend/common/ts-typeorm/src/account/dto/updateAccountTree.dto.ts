@@ -4,9 +4,9 @@ export class UpdateAccountTreeDto {
   @ApiProperty()
   leafId!: string;
   @ApiProperty()
-  tsAddr!: string;
+  tsAddr?: string;
   @ApiProperty()
-  nonce!: string;
+  nonce?: string;
   @ApiProperty()
-  tokenRoot!: string;
+  tokenRoot?: string;
 }

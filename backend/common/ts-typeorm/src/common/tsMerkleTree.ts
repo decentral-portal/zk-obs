@@ -2,7 +2,7 @@ import { BytesLike } from 'ethers';
 
 export abstract class TsMerkleTree<T> {
   // treeHeight for extend
-  private treeHeigt!: number;
+  protected treeHeigt!: number;
   private lastLevel!: number;
   private levelsDefaultHash!: Map<number, string>;
   public hashFunc!: (x: BytesLike| BytesLike[]) => string;
@@ -12,9 +12,11 @@ export abstract class TsMerkleTree<T> {
     this.lastLevel = Number(this.treeHeigt);
     this.setLevelDefaultHash();
   }
+  abstract getDefaultRoot(): string;
   abstract getLeafDefaultVavlue(): string;
   abstract updateLeaf(leafId: bigint, value: any, otherPayload: any): void;
   abstract getLeaf(leaf_id: bigint, otherPayload: any): Promise<T|null>;
+  abstract getMerklerProof(leaf_id: bigint): Promise<bigint[]>;
   getProofIds(leaf_id: bigint) {
     const prf: bigint[] = [];
     const height = this.treeHeigt;

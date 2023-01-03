@@ -28,8 +28,8 @@ import { TsTokenTreeService } from './tsTokenTree.service';
       BlockInformation
     ])
   ],
-  providers: [TsAccountTreeService, TsTokenTreeService, ObsOrderTreeService, ObsMerkleTreeService],
-  controllers: [MerkleTreeController],
-  exports: [TypeOrmModule]
+  providers: [TsAccountTreeService, TsTokenTreeService, ObsMerkleTreeService],
+  controllers: [],
+  exports: [TsAccountTreeService, TsTokenTreeService, ObsMerkleTreeService]
 })
 export class AccountModule{}

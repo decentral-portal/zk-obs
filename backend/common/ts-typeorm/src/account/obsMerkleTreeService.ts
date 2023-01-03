@@ -21,7 +21,7 @@ export class ObsMerkleTreeService {
     // get tokenRoot hash as AccountLeafNode.hash
     const [tokenRoot, accountLeaf] = await Promise.all([
       this.obsTokenTreeService.getRoot(accountId.toString()), 
-      this.obsAccountTreeService.getLeaf(accountId, null)
+      this.obsAccountTreeService.getLeaf(accountId)
     ]);
     // update account tree
     await this.obsAccountTreeService.updateLeaf(accountId, {

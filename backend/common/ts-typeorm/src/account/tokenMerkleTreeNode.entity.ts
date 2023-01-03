@@ -1,5 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryColumn, Unique } from 'typeorm';
-import { AccountMerkleTreeNode } from './accountMerkleTreeNode.entity';
+import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm';
 import { TokenLeafNode } from './tokenLeafNode.entity';
 
 @Entity('TokenMerkleTreeNode', { schema: 'public' })

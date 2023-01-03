@@ -14,6 +14,9 @@ import { TsTypeOrmModule } from 'common/ts-typeorm/src/tstypeorm.module';
 import { WorkerModule } from '@common/cluster/cluster.module';
 import { WorkerService } from '@common/cluster/worker.service';
 import { DatabasePubSubModule } from '@common/db-pubsub/db-pubsub.module';
+import { RollupModule } from '@common/ts-typeorm/rollup/rollup.module';
+import { AccountModule } from '@common/ts-typeorm/account/account.module';
+import { AuctionOrderMoudle } from '@common/ts-typeorm/auctionOrder/auctionOrder.module';
 
 @Module({
   imports: [
@@ -34,6 +37,9 @@ import { DatabasePubSubModule } from '@common/db-pubsub/db-pubsub.module';
       ]),
     WorkerModule,
     DatabasePubSubModule,
+    AccountModule,
+    AuctionOrderMoudle,
+    RollupModule,
   ],
   controllers: [],
   providers: [

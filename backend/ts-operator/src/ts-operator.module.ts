@@ -15,6 +15,7 @@ import { TransactionInfo } from 'common/ts-typeorm/src/account/transactionInfo.e
 import { WorkerModule } from '@common/cluster/cluster.module';
 import { WorkerService } from '@common/cluster/worker.service';
 import { DatabasePubSubModule } from '@common/db-pubsub/db-pubsub.module';
+import { AccountInformation } from '@common/ts-typeorm/account/accountInformation.entity';
 
 const localNetwork = {
   name: 'LOCAL',
@@ -35,7 +36,7 @@ const localNetwork = {
       queueName: TsWorkerName.OPERATOR,
     }),
     TsTypeOrmModule,
-    TypeOrmModule.forFeature([RollupInformation, TransactionInfo]),
+    TypeOrmModule.forFeature([RollupInformation, TransactionInfo, AccountInformation]),
     EthersModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

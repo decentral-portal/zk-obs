@@ -5,20 +5,17 @@ import { TsTokenLeafType } from '../ts-types/ts-merkletree.types';
 import {
   TsTxCancelOrderNonSignatureRequest,
   TsTxDepositNonSignatureRequest,
-  TsTxDepositRequest,
   TsTxLimitOrderNonSignatureRequest,
   TsTxMarketOrderNonSignatureRequest,
   TsTxRegisterRequest,
   TsTxWithdrawNonSignatureRequest,
 } from '../ts-types/ts-req-types';
-import { CHUNK_BYTES_SIZE, MAX_CHUNKS_BYTES_PER_REQ, TsSystemAccountAddress, TsTokenAddress, TsTokenInfo, TsTxType } from '../ts-types/ts-types';
+import { CHUNK_BYTES_SIZE, MAX_CHUNKS_BYTES_PER_REQ, TsTokenAddress, TsTokenInfo, TsTxType } from '../ts-types/ts-types';
 import { txToCircuitInput } from './ts-helper';
 import { amountToTxAmountV3_40bit } from '../bigint-helper';
 import { TransactionInfo } from '@common/ts-typeorm/account/transactionInfo.entity';
 
 // [L2AddrFrom, L2AddrTo, L2TokenAddr, tokenAmt, nonce, arg0, arg1, arg2, arg3, arg4]
-export type TsTxRequestDatasType = [bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint];
-
 export function exportTransferCircuitInput(
   txLogs: any[],
   oriTxNum: bigint,

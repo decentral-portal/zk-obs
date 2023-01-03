@@ -11,6 +11,15 @@ export function getOChunksSize(batchSize: number) {
   return MAX_CHUNKS_PER_REQ * batchSize;
 }
 
+export type TsTxRequestDatasType = [bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint];
+export type TokenLeafEncodeType = [bigint, bigint];
+export type AccountLeafEncodeType = [bigint, bigint, bigint];
+export type ObsOrderLeafEncodeType = [
+  bigint, bigint, bigint, bigint, bigint,
+  bigint, bigint, bigint, bigint, bigint,
+  bigint, bigint, bigint,
+];
+
 export enum TsSystemAccountAddress {
   BURN_ADDR = '0',
   MINT_ADDR = '0',
