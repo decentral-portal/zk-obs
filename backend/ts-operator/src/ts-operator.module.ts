@@ -15,6 +15,13 @@ import { TransactionInfo } from 'common/ts-typeorm/src/account/transactionInfo.e
 import { WorkerModule } from '@common/cluster/cluster.module';
 import { WorkerService } from '@common/cluster/worker.service';
 
+const localNetwork = {
+  name: 'LOCAL',
+  chainId: 31337,
+  _defaultProvider: (providers: any) => {
+    return new providers.JsonRpcProvider('http://localhost:8545');
+  },
+};
 @Module({
   imports: [
     ConfigModule,
@@ -22,22 +29,12 @@ import { WorkerService } from '@common/cluster/worker.service';
     BullQueueModule,
     BullModule.registerQueue(TsWorkerName.OPERATOR),
     TsTypeOrmModule,
-    TypeOrmModule.forFeature([
-      RollupInformation,
-      TransactionInfo
-    ]),
+    TypeOrmModule.forFeature([RollupInformation, TransactionInfo]),
     EthersModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        network: {
-          name: 'LOCAL',
-          chainId: 31337,
-          _defaultProvider: (providers: any) => {
-            return new providers.JsonRpcProvider('http://localhost:8545');
-          }
-        },
-        // configService.get('ETHEREUM_NETWORK', 'TESTNET') === 'MAINNET' ? MAINNET_NETWORK : LOCAL_NETWORK,
+        network: configService.get('ETHEREUM_NETWORK', 'TESTNET') === 'MAINNET' ? MAINNET_NETWORK : GOERLI_NETWORK,
         etherscan: configService.get('ETHERSCAN_API_KEY'),
         // custom: {
         //   url: 'http://localhost:8545',
@@ -50,17 +47,11 @@ import { WorkerService } from '@common/cluster/worker.service';
     WorkerModule,
   ],
   controllers: [],
-  providers: [
-    OperatorConsumer,
-    OperatorProducer,
-  ],
+  providers: [OperatorConsumer, OperatorProducer],
 })
 export class TsOperatorModule implements OnModuleInit {
   // eslint-disable-next-line no-empty-function
-  constructor(
-    private readonly logger: PinoLoggerService,
-    private readonly workerService: WorkerService,
-  ) { }
+  constructor(private readonly logger: PinoLoggerService, private readonly workerService: WorkerService) {}
 
   onModuleInit(): void {
     this.workerService.ready();

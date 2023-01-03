@@ -1,16 +1,16 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+import { ZkOBS } from './../../../../typechain-types/contracts/ZkOBS';
 import { PinoLoggerService } from '@common/logger/adapters/real/pinoLogger.service';
 import { Injectable, Scope } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
-import { VerifierContract } from '@ts-operator/domain/verifier-contract';
 import { TransactionInfo } from 'common/ts-typeorm/src/account/transactionInfo.entity';
-import { Wallet } from 'ethers';
+import { BigNumber, Wallet } from 'ethers';
 import { InjectSignerProvider, EthersSigner, InjectContractProvider, EthersContract, TransactionResponse } from 'nestjs-ethers';
 import { Connection, Repository } from 'typeorm';
 import * as ABI from '../domain/verified-abi.json';
 
 import { RollupInformation } from 'common/ts-typeorm/src/rollup/rollupInformation.entity';
-import BigNumber from 'bignumber.js';
 import { WorkerService } from '@common/cluster/worker.service';
 import { firstValueFrom } from 'rxjs/internal/firstValueFrom';
 import { AccountInformation } from '@common/ts-typeorm/account/accountInformation.entity';
@@ -19,7 +19,7 @@ import { AccountInformation } from '@common/ts-typeorm/account/accountInformatio
 })
 export class OperatorProducer {
   private wallet: Wallet;
-  private contract: VerifierContract;
+  private contract: ZkOBS;
   constructor(
     private readonly config: ConfigService,
     private readonly logger: PinoLoggerService,
@@ -32,7 +32,7 @@ export class OperatorProducer {
     private readonly workerService: WorkerService,
   ) {
     this.wallet = this.ethersSigner.createWallet(this.config.get('ETHEREUM_OPERATOR_PRIV', ''));
-    this.contract = this.ethersContract.create(this.config.get('ETHEREUM_ROLLUP_CONTRACT_ADDR', ''), ABI, this.wallet) as unknown as VerifierContract;
+    this.contract = this.ethersContract.create(this.config.get('ETHEREUM_ROLLUP_CONTRACT_ADDR', ''), ABI, this.wallet) as unknown as ZkOBS;
 
     this.logger.log({
       address: this.wallet.address,
@@ -47,43 +47,49 @@ export class OperatorProducer {
     this.logger.log(`OperatorProducer.listenRegisterEvent contract=${this.contract.address}`);
     const filters = this.contract.filters.Register();
     const handler = (log: any) => {
-      this.handleRegisterEvent(log.args.sender, log.args.accountId, log.args.tsPubX, log.args.tsPubY, log.args.tsAddr, log.transactionHash);
+      console.log({
+        registerLog: log,
+      });
+      this.logger.log(`OperatorProducer.listenRegisterEvent log:${JSON.stringify(log)}`);
+      this.handleRegisterEvent(log.args.sender, log.args.accountId, log.args.tsPubX, log.args.tsPubY, log.args.l2Addr, log);
     };
-    this.contract.on(filters, handler.bind(this));
+    const { lastSyncBlocknumberForRegisterEvent } = await this.rollupInfoRepository.findOneOrFail({ where: { id: 1 } });
+    this.contract.queryFilter(filters, lastSyncBlocknumberForRegisterEvent, 'latest').then((logs) => {
+      logs.forEach((log) => {
+        handler(log);
+      });
+    });
+    this.contract.on(filters, handler);
   }
 
-  async handleRegisterEvent(sender: string, accountId: BigNumber, tsPubX: BigNumber, tsPubY: BigNumber, tsAddr: BigNumber, tx: TransactionResponse) {
+  async handleRegisterEvent(sender: string, accountId: number, tsPubX: BigNumber, tsPubY: BigNumber, l2Addr: string, tx: TransactionResponse) {
     const rollupInfo = await this.rollupInfoRepository.findOneOrFail({ where: { id: 1 } });
     const { blockNumber = 0 } = tx;
 
-    if (blockNumber <= rollupInfo.lastSyncBlocknumberForRegisterEvent) {
+    if (blockNumber < rollupInfo.lastSyncBlocknumberForRegisterEvent) {
       this.logger.log(
-        `OperatorProducer.listenRegisterEvent skip blockNumber=${blockNumber} lastSyncBlocknumberForRegisterEvent=${rollupInfo.lastSyncBlocknumberForRegisterEvent}`,
+        `OperatorProducer.listenRegisterEvent SKIP blockNumber=${blockNumber} lastSyncBlocknumberForRegisterEvent=${rollupInfo.lastSyncBlocknumberForRegisterEvent}`,
       );
       return;
     }
-    await this.connection.transaction(async (manager) => {
-      return await Promise.all([
-        this.accountRepository.upsert(
-          {
-            L1Address: sender,
-            accountId: accountId.toString(),
-            tsPubKeyX: tsPubX.toString(),
-            tsPubKeyY: tsPubY.toString(),
-          },
-          ['L1Address'],
-        ),
-        this.txRepository.insert({
-          accountId: 0n,
-          tokenId: 0n,
-          amount: 0n,
-          arg0: BigInt(accountId.toString()),
-          arg1: BigInt(tsAddr.toString()),
-        }),
-        this.rollupInfoRepository.update({ id: 1 }, { lastSyncBlocknumberForRegisterEvent: blockNumber }),
-      ]);
-    });
-    this.logger.log(`OperatorProducer.listenRegisterEvent ${sender} ${accountId} ${tsPubX} ${tsPubY} ${tsAddr}`);
+    const txRegister = {
+      L1Address: sender,
+      accountId: accountId.toString(),
+      tsPubKeyX: tsPubX.toString(),
+      tsPubKeyY: tsPubY.toString(),
+    };
+    this.logger.log(`OperatorProducer.handleRegisterEvent txRegister:${JSON.stringify(txRegister)}`);
+    return await Promise.all([
+      this.accountRepository.upsert(txRegister, ['L1Address']),
+      this.txRepository.insert({
+        accountId: 0n,
+        tokenId: 0n,
+        amount: 0n,
+        arg0: BigInt(accountId.toString()),
+        arg1: BigInt(l2Addr),
+      }),
+      // this.rollupInfoRepository.update({ id: 1 }, { lastSyncBlocknumberForRegisterEvent: blockNumber }),
+    ]);
   }
 
   //! Deposit Event
@@ -91,28 +97,39 @@ export class OperatorProducer {
     await firstValueFrom(this.workerService.onReadyObserver);
     this.logger.log(`OperatorProducer.listenDepositEvent contract=${this.contract.address}`);
     const filters = this.contract.filters.Deposit();
+    const { lastSyncBlocknumberForDepositEvent } = await this.rollupInfoRepository.findOneOrFail({ where: { id: 1 } });
     const handler = (log: any) => {
+      this.logger.log(`OperatorProducer.listenDepositEvent log:${JSON.stringify(log)}`);
+      console.log({
+        depositLog: log,
+      });
       this.handleDepositEvent(log.args.sender, log.args.accountId, log.args.tokenId, log.args.amount, log.transactionHash);
     };
-    this.contract.on(filters, handler.bind(this));
+    this.contract.queryFilter(filters, lastSyncBlocknumberForDepositEvent, 'latest').then((logs) => {
+      logs.forEach((log) => {
+        handler(log);
+      });
+    });
+    this.contract.on(filters, handler);
   }
 
   async handleDepositEvent(sender: string, accountId: BigNumber, tokenId: BigNumber, amount: BigNumber, tx: TransactionResponse) {
     const rollupInfo = await this.rollupInfoRepository.findOneOrFail({ where: { id: 1 } });
     const { blockNumber = 0 } = tx;
 
-    if (blockNumber <= rollupInfo.lastSyncBlocknumberForDepositEvent) {
+    if (blockNumber < rollupInfo.lastSyncBlocknumberForDepositEvent) {
       this.logger.log(
-        `OperatorProducer.listenDepositEvent skip blockNumber=${blockNumber} lastSyncBlocknumberForDepositEvent=${rollupInfo.lastSyncBlocknumberForDepositEvent}`,
+        `OperatorProducer.listenDepositEvent SKIP blockNumber=${blockNumber} lastSyncBlocknumberForDepositEvent=${rollupInfo.lastSyncBlocknumberForDepositEvent}`,
       );
       return;
     }
-    // TODO: insert TransactionInfo
-    this.txRepository.insert({
+    this.logger.log(`OperatorProducer.handleDepositEvent txDeposit:${JSON.stringify({ tokenId, amount, accountId })}`);
+
+    await this.txRepository.insert({
       tokenId: BigInt(tokenId.toString()),
       amount: BigInt(amount.toString()),
-      arg0: BigInt(accountId.toString()), //TODO check args
+      arg0: BigInt(accountId.toString()),
     });
-    this.logger.log(`OperatorProducer.listenRegisterEvent ${sender} ${accountId} ${tokenId} ${amount}`);
+    // await this.rollupInfoRepository.update({ id: 1 }, { lastSyncBlocknumberForDepositEvent: blockNumber });
   }
 }

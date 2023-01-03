@@ -1,9 +1,9 @@
+import { ZkOBS } from './../../../../typechain-types/contracts/ZkOBS';
 import { TsWorkerName } from '@ts-sdk/constant';
 import { PinoLoggerService } from '@common/logger/adapters/real/pinoLogger.service';
 import { EthersContract, EthersSigner, InjectContractProvider, InjectSignerProvider, Wallet } from 'nestjs-ethers';
 import { ConfigService } from '@nestjs/config';
 import * as ABI from '../domain/verified-abi.json';
-import { VerifierContract } from '@ts-operator/domain/verifier-contract';
 import { BullWorker, BullWorkerProcess } from '@anchan828/nest-bullmq';
 import { Job } from 'bullmq';
 import { BlockInformation } from 'common/ts-typeorm/src/account/blockInformation.entity';
@@ -11,12 +11,12 @@ import { BlockInformation } from 'common/ts-typeorm/src/account/blockInformation
 @BullWorker({
   queueName: TsWorkerName.OPERATOR,
   options: {
-    concurrency: 1
-  }
+    concurrency: 1,
+  },
 })
 export class OperatorConsumer {
   private wallet: Wallet;
-  private contract: VerifierContract;
+  private contract: ZkOBS;
   constructor(
     private readonly config: ConfigService,
     private readonly logger: PinoLoggerService,
@@ -24,12 +24,9 @@ export class OperatorConsumer {
     @InjectContractProvider() private readonly ethersContract: EthersContract,
   ) {
     this.wallet = this.ethersSigner.createWallet(this.config.get('ETHEREUM_OPERATOR_PRIV', ''));
-    this.contract = this.ethersContract.create(this.config.get('ETHEREUM_ROLLUP_CONTRACT_ADDR', ''), ABI, this.wallet) as unknown as VerifierContract;
-  
-    
+    this.contract = this.ethersContract.create(this.config.get('ETHEREUM_ROLLUP_CONTRACT_ADDR', ''), ABI, this.wallet) as unknown as ZkOBS;
   }
-  
-  
+
   @BullWorkerProcess()
   async process(job: Job<BlockInformation>) {
     this.logger.log(`OperatorConsumer.process ${job.data.blockNumber}`);
