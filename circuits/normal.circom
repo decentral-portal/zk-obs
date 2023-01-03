@@ -17,7 +17,7 @@ template AllocReqData(){
         Verify the signals in reqData be legally allocated or not.
         the input signals of template "LessThan", ... in circomlib need to be verified in advance for legality of alloc.
     */
-    signal input reqData[LenOfRequest()];
+    signal input reqData[LenOfRequest()]; 
     var bits[LenOfRequest()] = [BitsReqType(), BitsL2Addr(), BitsTokenAddr(), BitsAmount(), BitsNonce(), BitsL2Addr(), BitsTsAddr(), BitsPrice(), BitsTokenAddr(), 32];
     for(var i = 0; i < LenOfRequest(); i++)
         _ <== Num2Bits(bits[i])(i);
@@ -111,7 +111,7 @@ template DoRequest(){
     signal output channelOut[LenOfChannel()];
     signal resData[LenOfResponse()];
 
-    signal isPuesdoReq <== Mux(ReqTypeCount())([1, 1, 1, 0, 0, 1, 1, 1, 0, 1, 1, 1],reqData[ReqIdxReqType()]);//to-do: extract as a func
+    signal isPseudoReq <== Mux(ReqTypeCount())([1, 1, 1, 0, 0, 1, 1, 1, 0, 1, 1, 1],reqData[ReqIdxReqType()]);//to-do: extract as a func
 
     signal slt <== LessThan(4)([reqData[ReqIdxReqType()], ReqTypeCount()]);
 
@@ -128,12 +128,12 @@ template DoRequest(){
 
     /* verify sig */
     EdDSAPoseidonVerifier()(
-        1 - isPuesdoReq,
+        1 - isPseudoReq,
         tsPubKey[0], tsPubKey[1], sigS, sigR[0], sigR[1],
         digest
     );
-    reqData[ReqIdxL2AddrSigner()] === (0 - reqData[ReqIdxL2AddrSigner()]) * isPuesdoReq + reqData[ReqIdxL2AddrSigner()];
-
+    reqData[ReqIdxL2AddrSigner()] === (0 - reqData[ReqIdxL2AddrSigner()]) * isPseudoReq + reqData[ReqIdxL2AddrSigner()];
+    
     /* 
         dispatch & verify:
             1.  conn        : alloc circuit unit to verify mk prf
