@@ -19,6 +19,7 @@ import { WebSocketModule } from '@common/websocket/websocket.module';
 import { BlockInformationController } from './infrastructure/adapters/blockInformation.controller';
 import { AvailableService } from './infrastructure/service/available.service';
 import { AccountInfoService } from './infrastructure/service/accountInfo.service';
+import { BlockInformationServcie } from './infrastructure/service/blockInfo.service';
 
 const controllers = [
   TsAccountController,
@@ -29,7 +30,8 @@ const controllers = [
 
 const services: Provider[] = [
   AvailableService,
-  AccountInfoService
+  AccountInfoService,
+  BlockInformationServcie
 ];
 @Module({
   controllers,

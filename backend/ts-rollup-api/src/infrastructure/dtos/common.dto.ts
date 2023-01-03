@@ -1,5 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { TS_STATUS } from 'common/ts-typeorm/src/account/tsStatus.enum';
+import { ApiProperty } from '@nestjs/swagger';
 
 
 export class PaginationDto {

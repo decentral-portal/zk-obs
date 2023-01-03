@@ -1,93 +1,97 @@
+import { BLOCK_STATUS } from '@common/ts-typeorm/account/blockStatus.enum';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { TsTxType } from '@ts-sdk/domain/lib/ts-types/ts-types';
+
 import { TS_STATUS } from 'common/ts-typeorm/src/account/tsStatus.enum';
 import { PaginationResponse } from './common.dto';
 
 export class TransactionInfoDto {
   @ApiProperty()
-  txId!: number;
+  txId!: string;
   @ApiProperty()
-  blockNumber!: number;
-  @ApiProperty({
-    enum: TsTxType,
-  })
-  reqType!: TsTxType;
+  reqType!: string;
+  @ApiPropertyOptional()
+  blockNumber!: string|null;
   @ApiProperty()
-  L2AddrFrom!: string;
+  accountId!: string;
   @ApiProperty()
-  L2AddrTo!: string;
+  tokenId!: string;
   @ApiProperty()
-  L2TokenAddr!: string;
+  accumulatedSellAmt!: string;
+  @ApiProperty()
+  accumulatedBuyAmt!: string;
   @ApiProperty()
   amount!: string;
   @ApiProperty()
-  nonce!: number;
+  nonce!: string;
   @ApiProperty()
-  arg0!: string | null;
+  arg0!: string;
   @ApiProperty()
-  arg1!: string | null;
+  arg1!: string;
   @ApiProperty()
-  arg2!: string | null;
+  arg2!: string;
   @ApiProperty()
-  arg3!: string | null;
+  arg3!: string;
   @ApiProperty()
-  arg4!: string | null;
+  arg4!: string;
   @ApiProperty()
   fee!: string;
   @ApiProperty()
   feeToken!: string;
   @ApiProperty()
+  txStatus!: string;
+  @ApiPropertyOptional()
   metadata!: object | null;
-  @ApiProperty({
-    enum: TS_STATUS,
-  })
-  txStatus!: TS_STATUS;
 }
 
 export class BlockInformationDto {
   @ApiProperty()
   blockNumber!: number;
   @ApiProperty()
-  circuitName!: string;
-
+  blockHash!: string | null;
   @ApiProperty()
-  startTxId!: number;
-  @ApiProperty()
-  endTxId!: number;
-
-  // @ApiProperty()
-  // publicInput!: object;
-  @ApiProperty()
-  publicCalldata!: string;
-  @ApiProperty()
-  proof!: object;
-  
-  @ApiProperty()
-  oldStateRoot!: string;
+  L1TransactionHash!: string;
   @ApiPropertyOptional()
-  newStateRoot!: string;
-  @ApiPropertyOptional()
-  L2CommittedAt!: number;
-  @ApiPropertyOptional()
-  L1VerifiedTxHash!: string;
-  @ApiPropertyOptional()
-  L1VerifiedAt!: number;
-
+  verifiedAt!: string;
+  @ApiProperty()
+  operatorAddress!: string;
+  @ApiProperty()
+  rawData!: string | null; 
+  @ApiProperty()
+  callData!: object | '{}';
+  @ApiProperty()
+  proof!: object | '{}';
   @ApiProperty({
-    enum: TS_STATUS,
+    enum: BLOCK_STATUS,
+    default: BLOCK_STATUS.PROCESSING,
   })
-  status!: TS_STATUS;
+  blockStatus!: BLOCK_STATUS;
 }
 
 
 export class BlockInformationWithTxDto extends BlockInformationDto {
+  @ApiProperty()
+  totalTxs!: number;
   @ApiProperty({
     isArray: true,
     type: TransactionInfoDto,
   })
-  txs!: TransactionInfoDto[];
+  latest10txs!: TransactionInfoDto[];
 }
-
+export class TransactionInfoPagination implements PaginationResponse<TransactionInfoDto> {
+  @ApiProperty({
+    isArray: true,
+    type: TransactionInfoDto,
+  })
+  list!: TransactionInfoDto[];
+  @ApiProperty()
+  total!: number;
+  @ApiProperty()
+  perPage!: number;
+  @ApiProperty()
+  pageNumber!: number;
+  @ApiProperty()
+  totalPage!: number;
+}
 export class BlockInformationPagination implements PaginationResponse<BlockInformationDto> {
   @ApiProperty({
     isArray: true,
@@ -103,3 +107,4 @@ export class BlockInformationPagination implements PaginationResponse<BlockInfor
   @ApiProperty()
   totalPage!: number;
 }
+
