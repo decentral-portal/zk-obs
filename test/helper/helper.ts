@@ -41,9 +41,35 @@ export function getRollupData(inputs: any, root: any, calldata: any) {
   const pubKeyX = BigNumber.from(inputs.tsPubKey[0][0]);
   const pubKeyY = BigNumber.from(inputs.tsPubKey[0][1]);
   const amount: BigNumber = BigNumber.from(inputs.reqData[0][3]);
+  const oriStateRoot = root.oriStateRoot;
+  const newStateRoot = root.newStateRoot;
+  const newTsRoot = root.newTsRoot;
+  const { commitment, commitmentMessage, commitmentHashOrigin } =
+    stateToCommitment(root);
+  const proof_a = [
+    BigNumber.from(calldata[0][0]),
+    BigNumber.from(calldata[0][1]),
+  ];
+  const proof_b = [
+    [BigNumber.from(calldata[1][0][0]), BigNumber.from(calldata[1][0][1])],
+    [BigNumber.from(calldata[1][1][0]), BigNumber.from(calldata[1][1][1])],
+  ];
+  const proof_c = [
+    BigNumber.from(calldata[2][0]),
+    BigNumber.from(calldata[2][1]),
+  ];
+  const proof_commitment = [BigNumber.from(calldata[3][0])];
   return {
     pubKeyX,
     pubKeyY,
     amount,
+    oriStateRoot,
+    newStateRoot,
+    newTsRoot,
+    commitmentHashOrigin,
+    proof_a,
+    proof_b,
+    proof_c,
+    proof_commitment,
   };
 }

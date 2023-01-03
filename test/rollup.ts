@@ -13,12 +13,6 @@ import calldata0 from './example/zkobs-p1/0_register-acc1-p5-8-8-4-8-calldata-ra
 import { stateToCommitment, getRollupData } from './helper/helper';
 
 describe('Unit test of rollup', function () {
-  let operator: Signer;
-  let user1: Signer;
-  let user2: Signer;
-  let zkUSDC: ERC20FreeMint;
-  let zkOBS: ZkOBS;
-  let wETH: WETH9;
   enum OpType {
     UNKNOWN,
     REGISTER,
@@ -34,15 +28,32 @@ describe('Unit test of rollup', function () {
     CANCELORDER,
   }
 
+  let operator: Signer;
+  let user1: Signer;
+  let user2: Signer;
+  let zkUSDC: ERC20FreeMint;
+  let zkOBS: ZkOBS;
+  let wETH: WETH9;
+
+  const CALLDATA_CHUNK = 9;
+  const emptyHash =
+    '0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470';
+
   describe('Rollup for single register with ETH', function () {
-    const { pubKeyX, pubKeyY, amount } = getRollupData(
-      inputs0,
-      root0,
-      calldata0,
-    );
-    const CALLDATA_CHUNK = 9;
-    const emptyHash =
-      '0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470';
+    const {
+      pubKeyX,
+      pubKeyY,
+      amount,
+      oriStateRoot,
+      newStateRoot,
+      newTsRoot,
+      commitmentHashOrigin,
+      proof_a,
+      proof_b,
+      proof_c,
+      proof_commitment,
+    } = getRollupData(inputs0, root0, calldata0);
+
     before(async function () {
       const {
         operator: _operator,
@@ -62,21 +73,18 @@ describe('Unit test of rollup', function () {
       await zkOBS.connect(operator).addToken(zkUSDC.address);
     });
 
-    it('User register with USDC', async function () {
+    it('User register with ETH', async function () {
       // get user's states first
-      const oriBalance: BigNumber = await zkUSDC.balanceOf(zkOBS.address);
+      const oriBalance: BigNumber = await wETH.balanceOf(zkOBS.address);
       const oriAccountNum = await zkOBS.accountNum();
       const oriTotalPendingRequests = await zkOBS.pendingL1RequestNum();
 
       // call deposit
-      zkUSDC.connect(user1).mint(amount);
-
-      await zkUSDC.connect(user1).approve(zkOBS.address, amount);
       await zkOBS
         .connect(user1)
-        .registerERC20(pubKeyX, pubKeyY, zkUSDC.address, amount);
+        .registerETH(pubKeyX, pubKeyY, { value: amount });
       // check user balance
-      const newBalance: BigNumber = await zkUSDC.balanceOf(zkOBS.address);
+      const newBalance: BigNumber = await wETH.balanceOf(zkOBS.address);
       expect(newBalance.sub(oriBalance)).to.be.eq(amount);
 
       // check accountNum increased
@@ -91,7 +99,7 @@ describe('Unit test of rollup', function () {
       const firstL1RequestId = await zkOBS.firstL1RequestId();
       const totalPendingL1Requests = await zkOBS.pendingL1RequestNum();
       const accountId = await zkOBS.accountIdOf(await user1.getAddress());
-      const tokenId = await zkOBS.tokenIdOf(zkUSDC.address);
+      const tokenId = await zkOBS.tokenIdOf(wETH.address);
       const l2Addr = genTsAddr(pubKeyX, pubKeyY);
       const register: Operations.RegisterStruct = {
         accountId: accountId,
@@ -112,12 +120,12 @@ describe('Unit test of rollup', function () {
       expect(success).to.be.true;
     });
 
-    it('Commit single register with USDC', async function () {
+    it('Commit single register with ETH', async function () {
       zkOBS = zkOBS.connect(operator);
 
       const lastCommittedBlock: ZkOBS.StoredBlockStruct = {
         blockNumber: BigNumber.from('0'),
-        stateRoot: root.oriStateRoot,
+        stateRoot: oriStateRoot,
         l1RequestNum: BigNumber.from('0'),
         pendingRollupTxHash: emptyHash,
         commitment: ethers.utils.defaultAbiCoder.encode(
@@ -128,15 +136,13 @@ describe('Unit test of rollup', function () {
       };
 
       const newBlocks: ZkOBS.CommitBlockStruct[] = [];
-      const tokenIdUSDC = await zkOBS.tokenIdOf(zkUSDC.address);
-      const newStateRoot = root.newStateRoot;
-      const newTsRoot = root.newTsRoot;
+      const tokenIdWETH = await zkOBS.tokenIdOf(wETH.address);
       const accountId = await zkOBS.accountIdOf(await user1.getAddress());
       const l2Addr = genTsAddr(pubKeyX, pubKeyY);
       const publicData = ethers.utils
         .solidityPack(
           ['uint8', 'uint32', 'uint16', 'uint128', 'bytes20'],
-          [OpType.REGISTER, accountId, tokenIdUSDC, amount, l2Addr],
+          [OpType.REGISTER, accountId, tokenIdWETH, amount, l2Addr],
         )
         .padEnd((CALLDATA_CHUNK * 12 * 8) / 4 + 2, '0');
       console.log({ publicData });
@@ -163,20 +169,11 @@ describe('Unit test of rollup', function () {
       ).to.be.eq(2);
     });
 
-    it('Prove single register with USDC', async function () {
+    it('Prove single register with ETH', async function () {
       // prove blocks
       const oriTotalProvedBlocks = await zkOBS.provedBlockNum();
 
       const committedBlocks: ZkOBS.StoredBlockStruct[] = [];
-      const newStateRoot = root.newStateRoot;
-      const { commitment, commitmentMessage, commitmentHashOrigin } =
-        stateToCommitment(root);
-
-      console.log({
-        commitment,
-        commitmentMessage,
-        commitmentHashOrigin,
-      });
       const commitedBlock: ZkOBS.StoredBlockStruct = {
         blockNumber: 1,
         stateRoot: newStateRoot,
@@ -188,19 +185,13 @@ describe('Unit test of rollup', function () {
       committedBlocks.push(commitedBlock);
       const proofs: ZkOBS.ProofStruct[] = [];
       const proof: ZkOBS.ProofStruct = {
-        a: [BigNumber.from(calldata[0][0]), BigNumber.from(calldata[0][1])],
+        a: [proof_a[0], proof_a[1]],
         b: [
-          [
-            BigNumber.from(calldata[1][0][0]),
-            BigNumber.from(calldata[1][0][1]),
-          ],
-          [
-            BigNumber.from(calldata[1][1][0]),
-            BigNumber.from(calldata[1][1][1]),
-          ],
+          [proof_b[0][0], proof_b[0][1]],
+          [proof_b[1][0], proof_b[1][1]],
         ],
-        c: [BigNumber.from(calldata[2][0]), BigNumber.from(calldata[2][1])],
-        commitment: [BigNumber.from(calldata[3][0])],
+        c: [proof_c[0], proof_c[1]],
+        commitment: [proof_commitment[0]],
       };
       proofs.push(proof);
 
@@ -211,7 +202,7 @@ describe('Unit test of rollup', function () {
         committedBlocks.length,
       );
     });
-    it('Execute single register with USDC', async function () {
+    it('Execute single register with ETH', async function () {
       // // execute blocks
       // const oriTotalExecutedBlocks = await zkTrueUp.getTotalExecutedBlocks();
       // const oriFirstL1RequestId = await zkTrueUp.getFirstL1RequestId();
@@ -248,7 +239,11 @@ describe('Unit test of rollup', function () {
   });
 
   describe('Rollup for single register with USDC', function () {
-    const { pubKeyX, pubKeyY, amount } = getRollupData(inputs0, root0, calldata0);
+    const { pubKeyX, pubKeyY, amount } = getRollupData(
+      inputs0,
+      root0,
+      calldata0,
+    );
     const CALLDATA_CHUNK = 9;
     const emptyHash =
       '0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470';
