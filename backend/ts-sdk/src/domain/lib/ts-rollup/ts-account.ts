@@ -3,10 +3,10 @@ import { EddsaSigner } from '../eddsa';
 import { TsMerkleTree } from '../merkle-tree-dp';
 import { dpPoseidonHash } from '../poseidon-hash-dp';
 import { EdDSASignaturePayload } from '../ts-types/eddsa-types';
-import { TsTxWithdrawRequest, TsTxWithdrawNonSignatureRequest, TsTxDepositRequest, TsTxDepositNonSignatureRequest } from '../ts-types/ts-req-types';
+import { TsTxWithdrawRequest, TsTxWithdrawNonSignatureRequest, TsTxDepositRequest, TsTxDepositNonSignatureRequest, TsTxLimitOrderRequest, TsTxLimitOrderNonSignatureRequest } from '../ts-types/ts-req-types';
 import { TsTokenInfo, TsTokenAddress, TsSystemAccountAddress, TsTxType } from '../ts-types/ts-types';
 import { toTreeLeaf, tsHashFunc } from './ts-helper';
-import { encodeTxDepositMessage, encodeTxWithdrawMessage } from './ts-tx-helper';
+import { encodeTsTxLimitOrderMessage, encodeTxDepositMessage, encodeTxWithdrawMessage } from './ts-tx-helper';
 import { RESERVED_ACCOUNTS } from './ts-env';
 import { TsAccountLeafType, TsTokenLeafType } from '../ts-types/ts-merkletree.types';
 
@@ -17,10 +17,10 @@ export class TsRollupAccount {
   L2Address = -1n;
 
   
-  // private eddsaPubKey: [bigint, bigint];
-  // get tsPubKey(): [bigint, bigint] {
-  //   return this.eddsaPubKey;
-  // }
+  private eddsaPubKey: [bigint, bigint];
+  get tsPubKey(): [string, string] {
+    return [this.eddsaPubKey[0].toString(), this.eddsaPubKey[1].toString()];
+  }
   tsAddr!: bigint;
   nonce: bigint;
   tokenLeafs: TokenLeafInfoType;
@@ -35,15 +35,16 @@ export class TsRollupAccount {
   }
 
   public get hashedTsPubKey() {
-    // const raw = BigInt(tsHashFunc(this.tsPubKey.map(v => v.toString())));
-    // const hash = raw % BigInt(2 ** 160);
-    return `0x${this.tsAddr.toString(16)}`;
+    const raw = BigInt(tsHashFunc(this.tsPubKey));
+    const hash = raw % BigInt(2 ** 160);
+    return hash;
+    // return `0x${this.tsAddr.toString(16)}`;
   }
 
   constructor(
     tokenLeafs: TokenLeafInfoType,
     tokenTreeSize: number,
-    tsAddr: bigint,
+    _eddsaPubKey: [bigint, bigint],
     // eddsaPubKey: [bigint, bigint],
     nonce = 0n,
   ) {
@@ -51,7 +52,8 @@ export class TsRollupAccount {
     this.nonce = nonce;
     this.tokenLeafs = tokenLeafs;
 
-    this.tsAddr = tsAddr;
+    // this.tsAddr = tsAddr;
+    this.eddsaPubKey = _eddsaPubKey;
    
     this.tokenTree = new TsMerkleTree(
       this.encodeTokenLeafs(),
@@ -146,8 +148,6 @@ export class TsRollupAccount {
         amount: addAmt,
         lockAmt: addLockAmt,
       };
-      assert(tokenInfo.amount >= 0n, 'new token amount must >= 0');
-      assert(tokenInfo.lockAmt >= 0n, 'new token lock amount must >= 0');
     }
     assert(tokenInfo.amount >= 0n, 'new token amount must >= 0');
     assert(tokenInfo.lockAmt >= 0n, 'new token lock amount must >= 0');
@@ -227,6 +227,44 @@ export class TsRollupSigner {
     };
   }
 
+  prepareTxObsLimitOrder({
+    sender,
+    sellTokenId,
+    sellAmt,
+    nonce,
+    buyTokenId,
+    buyAmt,
+  }: {
+    sender: string,
+    sellTokenId: TsTokenAddress,
+    sellAmt: bigint,
+    nonce: bigint,
+    buyTokenId: TsTokenAddress,
+    buyAmt: bigint,
+  }): TsTxLimitOrderRequest {
+    const req: TsTxLimitOrderNonSignatureRequest = {
+      reqType: TsTxType.SecondLimitOrder,
+      sender,
+      sellTokenId,
+      sellAmt: sellAmt.toString(),
+      nonce: nonce.toString(),
+      buyTokenId,
+      buyAmt: buyAmt.toString(),
+    };
+    const msgHash = dpPoseidonHash(encodeTsTxLimitOrderMessage(req));
+    const eddsaSig = this.signPoseidonMessageHash(msgHash);
+    return {
+      ...req,
+      eddsaSig: {
+        R8: [
+          EddsaSigner.toObject(eddsaSig.R8[0]).toString(),
+          EddsaSigner.toObject(eddsaSig.R8[1]).toString(),
+        ],
+        S: eddsaSig.S.toString(),
+      },
+    };
+  }
+
   // prepareTxTransfer(nonce: bigint | number, fromAddr: bigint, toAddr: bigint, tokenAddr: TsTokenAddress, amount: bigint): TsTxTransferRequest {
   //   const req = {
   //     reqType: TsTxType.TRANSFER,
@@ -258,20 +296,10 @@ export class TsRollupSigner {
       sender: toAddr.toString(),
       tokenId: tokenAddr,
       stateAmt: amount.toString(),
-      nonce: '0',
     };
-    const msgHash = dpPoseidonHash(encodeTxDepositMessage(req));
-    const eddsaSig = this.signPoseidonMessageHash(msgHash);
 
     return {
-      ...req,
-      eddsaSig: {
-        S: eddsaSig.S.toString(),
-        R8: [
-          EddsaSigner.toObject(eddsaSig.R8[0]).toString(),
-          EddsaSigner.toObject(eddsaSig.R8[1]).toString(),
-        ]
-      },
+      ...req
     };
   }
 }

@@ -1,3 +1,4 @@
+import { toTreeLeaf } from '../ts-rollup/ts-helper';
 import { TsSystemAccountAddress, TsTokenAddress, TsTxType } from './ts-types';
 
 export type TsApiResponsePayload<T> = {
@@ -18,6 +19,7 @@ export interface ITxRequest {
 export interface TsTxSignaturePayload {
     eddsaSig: EdDSASignatureRequestType;
     ecdsaSig?: string;
+    // tsPubKey: [string, string];
 }
 
 /** Client Request Types */
@@ -36,17 +38,15 @@ export interface TsTxRegisterRequest extends ITxRequest {
 export interface TsTxDepositNonSignatureRequest extends ITxRequest {
   tokenId: TsTokenAddress;
   stateAmt: string;
-  nonce: string;
   sender: string;
 }
-export interface TsTxDepositRequest extends TsTxDepositNonSignatureRequest, TsTxSignaturePayload {
-}
+export type TsTxDepositRequest = TsTxDepositNonSignatureRequest
 
 /** Transfer */
 // TODO: replace with TsTxEntityRequest
 export interface TsTxEntityRequest {
   txId: number;
-  blockNumber: number;
+  blockNumber?: number;
   reqType: TsTxType;
   accountId: bigint;
   tokenId: bigint;
@@ -66,12 +66,81 @@ export interface TsTxEntityRequest {
   arg4: bigint;
   fee: bigint;
   feeToken: bigint;
-  metadata: object | null;
 
   tsPubKeyX: string;
   tsPubKeyY: string;
 
   tokenAddr: TsTokenAddress;
+}
+export enum TsSide {
+  BUY = '0',
+  SELL = '1',
+}
+export class ObsOrderLeaf {
+  txId!: bigint;
+  reqType!: TsTxType;
+  sender!: bigint;
+  sellTokenId!: bigint;
+  sellAmt!: bigint;
+  nonce!: bigint;
+
+  buyTokenId!: bigint;
+  buyAmt!: bigint;
+  accumulatedSellAmt!: bigint;
+  accumulatedBuyAmt!: bigint;
+  orderLeafId!: bigint;
+
+  constructor(
+    txId: bigint,
+    reqType: TsTxType,
+    sender: bigint,
+    sellTokenId: bigint,
+    sellAmt: bigint,
+    nonce: bigint,
+    buyTokenId: bigint,
+    buyAmt: bigint,
+    accumulatedSellAmt: bigint,
+    accumulatedBuyAmt: bigint,
+    // orderLeafId: bigint,
+  ) {
+    this.txId = txId;
+    this.reqType = reqType;
+    this.sender = sender;
+    this.sellTokenId = sellTokenId;
+    this.sellAmt = sellAmt;
+    this.nonce = nonce;
+    this.buyTokenId = buyTokenId;
+    this.buyAmt = buyAmt;
+    this.accumulatedSellAmt = accumulatedSellAmt;
+    this.accumulatedBuyAmt = accumulatedBuyAmt;
+    // this.orderLeafId = orderLeafId;
+  }
+  
+  setOrderLeafId(orderLeafId: bigint) {
+    this.orderLeafId = orderLeafId;
+  }
+
+  encodeLeafMessage() {
+    return [
+      BigInt(this.reqType),
+      this.sender,
+      this.sellTokenId,
+      this.sellAmt,
+      this.nonce,
+      0n,
+      0n,
+      this.buyTokenId,
+      this.buyAmt,
+      0n,
+      this.txId,
+      this.accumulatedSellAmt,
+      this.accumulatedBuyAmt,
+    ];
+  }
+
+  encodeLeafMessageForHash() {
+    return toTreeLeaf(this.encodeLeafMessage());
+  }
 }
 
 /** Withdraw */

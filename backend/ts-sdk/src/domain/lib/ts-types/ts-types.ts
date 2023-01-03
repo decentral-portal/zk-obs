@@ -1,3 +1,5 @@
+import { TsTxEntityRequest } from './ts-req-types';
+
 export const LEN_OF_REQUEST = 10;
 export const CHUNK_BYTES_SIZE = 12;
 export const CHUNK_BITS_SIZE = CHUNK_BYTES_SIZE * 8;
@@ -51,21 +53,37 @@ export const TsDeciaml = {
 
 export enum TsTokenAddress {
     Unknown = '0',
-    WETH = '6',
-    WBTC = '7',
-    USDT = '8',
-    USDC = '9',
-    DAI = '10',
-
-    // TODO: TSL Token mapping
-    TslETH20221231 = '46',
-    TslBTC20221231 = '47',
-    TslUSDT20221231 = '48',
-    TslUSDC20221231 = '49',
-    TslDAI20221231 = '50',
+    WETH = '1',
+    USDT = '2'
   }
 
 export interface TsTokenInfo {
     amount: bigint;
     lockAmt: bigint;
 }
+
+export const TxNoop: TsTxEntityRequest = {
+  reqType: TsTxType.UNKNOWN,
+  txId: 0,
+  accountId: 0n,
+  tokenId: 0n,
+  accumulatedSellAmt: 0n,
+  accumulatedBuyAmt: 0n,
+  amount: 0n,
+  nonce: 0n,
+  eddsaSig: {
+    R8: ['0','0'],
+    S: '0'
+  },
+  ecdsaSig: 0n,
+  arg0: 0n,
+  arg1: 0n,
+  arg2: 0n,
+  arg3: 0n,
+  arg4: 0n,
+  fee: 0n,
+  feeToken: 0n,
+  tsPubKeyX: '',
+  tsPubKeyY: '',
+  tokenAddr: TsTokenAddress.Unknown,
+};

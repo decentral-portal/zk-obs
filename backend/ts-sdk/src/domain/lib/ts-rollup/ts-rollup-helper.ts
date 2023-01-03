@@ -1,5 +1,5 @@
-import { TsTxDepositNonSignatureRequest, TsTxEntityRequest, TsTxRegisterRequest, TsTxWithdrawRequest } from '../ts-types/ts-req-types';
-import { TsTxType } from '../ts-types/ts-types';
+import { TsTxDepositNonSignatureRequest, TsTxEntityRequest, TsTxLimitOrderRequest, TsTxRegisterRequest, TsTxWithdrawRequest } from '../ts-types/ts-req-types';
+import { TsTxType, TsTokenAddress } from '../ts-types/ts-types';
 
 export type CircuitReqDataType = [
   bigint, bigint,
@@ -43,10 +43,9 @@ export function convertRegisterReq2TxEntity(req: TsTxRegisterRequest): TsTxEntit
     arg4: 0n,
     fee: 0n,
     feeToken: 0n,
-    metadata: null,
     tokenAddr: req.tokenId,
-    tsPubKeyX: '0',
-    tsPubKeyY: '0',
+    tsPubKeyX: req.tsPubKey[0],
+    tsPubKeyY: req.tsPubKey[1],
   };
 }
 
@@ -60,7 +59,7 @@ export function convertDepositReq2TxEntity(req: TsTxDepositNonSignatureRequest):
     accumulatedSellAmt: 0n,
     accumulatedBuyAmt: 0n,
     amount: BigInt(req.stateAmt),
-    nonce: BigInt(req.nonce),
+    nonce: 0n,
     eddsaSig: {
       R8: ['0', '0'],
       S: '0',
@@ -73,7 +72,6 @@ export function convertDepositReq2TxEntity(req: TsTxDepositNonSignatureRequest):
     arg4: 0n,
     fee: 0n,
     feeToken: 0n,
-    metadata: null,
     tokenAddr: req.tokenId,
     tsPubKeyX: '0',
     tsPubKeyY: '0',
@@ -103,10 +101,38 @@ export function convertWithdrawReq2TxEntity(req: TsTxWithdrawRequest, tsPubKey: 
     arg4: 0n,
     fee: 0n,
     feeToken: 0n,
-    metadata: null,
     tokenAddr: req.tokenId,
 
     tsPubKeyX: tsPubKey[0].toString(),
     tsPubKeyY: tsPubKey[1].toString(),
+  };
+}
+
+
+export function convertLimitOrderReq2TxEntity(txId: number, req: TsTxLimitOrderRequest): TsTxEntityRequest {
+  return {
+    txId,
+    reqType: req.reqType,
+    accountId: BigInt(req.sender),
+    tokenId: BigInt(req.sellTokenId),
+    amount: BigInt(req.sellAmt),
+    nonce: BigInt(req.nonce),
+    eddsaSig: {
+      R8: req.eddsaSig.R8,
+      S: req.eddsaSig.S,
+    },
+    ecdsaSig: 0n,
+    accumulatedSellAmt: 0n,
+    accumulatedBuyAmt: 0n,
+    arg0: 0n,
+    arg1: 0n,
+    arg2: BigInt(req.buyTokenId),
+    arg3: BigInt(req.buyAmt),
+    arg4: 0n,
+    fee: 0n,
+    feeToken: 0n,
+    tokenAddr: BigInt(req.sellTokenId).toString() as TsTokenAddress,
+    tsPubKeyX: '0',
+    tsPubKeyY: '0',
   };
 }

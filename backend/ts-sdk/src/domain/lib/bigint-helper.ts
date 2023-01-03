@@ -1,3 +1,5 @@
+import { CHUNK_BYTES_SIZE } from './ts-types/ts-types';
+
 export const bigIntMax = (arr: bigint[]) => {
   return arr.reduce((max, e) => {
     return e > max ? e : max;
@@ -10,7 +12,7 @@ export const bigIntMin = (arr: bigint[]) => {
   }, arr[0]);
 };
 
-export function amountToTxAmountV2(number: bigint): bigint {
+export function amountToTxAmountV2(number: bigint): bigint { // 48bit
   const sign = number >> 127n << 47n;
   const fraction = number - sign;
   const fractionLength = BigInt(fraction.toString(2).length);
@@ -27,9 +29,29 @@ export function amountToTxAmountV2(number: bigint): bigint {
   return retVal;
 }
 
-export function arrayChunkToHexString(arr: string[], pad: number) {
-  const hex = arr.map((e) => {
-    return BigInt(e).toString(16).padStart(pad, '0');
-  }).join('');
-  return hex;
+
+export function amountToTxAmountV3_40bit(number: bigint): bigint { // 48bit
+  let val_exp = 0n;
+  if(number === 0n) {
+    return 0n;
+  }
+  while(number % 10n === 0n) {
+    number /= 10n;
+    val_exp += 1n;
+  }
+  return number + (val_exp << 35n);
 }
+
+export function arrayChunkToHexString(arr: string[], chunkSize: number = CHUNK_BYTES_SIZE) {
+  const hex = arr.map((e) => {
+    return BigInt(e).toString(16).padStart(chunkSize * 2, '0');
+  }).join('');
+
+  return '0x' + hex;
+}
+
+// function toHex(n: string) {
+//   const num = BigInt(n);
+//   const rawHex = num.toString(16);
+//   return '0x' + (rawHex.length % 2 === 0 ? rawHex : '0' + rawHex);
+// }
