@@ -68,7 +68,7 @@ export class TsTokenTreeService extends TsMerkleTree<TokenLeafNode> {
         const iLevel = Math.floor(Math.log2(Number(i)));
         const jHashValue: string = (jValue == null)? this.getDefaultHashByLevel(jLevel): jValue.hash.toString();
         const iHashValue: string = (iValue == null)? this.getDefaultHashByLevel(iLevel): iValue.hash.toString();
-        let r = (id % 2n == 0n) ?[ jHashValue, iHashValue] : [ iHashValue, jHashValue];
+        const r = (id % 2n == 0n) ?[ jHashValue, iHashValue] : [ iHashValue, jHashValue];
         const hash = this.hashFunc(r);
         const jobs = [];
         if (iValue == null) {
@@ -133,7 +133,7 @@ export class TsTokenTreeService extends TsMerkleTree<TokenLeafNode> {
         id: 1,
         leafId: null,
         hash: hash
-      }
+      };
     }
     const resultHash = result.hash ? result.hash.toString() : '';
     return {

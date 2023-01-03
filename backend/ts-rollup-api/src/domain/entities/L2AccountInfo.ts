@@ -18,4 +18,4 @@ export const toTsTokenAddress = (value: number): TsTokenAddress => {
 export const toTsTokenAddressFromStr = (value: string): TsTokenAddress => {
   const token = Object.values(TsTokenAddress).find((token) => token.toString() == value);
   return token ? token : TsTokenAddress.Unknown;
-}
+};

@@ -13,10 +13,10 @@ import { Test } from '@nestjs/testing';
 
 describe('[UnitTest] AccountController', () => {
   let accountController: AccountController;
-  let counter = 0;
+  const counter = 0;
   beforeEach(() => {
     jest.setTimeout(30000);
-  })
+  });
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       imports: [  

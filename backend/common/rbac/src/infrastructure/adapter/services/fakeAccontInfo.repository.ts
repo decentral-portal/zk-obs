@@ -25,7 +25,7 @@ export class FakeAccountInfoRepository implements AccountInfoRepository {
     const exists = this.accountInfos.find((account) => account.email == accountInfo.email || account.L1Address == accountInfo.L1Address);
     if (exists !== undefined) {
       // throw new L1AddressAlreadyExistsException(`Account already exists, please use another L1Address or email`);
-      throw new TypeORMError(`Account already exists, please use another L1Address or email`); 
+      throw new TypeORMError('Account already exists, please use another L1Address or email'); 
     }
     this.currentNonce++;
     this.accountInfos.push({...accountInfo, nonce: Nonce.check(this.currentNonce) } as AccountNonceInfo);
@@ -42,7 +42,7 @@ export class FakeAccountInfoRepository implements AccountInfoRepository {
     const accountInfos = this.accountInfos.map((accountInfo) => {
       const { password, nonce, ...accountInfoWithoutPassword } = accountInfo;
       return accountInfoWithoutPassword as AccountInfoWithoutPassword;
-    })
+    });
     return from([accountInfos]);
   }
   async findByEmail(email: Email): Promise<AccountNonceInfo> {

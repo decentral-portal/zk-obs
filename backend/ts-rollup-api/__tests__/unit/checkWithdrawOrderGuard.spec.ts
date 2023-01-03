@@ -85,7 +85,7 @@ describe('[Unit] checkWithdrawOrderGuard', () => {
           L2AddrFrom: '100',
           L2TokenAddr: TsTokenAddress.DAI,
           amount: '5'
-        }
+        };
       }
     });
     const result = await checkWithdrawrOrderGuard.canActivate(context);
@@ -99,7 +99,7 @@ describe('[Unit] checkWithdrawOrderGuard', () => {
           L2AddrFrom: '100',
           L2TokenAddr: TsTokenAddress.USDC,
           amount: '5'
-        }
+        };
       }
     });
     const result = await checkWithdrawrOrderGuard.canActivate(context);
@@ -113,10 +113,10 @@ describe('[Unit] checkWithdrawOrderGuard', () => {
           L2AddrFrom: '100',
           L2TokenAddr: TsTokenAddress.USDC,
           amount: '11'
-        }
+        };
       }
     });
     const result = await checkWithdrawrOrderGuard.canActivate(context);
     expect(result).toBeFalsy();
-  })
+  });
 });

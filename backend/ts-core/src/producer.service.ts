@@ -45,7 +45,7 @@ export class ProducerService {
   })
   async process(job: Job<TransactionInfo>) {
     const name = job.name;
-    console.log('==============process============', name)
+    console.log('==============process============', name);
     if(name === 'TransactionInfo') {
       await this.dispatchPendingTransaction();
     }

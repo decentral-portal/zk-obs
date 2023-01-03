@@ -14,7 +14,7 @@ export const checkTsTokenAddress = (token: string) => {
     return value;
   }
   return TsTokenAddress.Unknown;
-}
+};
 export class TsTokenInfo {
   tokenAddr!: TsTokenAddress;
   amount!: string;

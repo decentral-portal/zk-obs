@@ -67,7 +67,7 @@ export class TsTransactionController {
       '0': (Number(mainQty)/Number(baseQty)).toString();
     const formatPrice = this.toFixed8(price);
     const nonce = dto.nonce.toString();
-    let txInfo = {
+    const txInfo = {
       reqType: Number(dto.reqType),
       accountId: BigInt(dto.sender),
       nonce: BigInt(nonce),

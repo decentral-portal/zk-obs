@@ -35,7 +35,7 @@ export class CheckWithdrawOrderGuard implements CanActivate {
         return false;
       }
       const tokenInfo = tokenInfos.list[0];
-      const requestWithdrawAmt: bigint = BigInt(amount);
+      const requestWithdrawAmt = BigInt(amount);
       return requestWithdrawAmt <= BigInt(tokenInfo.availableAmt);
     } catch (error) {
       this.logger.log(error);

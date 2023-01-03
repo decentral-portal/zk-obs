@@ -1,4 +1,11 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToOne,
+  PrimaryColumn,
+} from 'typeorm';
 import { MatchObsOrderEntity } from '../auctionOrder/matchObsOrder.entity';
 import { BaseTimeEntity } from '../common/baseTimeEntity';
 import { AccountInformation } from './accountInformation.entity';
@@ -99,7 +106,7 @@ export class TransactionInfo extends BaseTimeEntity {
     name: 'ecdsaSig',
     length: '66',
     nullable: false,
-    default: "''",
+    default: '\'\'',
   })
   ecdsaSig!: string;
   @Column({
@@ -152,7 +159,7 @@ export class TransactionInfo extends BaseTimeEntity {
     name: 'tsPubKeyX',
     length: '100',
     nullable: false,
-    default: "'0'",
+    default: '\'0\'',
   })
   tsPubKeyX!: string;
   @Column({
@@ -160,7 +167,7 @@ export class TransactionInfo extends BaseTimeEntity {
     name: 'tsPubKeyY',
     length: '100',
     nullable: false,
-    default: "'0'",
+    default: '\'0\'',
   })
   tsPubKeyY!: string;
   @Column({
@@ -185,7 +192,7 @@ export class TransactionInfo extends BaseTimeEntity {
     type: 'json',
     name: 'metadata',
     nullable: false,
-    default: () => "'{}'",
+    default: () => '\'{}\'',
   })
   metadata!: object | null;
   @Column({
@@ -204,25 +211,37 @@ export class TransactionInfo extends BaseTimeEntity {
     default: `'${TS_STATUS.PENDING}'`,
   })
   txStatus!: TS_STATUS;
-  @ManyToOne(() => AccountInformation, (accountInformation: AccountInformation) => accountInformation.transactionInfos, {
-    onDelete: 'RESTRICT',
-    onUpdate: 'CASCADE',
-  })
+  @ManyToOne(
+    () => AccountInformation,
+    (accountInformation: AccountInformation) =>
+      accountInformation.transactionInfos,
+    {
+      onDelete: 'RESTRICT',
+      onUpdate: 'CASCADE',
+    },
+  )
   @JoinColumn({
     name: 'accountId',
     referencedColumnName: 'accountId',
   })
   L2AccountInfo!: AccountInformation;
-  @ManyToOne(() => BlockInformation, (blockInformation: BlockInformation) => blockInformation.transactionInfos, {
-    onDelete: 'RESTRICT',
-    onUpdate: 'CASCADE',
-  })
+  @ManyToOne(
+    () => BlockInformation,
+    (blockInformation: BlockInformation) => blockInformation.transactionInfos,
+    {
+      onDelete: 'RESTRICT',
+      onUpdate: 'CASCADE',
+    },
+  )
   @JoinColumn({
     name: 'blockNumber',
     referencedColumnName: 'blockNumber',
   })
   blockInfo!: BlockInformation;
-  @OneToOne(() => MatchObsOrderEntity, (matchedObsOrder: MatchObsOrderEntity) => matchedObsOrder.matchedTx)
+  @OneToOne(
+    () => MatchObsOrderEntity,
+    (matchedObsOrder: MatchObsOrderEntity) => matchedObsOrder.matchedTx,
+  )
   @JoinColumn({
     name: 'txId',
     referencedColumnName: 'txId',

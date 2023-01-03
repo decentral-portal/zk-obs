@@ -73,7 +73,7 @@ export class AccountInformation extends BaseTimeEntity {
     type: 'jsonb',
     name: 'label',
     nullable: true,
-    default: () => "'{}'",
+    default: () => '\'{}\'',
   })
   label!: object;
   @Column({
@@ -89,7 +89,7 @@ export class AccountInformation extends BaseTimeEntity {
     name: 'tsPubKeyX',
     length: '100',
     nullable: false,
-    default: "'0'",
+    default: '\'0\'',
   })
   tsPubKeyX!: string;
   @Column({
@@ -97,7 +97,7 @@ export class AccountInformation extends BaseTimeEntity {
     name: 'tsPubKeyY',
     length: '100',
     nullable: false,
-    default: "'0'",
+    default: '\'0\'',
   })
   tsPubKeyY!: string;
   // relations

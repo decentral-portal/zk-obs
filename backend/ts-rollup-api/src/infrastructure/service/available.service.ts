@@ -39,31 +39,31 @@ export class AvailableService {
     }
     
     const result = (dto.L2TokenAddrs && dto.L2TokenAddrs.length !== 0)? 
-    await this.availableViewRepository.find({
-      where: {
-        tokenId: In(dto.L2TokenAddrs),
-        accountId: accountId
-      }
-    }):
-    await this.availableViewRepository.find({
-      where: {
-        accountId: accountId
-      }
-    });
+      await this.availableViewRepository.find({
+        where: {
+          tokenId: In(dto.L2TokenAddrs),
+          accountId: accountId
+        }
+      }):
+      await this.availableViewRepository.find({
+        where: {
+          accountId: accountId
+        }
+      });
     const txBasicResult = (dto.L2TokenAddrs && dto.L2TokenAddrs.length !== 0)? 
-    await this.tokenLeafNodeRepository.find({
-      select: ['leafId', 'availableAmt', 'lockedAmt'],
-      where: {
-        leafId: In(dto.L2TokenAddrs),
-        accountId: accountId
-      }
-    }):
-    await this.tokenLeafNodeRepository.find({
-      select: ['leafId', 'availableAmt', 'lockedAmt'],
-      where: {
-        accountId: accountId
-      }
-    });
+      await this.tokenLeafNodeRepository.find({
+        select: ['leafId', 'availableAmt', 'lockedAmt'],
+        where: {
+          leafId: In(dto.L2TokenAddrs),
+          accountId: accountId
+        }
+      }):
+      await this.tokenLeafNodeRepository.find({
+        select: ['leafId', 'availableAmt', 'lockedAmt'],
+        where: {
+          accountId: accountId
+        }
+      });
     return (result.length == 0)? {
       list: txBasicResult.map(item => ({
         tokenAddr: item.leafId,
@@ -78,15 +78,15 @@ export class AvailableService {
             tokenAddr: item.leafId,
             amount: available.availableAmt.toString(),
             lockAmt: available.lockedAmt.toString()
-          }
+          };
         } else {
           return {
             tokenAddr: item.leafId,
             amount: item.availableAmt.toString(),
             lockAmt: item.lockedAmt.toString()
-          }
+          };
         }
       })
-    }
+    };
   }
 }

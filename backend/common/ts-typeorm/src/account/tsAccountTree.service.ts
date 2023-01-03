@@ -43,7 +43,7 @@ export class TsAccountTreeService extends TsMerkleTree<AccountLeafNode>{
           BigInt(value.tsAddr), 
           BigInt(value.nonce), 
           BigInt(value.tokenRoot)])) 
-        }, ['id']);
+      }, ['id']);
       await manager.upsert(AccountLeafNode, {
         tsAddr: BigInt(value.tsAddr),
         nonce: BigInt(value.nonce),
@@ -60,7 +60,7 @@ export class TsAccountTreeService extends TsMerkleTree<AccountLeafNode>{
         const iLevel = Math.floor(Math.log2(Number(i)));
         const jHashValue: string = (jValue == null)? this.getDefaultHashByLevel(jLevel): jValue.hash.toString();
         const iHashValue: string = (iValue == null)? this.getDefaultHashByLevel(iLevel): iValue.hash.toString();
-        let r = (id % 2n == 0n) ?[ jHashValue, iHashValue] : [ iHashValue, jHashValue];
+        const r = (id % 2n == 0n) ?[ jHashValue, iHashValue] : [ iHashValue, jHashValue];
         const hash = this.hashFunc(r);
         const jobs = [];
         if (iValue == null) {
@@ -127,7 +127,7 @@ export class TsAccountTreeService extends TsMerkleTree<AccountLeafNode>{
       return {
         id: 1n.toString(),
         hash: hash
-      }
+      };
     }
     return result;  
   }

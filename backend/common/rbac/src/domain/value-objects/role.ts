@@ -6,5 +6,5 @@ export enum RoleEnum  {
 }
 
 export const Role = String.withBrand('Role')
-  .withConstraint((role: string) => Object.keys(RoleEnum).includes(role) || 'Role should be Valid')
+  .withConstraint((role: string) => Object.keys(RoleEnum).includes(role) || 'Role should be Valid');
 export type Role = Static<typeof Role>;

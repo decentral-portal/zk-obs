@@ -85,7 +85,7 @@ describe('[Unit] checkLendOrderGuard', () => {
           L2AddrFrom: '100',
           L2TokenAddrLending: TsTokenAddress.USDC,
           lendingAmt: '5'
-        }
+        };
       }
     });
     const result = await checkLendOrderGuard.canActivate(context);
@@ -99,7 +99,7 @@ describe('[Unit] checkLendOrderGuard', () => {
           L2AddrFrom: '100',
           L2TokenAddrLending: TsTokenAddress.DAI,
           lendingAmt: '5'
-        }
+        };
       }
     });
     const result = await checkLendOrderGuard.canActivate(context);

@@ -48,14 +48,14 @@ export class AccountController {
       );
       return {
         message: `account for email: ${accountInfo.email} create successfully`
-      }
+      };
     } catch (error: any) {
       if (error instanceof ValidationError) {
         console.log(error);
         throw new BadRequestException('Invalid Input');
       }
       if((Object.hasOwnProperty.call(error, 'code') && error.code === '23505')) {
-        throw new L1AddressAlreadyExistsException(`Account already exists, please use another L1Address or email`);
+        throw new L1AddressAlreadyExistsException('Account already exists, please use another L1Address or email');
       }
       throw error;
     }

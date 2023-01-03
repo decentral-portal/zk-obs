@@ -18,7 +18,7 @@ export class L2RealBalanceController {
     if (L2TokenAddrList && L2TokenAddrList.length === 1) {
       L2TokenAddrList = [L2TokenAddrList[0]];
     }
-    let l2TokenList = L2TokenAddrList ? L2TokenAddrList.map((item) => {
+    const l2TokenList = L2TokenAddrList ? L2TokenAddrList.map((item) => {
       return toTsTokenAddressFromStr(item);
     }): undefined;
     return this.L2RealBalanceService.getL2RealBalance({

@@ -1,5 +1,5 @@
-import { MigrationInterface, QueryRunner } from "typeorm"
-import { View } from "typeorm/schema-builder/view/View";
+import { MigrationInterface, QueryRunner } from 'typeorm';
+import { View } from 'typeorm/schema-builder/view/View';
 
 export class CREATEAVAILABLEVIEW1672586725397 implements MigrationInterface {
 

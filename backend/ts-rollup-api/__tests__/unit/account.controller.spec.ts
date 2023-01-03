@@ -26,7 +26,7 @@ const generatePublicKey = (() => {
     rawX: BigInt('0x' + key.subarray(-64, -32).toString('hex')).toString(10),
     rawY: BigInt('0x' + key.subarray(-32).toString('hex')).toString(10)
   };
-})
+});
 let EdDSA: any;
 describe('[UnitTest] account.controller test', () => {
   // setup enviroment for lanch test

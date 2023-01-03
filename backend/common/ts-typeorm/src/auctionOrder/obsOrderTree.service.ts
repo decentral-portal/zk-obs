@@ -70,7 +70,7 @@ export class ObsOrderTreeService extends TsMerkleTree<ObsOrderLeafEntity> {
         const iLevel = Math.floor(Math.log2(Number(i)));
         const jHashValue: string = (jValue == null)? this.getDefaultHashByLevel(jLevel): jValue.hash.toString();
         const iHashValue: string = (iValue == null)? this.getDefaultHashByLevel(iLevel): iValue.hash.toString();
-        let r = (id % 2n == 0n) ?[ jHashValue, iHashValue] : [ iHashValue, jHashValue];
+        const r = (id % 2n == 0n) ?[ jHashValue, iHashValue] : [ iHashValue, jHashValue];
         const hash = this.hashFunc(r);
         const jobs = [];
         if (iValue == null) {
@@ -117,7 +117,7 @@ export class ObsOrderTreeService extends TsMerkleTree<ObsOrderLeafEntity> {
         });
         await manager.insert(ObsOrderLeafEntity, {
           orderLeafId: leaf_id,
-        })
+        });
       });
       return this.obsOrderLeafRepository.findOneBy({
         orderLeafId: leaf_id
@@ -140,7 +140,7 @@ export class ObsOrderTreeService extends TsMerkleTree<ObsOrderLeafEntity> {
       return {
         id: 1n.toString(),
         hash: hash
-      }
+      };
     }
     return {
       id: result.id,

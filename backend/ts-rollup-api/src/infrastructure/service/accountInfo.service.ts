@@ -17,16 +17,16 @@ export class AccountInfoService {
     if (dto.L1Address == undefined && dto.accountId == undefined) {
       throw new BadRequestException('L1Address & accountId not provide');
     } 
-    let query = {}
+    let query = {};
     if (dto.L1Address && !dto.accountId) {
       query = {
         L1Address: dto.L1Address
-      }
+      };
     }
     if (dto.accountId && !dto.L1Address) {
       query = {
         accountId: dto.accountId
-      }
+      };
     }
     const result = await this.accountInfoRepo.findOne({
       where: {
@@ -34,13 +34,13 @@ export class AccountInfoService {
       }
     });
     if (result == null) {
-      throw new NotFoundException(`account not found`);
+      throw new NotFoundException('account not found');
     }
     const nonceInfo = await this.accountLeafRepo.findOneBy({
       leafId: result.accountId
     });
     if (nonceInfo == null) {
-      throw new NotFoundException(`nonce not found`);
+      throw new NotFoundException('nonce not found');
     }
     return {
       L1Address: result.L1Address,

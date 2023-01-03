@@ -14,7 +14,7 @@ import { ObsMerkleTreeService } from './obsMerkleTreeService';
 @Controller('merkleTree')
 export class MerkleTreeController {
   private logger: Logger = new Logger(MerkleTreeController.name);
-  private accountLeafId: bigint = 100n;
+  private accountLeafId = 100n;
   // private tokeneLeafId: bigint = 0n;
   constructor(
     private readonly tsAccountTreeService: TsAccountTreeService,  
@@ -35,7 +35,7 @@ export class MerkleTreeController {
     await this.tsAccountTreeService.updateLeaf(
       BigInt(updateAccountTreeDto.leafId),
       updateAccountTreeDto
-      );
+    );
     console.timeEnd('controller updateAccountTree');
   }
   @Post('updateTokenTree')
@@ -45,7 +45,7 @@ export class MerkleTreeController {
     await this.tsTokenTreeService.updateLeaf(
       BigInt(updateTokenTreeDto.leafId),
       updateTokenTreeDto,
-      );
+    );
     console.timeEnd('controller updateTokenTree');
   }
   @Post('updateObsOrderTree')
@@ -77,7 +77,7 @@ export class MerkleTreeController {
     }, {
       mainTokenId: dto.buyTokenId,
       baseTokenId: dto.sellTokenId,
-    }]
+    }];
     const marketPairInfo = await this.marketPairInfoService.findOneMarketPairInfo({pairs: pair});
     const side = marketPairInfo.mainTokenId === dto.buyTokenId ?  TsSide.BUY: TsSide.SELL;
     return {

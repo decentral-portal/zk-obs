@@ -26,7 +26,7 @@ export class L2RealBalanceServiceFake implements L2BalanceRepository {
       throw new BadRequestException('accountId is not provided');
     }
     // get L2TokenAddrList from req
-    let L2TokenAddrList: TsTokenAddress[] = (req.L2TokenAddrList === undefined||req.L2TokenAddrList.length === 0) ? [
+    const L2TokenAddrList: TsTokenAddress[] = (req.L2TokenAddrList === undefined||req.L2TokenAddrList.length === 0) ? [
       TsTokenAddress.WETH,
       TsTokenAddress.WBTC,
       TsTokenAddress.USDT,

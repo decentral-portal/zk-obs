@@ -53,7 +53,7 @@ export class ObsOrderEntity {
     name: 'marketPair',
     length: 100,
     nullable: false,
-    default: `'ETH/USDC'`,
+    default: '\'ETH/USDC\'',
   })
   marketPair!: string;
   @Column({
@@ -149,7 +149,7 @@ export class ObsOrderEntity {
     name: 'timestamp',
     nullable: false,
     precision: 3,
-    default: () => `now()`,
+    default: () => 'now()',
   })
   timestamp!: Date;
   @Column({

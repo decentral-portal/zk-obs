@@ -42,7 +42,9 @@ export class TokenLeafNode {
     (tokenMerkleTreeNode: TokenMerkleTreeNode) => tokenMerkleTreeNode.leaf,
     { onDelete: 'RESTRICT', onUpdate: 'CASCADE' }
   )
-  @JoinColumn([{ name: 'leafId', referencedColumnName: 'leafId' },
-  { name: 'accountId', referencedColumnName: 'accountId' }])
+  @JoinColumn([
+    { name: 'leafId', referencedColumnName: 'leafId' },
+    { name: 'accountId', referencedColumnName: 'accountId' }
+  ])
   tokenMerkleNode!: TokenMerkleTreeNode;
 }

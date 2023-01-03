@@ -19,7 +19,7 @@ import { HashingServiceInterface } from '@common/rbac/infrastructure/ports/hashi
 
 @Injectable()
 export class AccountInfoService implements AccountInfoRepository{
-  private currentCounter: bigint = 0n;
+  private currentCounter = 0n;
   constructor(private readonly logger: PinoLoggerService,
     @InjectRepository(AccountInformation)
     private readonly accountInformationRepository: Repository<AccountInformation>,

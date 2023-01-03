@@ -52,7 +52,7 @@ export class MatchObsOrderEntity {
     type: 'varchar',
     name: 'marketPair',
     length: 100,
-    default: `'ETH/USDC'`,
+    default: '\'ETH/USDC\'',
     nullable: false
   })
   marketPair!: string;

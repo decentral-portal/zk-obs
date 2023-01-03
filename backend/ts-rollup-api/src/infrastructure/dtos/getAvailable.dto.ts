@@ -1,11 +1,11 @@
-import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class GetAvailableRequestDto {
   @ApiPropertyOptional({
     isArray: true,
     type: [String]
   })
-  L2TokenAddrs!: string[]
+  L2TokenAddrs!: string[];
   @ApiPropertyOptional()
   L1Address!: string;
   @ApiPropertyOptional()

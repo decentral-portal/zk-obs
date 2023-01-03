@@ -32,7 +32,7 @@ export const toTsTxType = (txType: string): TsTxType => {
     return TsTxType.UNKNOWN;
   }
   return type;
-}
+};
 export const TsDeciaml = {
   TS_TOKEN_AMOUNT_DEC: 18,
   TS_INTEREST_DEC: 6,
@@ -57,4 +57,4 @@ export enum TsTokenAddress {
 export const toTsTokenAddressFromStr = (value: string): TsTokenAddress => {
   const token = Object.values(TsTokenAddress).find((token) => token.toString() == value);
   return token ? token : TsTokenAddress.UNKNOWN;
-}
+};

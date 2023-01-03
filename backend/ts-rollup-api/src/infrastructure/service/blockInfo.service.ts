@@ -48,7 +48,7 @@ export class BlockInformationServcie {
       perPage: Number(perPage),
       pageNumber: Number(pageNumber),
       totalPage: Math.ceil(total / perPage),
-    }
+    };
   }
   async getBlockInformations(paginationDto: PaginationDto): Promise<BlockInformationPagination> {
     const { pageNumber, perPage } = paginationDto;
