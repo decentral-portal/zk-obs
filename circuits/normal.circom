@@ -47,7 +47,7 @@ template Chunkify(){
         Temp[2] * (1 << (8 * 11)) + 
         reqData[ReqIdxArg(3)] * (1 << (8 * 9)) +
         Temp[3] * (1 << (8 * 4));
-    signal B_4 <== resData[1] * (1 << (8 * 13));
+    signal B_4 <== Temp[3] * (1 << (8 * 13));
 
     signal B <== Mux(6)([B_0, B_1, B_2, B_3, B_4, 0], Mux(ReqTypeCount())([5, 0, 0, 0, 1, 5, 4, 5, 1, 4, 5, 5], reqData[ReqIdxReqType()]));
 
@@ -290,7 +290,6 @@ template Normal(){
             chunkCounter[i + 1] <== chunkCounter[i] + chunkCount[i];
         for(var j = 0; j < MaxChunksPerReq(); j++){
             chunkMasks[i][j] <== LessThan(MaxChunksPerReq())([j, chunkCount[i]]);
-            log(chunkCounter[i] + j);
             Indexer(NumOfChunks())(chunkMasks[i][j], r_chunks[i][j], chunkCounter[i] + j, o_chunks);
             if(j == 0)
                 Indexer(NumOfChunks())(chunkMasks[i][j], Mux(ReqTypeCount())([0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0], reqData[i][ReqIdxReqType()]), chunkCounter[i] + j, isCriticalChunk);
