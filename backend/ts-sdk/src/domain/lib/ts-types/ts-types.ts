@@ -1,4 +1,5 @@
-import { TsTxEntityRequest } from './ts-req-types';
+import { TS_STATUS } from 'common/ts-typeorm/src/account/tsStatus.enum';
+import { TransactionInfo } from '@common/ts-typeorm/account/transactionInfo.entity';
 
 export const LEN_OF_REQUEST = 10;
 export const CHUNK_BYTES_SIZE = 12;
@@ -24,7 +25,6 @@ export const TsDefaultValue = {
   ADDRESS_DEFAULT_VALUE: '0x00',
 };
 
-
 export enum TsTxType {
   UNKNOWN = '0',
   NOOP = '0',
@@ -43,7 +43,7 @@ export enum TsTxType {
 
   AUCTION_LEND = '99',
   AUCTION_BORROW = '100',
-  AUCTION_CANCEL = '101'
+  AUCTION_CANCEL = '101',
 }
 
 export const TsDeciaml = {
@@ -52,18 +52,18 @@ export const TsDeciaml = {
 };
 
 export enum TsTokenAddress {
-    Unknown = '0',
-    WETH = '1',
-    USDT = '2'
-  }
-
-export interface TsTokenInfo {
-    amount: bigint;
-    lockAmt: bigint;
+  Unknown = '0',
+  WETH = '1',
+  USDT = '2',
 }
 
-export const TxNoop: TsTxEntityRequest = {
-  reqType: TsTxType.UNKNOWN,
+export interface TsTokenInfo {
+  amount: bigint;
+  lockAmt: bigint;
+}
+
+export const TxNoop: TransactionInfo = {
+  reqType: Number(TsTxType.UNKNOWN),
   txId: 0,
   accountId: 0n,
   tokenId: 0n,
@@ -72,10 +72,10 @@ export const TxNoop: TsTxEntityRequest = {
   amount: 0n,
   nonce: 0n,
   eddsaSig: {
-    R8: ['0','0'],
-    S: '0'
+    R8: ['0', '0'],
+    S: '0',
   },
-  ecdsaSig: 0n,
+  ecdsaSig: '0',
   arg0: 0n,
   arg1: 0n,
   arg2: 0n,
@@ -85,5 +85,18 @@ export const TxNoop: TsTxEntityRequest = {
   feeToken: 0n,
   tsPubKeyX: '',
   tsPubKeyY: '',
+  blockNumber: null,
+  metadata: null,
+  txStatus: TS_STATUS.PENDING,
+  L2AccountInfo: {} as any,
+  blockInfo: {} as any,
+  matchedOrder: null,
+  matchedOrder2: null,
+  createdAt: new Date(0),
+  createdBy: null,
+  updatedAt: new Date(0),
+  updatedBy: null,
+  deletedAt: null,
+  deletedBy: null,
   tokenAddr: TsTokenAddress.Unknown,
 };

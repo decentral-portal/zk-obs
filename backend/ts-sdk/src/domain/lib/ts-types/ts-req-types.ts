@@ -2,24 +2,24 @@ import { toTreeLeaf } from '../ts-rollup/ts-helper';
 import { TsSystemAccountAddress, TsTokenAddress, TsTxType } from './ts-types';
 
 export type TsApiResponsePayload<T> = {
-    status: number,
-    data: T,
-    error?: string,
-}
+  status: number;
+  data: T;
+  error?: string;
+};
 
 export type EdDSASignatureRequestType = {
-    R8: [string, string],
-    S: string
-}
+  R8: [string, string];
+  S: string;
+};
 
 export interface ITxRequest {
-    reqType: TsTxType;
+  reqType: TsTxType;
 }
 
 export interface TsTxSignaturePayload {
-    eddsaSig: EdDSASignatureRequestType;
-    ecdsaSig?: string;
-    // tsPubKey: [string, string];
+  eddsaSig: EdDSASignatureRequestType;
+  ecdsaSig?: string;
+  // tsPubKey: [string, string];
 }
 
 /** Client Request Types */
@@ -40,38 +40,10 @@ export interface TsTxDepositNonSignatureRequest extends ITxRequest {
   stateAmt: string;
   sender: string;
 }
-export type TsTxDepositRequest = TsTxDepositNonSignatureRequest
+export type TsTxDepositRequest = TsTxDepositNonSignatureRequest;
 
 /** Transfer */
-// TODO: replace with TsTxEntityRequest
-export interface TsTxEntityRequest {
-  txId: number;
-  blockNumber?: number;
-  reqType: TsTxType;
-  accountId: bigint;
-  tokenId: bigint;
-  accumulatedSellAmt: bigint;
-  accumulatedBuyAmt: bigint;
-  amount: bigint;
-  nonce: bigint;
-  eddsaSig: {
-    R8: [string, string];
-    S: string;
-  };
-  ecdsaSig: bigint;
-  arg0: bigint;
-  arg1: bigint;
-  arg2: bigint;
-  arg3: bigint;
-  arg4: bigint;
-  fee: bigint;
-  feeToken: bigint;
 
-  tsPubKeyX: string;
-  tsPubKeyY: string;
-
-  tokenAddr: TsTokenAddress;
-}
 export enum TsSide {
   BUY = '0',
   SELL = '1',
@@ -115,7 +87,7 @@ export class ObsOrderLeaf {
     this.accumulatedBuyAmt = accumulatedBuyAmt;
     // this.orderLeafId = orderLeafId;
   }
-  
+
   setOrderLeafId(orderLeafId: bigint) {
     this.orderLeafId = orderLeafId;
   }
@@ -150,7 +122,7 @@ export interface TsTxWithdrawNonSignatureRequest extends ITxRequest {
   stateAmt: string;
   nonce: string;
 }
-export interface TsTxWithdrawRequest extends TsTxWithdrawNonSignatureRequest, TsTxSignaturePayload { }
+export interface TsTxWithdrawRequest extends TsTxWithdrawNonSignatureRequest, TsTxSignaturePayload {}
 
 export interface TsTxLimitOrderNonSignatureRequest extends ITxRequest {
   sender: string;
@@ -160,22 +132,22 @@ export interface TsTxLimitOrderNonSignatureRequest extends ITxRequest {
   buyTokenId: TsTokenAddress;
   buyAmt: string;
 }
-export interface TsTxLimitOrderRequest extends TsTxLimitOrderNonSignatureRequest, TsTxSignaturePayload { }
+export interface TsTxLimitOrderRequest extends TsTxLimitOrderNonSignatureRequest, TsTxSignaturePayload {}
 
 export interface TsTxLimitStartNonSignatureRequest extends ITxRequest {
   orderLeafId: string;
 }
-export interface TsTxLimitStartRequest extends TsTxLimitStartNonSignatureRequest, TsTxSignaturePayload { }
+export interface TsTxLimitStartRequest extends TsTxLimitStartNonSignatureRequest, TsTxSignaturePayload {}
 
 export interface TsTxLimitExchangeNonSignatureRequest extends ITxRequest {
   orderLeafId: string;
 }
-export interface TsTxLimitExchangeRequest extends TsTxLimitExchangeNonSignatureRequest, TsTxSignaturePayload { }
+export interface TsTxLimitExchangeRequest extends TsTxLimitExchangeNonSignatureRequest, TsTxSignaturePayload {}
 
 export interface TsTxLimitEndNonSignatureRequest extends ITxRequest {
   orderLeafId: string;
 }
-export interface TsTxLimitEndRequest extends TsTxLimitEndNonSignatureRequest, TsTxSignaturePayload { }
+export interface TsTxLimitEndRequest extends TsTxLimitEndNonSignatureRequest, TsTxSignaturePayload {}
 
 export interface TsTxMarketOrderNonSignatureRequest extends ITxRequest {
   sender: string;
@@ -184,20 +156,19 @@ export interface TsTxMarketOrderNonSignatureRequest extends ITxRequest {
   nonce: string;
   buyTokenId: TsTokenAddress;
 }
-export interface TsTxMarketOrderRequest extends TsTxMarketOrderNonSignatureRequest, TsTxSignaturePayload { }
+export interface TsTxMarketOrderRequest extends TsTxMarketOrderNonSignatureRequest, TsTxSignaturePayload {}
 
 export interface TsTxMarketExchangeNonSignatureRequest extends ITxRequest {
   orderLeafId: string;
 }
-export interface TsTxMarketExchangeRequest extends TsTxMarketExchangeNonSignatureRequest, TsTxSignaturePayload { }
+export interface TsTxMarketExchangeRequest extends TsTxMarketExchangeNonSignatureRequest, TsTxSignaturePayload {}
 
 export interface TsTxMarketEndNonSignatureRequest extends ITxRequest {
   orderLeafId: string;
 }
-export interface TsTxMarketEndRequest extends TsTxMarketEndNonSignatureRequest, TsTxSignaturePayload { }
+export interface TsTxMarketEndRequest extends TsTxMarketEndNonSignatureRequest, TsTxSignaturePayload {}
 
 export interface TsTxCancelOrderNonSignatureRequest extends ITxRequest {
   orderLeafId: string;
 }
-export interface TsTxCancelOrderRequest extends TsTxCancelOrderNonSignatureRequest, TsTxSignaturePayload { }
-
+export interface TsTxCancelOrderRequest extends TsTxCancelOrderNonSignatureRequest, TsTxSignaturePayload {}

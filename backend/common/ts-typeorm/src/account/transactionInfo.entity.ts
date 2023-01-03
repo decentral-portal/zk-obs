@@ -4,6 +4,7 @@ import { BaseTimeEntity } from '../common/baseTimeEntity';
 import { AccountInformation } from './accountInformation.entity';
 import { BlockInformation } from './blockInformation.entity';
 import { TS_STATUS } from './tsStatus.enum';
+import { TsTokenAddress } from '../../../../ts-sdk/src/domain/lib/ts-types/ts-types';
 
 @Entity('TransactionInfo', { schema: 'public' })
 export class TransactionInfo extends BaseTimeEntity {
@@ -19,9 +20,9 @@ export class TransactionInfo extends BaseTimeEntity {
     type: 'integer',
     name: 'blockNumber',
     nullable: true,
-    default: 0
+    default: 0,
   })
-  blockNumber!: number| null;
+  blockNumber!: number | null;
   @Column({
     type: 'integer',
     name: 'reqType',
@@ -98,7 +99,7 @@ export class TransactionInfo extends BaseTimeEntity {
     name: 'ecdsaSig',
     length: '66',
     nullable: false,
-    default: `''`,
+    default: "''",
   })
   ecdsaSig!: string;
   @Column({
@@ -233,4 +234,8 @@ export class TransactionInfo extends BaseTimeEntity {
     referencedColumnName: 'txId2',
   })
   matchedOrder2!: MatchObsOrderEntity | null;
+
+  get tokenAddr(): TsTokenAddress {
+    return this.tokenId.toString() as TsTokenAddress;
+  }
 }

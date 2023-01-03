@@ -7,12 +7,13 @@ import { BlockInformation } from 'common/ts-typeorm/src/account/blockInformation
 import { TransactionInfo } from 'common/ts-typeorm/src/account/transactionInfo.entity';
 import { Repository } from 'typeorm';
 import { TS_STATUS } from 'common/ts-typeorm/src/account/tsStatus.enum';
+import { TsRollupService } from '@ts-rollup-api/infrastructure/service/rollup.service';
 
 @BullWorker({
   queueName: TsWorkerName.SEQUENCER,
   options: {
-    concurrency: 1
-  }
+    concurrency: 1,
+  },
 })
 export class SequencerConsumer {
   constructor(
@@ -21,7 +22,7 @@ export class SequencerConsumer {
     private txRepository: Repository<TransactionInfo>,
     @InjectRepository(BlockInformation)
     private blockRepository: Repository<BlockInformation>,
-
+    private readonly rollupService: TsRollupService,
   ) {
     this.logger.log('SEQUENCER.process START');
   }
@@ -30,22 +31,28 @@ export class SequencerConsumer {
   })
   async process(job: Job<TransactionInfo>) {
     this.logger.log(`SEQUENCER.process ${job.data.txId}`);
-    // TODO: Sequencer process
-    await this.txRepository.update({
-      txId: job.data.txId,
-    }, {
-      txStatus: TS_STATUS.PROCESSING
-    });
+
+    await this.txRepository.update(
+      {
+        txId: job.data.txId,
+      },
+      {
+        txStatus: TS_STATUS.PROCESSING,
+      },
+    );
     await delay(1000 * 1.5);
-    await this.txRepository.update({
-      txId: job.data.txId,
-    }, {
-      txStatus: TS_STATUS.L2EXECUTED
-    });
+    await this.txRepository.update(
+      {
+        txId: job.data.txId,
+      },
+      {
+        txStatus: TS_STATUS.L2EXECUTED,
+      },
+    );
     return true;
   }
 }
 
 function delay(ms: number) {
-  return new Promise( resolve => setTimeout(resolve, ms) );
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
