@@ -88,7 +88,7 @@ export class OperatorProducer {
         arg0: BigInt(accountId.toString()),
         arg1: BigInt(l2Addr),
       }),
-      // this.rollupInfoRepository.update({ id: 1 }, { lastSyncBlocknumberForRegisterEvent: blockNumber }),
+      this.rollupInfoRepository.update({ id: 1 }, { lastSyncBlocknumberForRegisterEvent: blockNumber }),
     ]);
   }
 
@@ -130,6 +130,6 @@ export class OperatorProducer {
       amount: BigInt(amount.toString()),
       arg0: BigInt(accountId.toString()),
     });
-    // await this.rollupInfoRepository.update({ id: 1 }, { lastSyncBlocknumberForDepositEvent: blockNumber });
+    await this.rollupInfoRepository.update({ id: 1 }, { lastSyncBlocknumberForDepositEvent: blockNumber });
   }
 }

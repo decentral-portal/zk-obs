@@ -3,13 +3,11 @@ import { CHANNEL } from '@common/db-pubsub/domains/value-objects/pubSub.constant
 import { MessageBroker } from '@common/db-pubsub/ports/messageBroker';
 import { PinoLoggerService } from '@common/logger/adapters/real/pinoLogger.service';
 import { Injectable, Scope } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BlockInformation } from 'common/ts-typeorm/src/account/blockInformation.entity';
 import { TransactionInfo } from 'common/ts-typeorm/src/account/transactionInfo.entity';
 import { TS_STATUS } from 'common/ts-typeorm/src/account/tsStatus.enum';
 import { MoreThan, Repository } from 'typeorm';
-import { TsTxType } from '@ts-sdk/domain/lib/ts-types/ts-types';
 import { Queue } from 'bullmq';
 import { TsWorkerName } from '../../ts-sdk/src/constant';
 import { BLOCK_STATUS } from '@common/ts-typeorm/account/blockStatus.enum';
@@ -44,7 +42,6 @@ export class ProducerService {
     this.messageBrokerService.close();
   }
 
-
   private prevJobId?: string;
   async dispatchPendingTransaction() {
     this.logger.log('dispatchPendingTransaction');
@@ -55,9 +52,9 @@ export class ProducerService {
       },
       order: {
         txId: 'asc',
-      }
+      },
     });
-    if(transactions.length) {
+    if (transactions.length) {
       this.logger.log(`dispatchPendingTransaction add ${transactions.length} blocks`);
       this.currentPendingTxId = transactions[transactions.length - 1].txId;
       for (let index = 0; index < transactions.length; index++) {
@@ -94,9 +91,9 @@ export class ProducerService {
       },
       order: {
         blockNumber: 'asc',
-      }
+      },
     });
-    if(blocks.length) {
+    if (blocks.length) {
       this.logger.log(`dispatchPeningBlock add ${blocks.length} blocks`);
       this.currentPendingBlock = blocks[blocks.length - 1].blockNumber;
       for (let index = 0; index < blocks.length; index++) {
@@ -116,9 +113,9 @@ export class ProducerService {
       },
       order: {
         blockNumber: 'asc',
-      }
+      },
     });
-    if(blocks.length) {
+    if (blocks.length) {
       this.logger.log(`dispatchProvedBlock add ${blocks.length} blocks`);
       this.currentProvedBlock = blocks[blocks.length - 1].blockNumber;
       for (let index = 0; index < blocks.length; index++) {
@@ -128,5 +125,4 @@ export class ProducerService {
       }
     }
   }
-  
 }
