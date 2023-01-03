@@ -59,8 +59,13 @@
     },
     {
       "circuitName": "main-p5d-8-8-4-8",
-      "name": "8_noop-tx-8-8-4-8",
-      "path": "/Users/abner.huang/Tkspring/zk-circom/build/zkobs-p1/8_noop-tx-8-8-4-8-inputs.json"
+      "name": "8_match-8-8-4-8",
+      "path": "/Users/abner.huang/Tkspring/zk-circom/build/zkobs-p1/8_match-8-8-4-8-inputs.json"
+    },
+    {
+      "circuitName": "main-p5d-8-8-4-8",
+      "name": "9_noop-tx-8-8-4-8",
+      "path": "/Users/abner.huang/Tkspring/zk-circom/build/zkobs-p1/9_noop-tx-8-8-4-8-inputs.json"
     }
   ],
   "metadata": {
