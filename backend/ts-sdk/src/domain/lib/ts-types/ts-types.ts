@@ -91,7 +91,7 @@ export const TxNoop: TransactionInfo = {
   L2AccountInfo: {} as any,
   blockInfo: {} as any,
   matchedOrder: null,
-  matchedOrder2: null,
+  // matchedOrder2: null,
   createdAt: new Date(0),
   createdBy: null,
   updatedAt: new Date(0),
