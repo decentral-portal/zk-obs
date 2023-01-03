@@ -1,4 +1,4 @@
-import { ZkOBS } from './../../../../typechain-types/contracts/ZkOBS';
+import { ZkOBS } from '../../../ts-contract-types/contracts/ZkOBS';
 import { TsWorkerName } from '@ts-sdk/constant';
 import { PinoLoggerService } from '@common/logger/adapters/real/pinoLogger.service';
 import { EthersContract, EthersSigner, InjectContractProvider, InjectSignerProvider, Wallet } from 'nestjs-ethers';

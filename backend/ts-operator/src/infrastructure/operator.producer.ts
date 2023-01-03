@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-import { ZkOBS } from './../../../../typechain-types/contracts/ZkOBS';
+import { ZkOBS } from '../../../ts-contract-types/contracts/ZkOBS';
 import { PinoLoggerService } from '@common/logger/adapters/real/pinoLogger.service';
 import { Injectable, Scope } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
