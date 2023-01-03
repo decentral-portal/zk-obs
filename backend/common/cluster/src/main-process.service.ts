@@ -81,9 +81,11 @@ export class MainProcessService {
     }
     if(!this.workerMap[payload.to]) {
       this.logger.error(`Worker ${payload.to} not found`);
-      throw new Error(`Worker ${payload.to} not found`);
+      // throw new Error(`Worker ${payload.to} not found`);
+    } else {
+      this.workerMap[payload.to].worker?.send(payload);
+
     }
-    this.workerMap[payload.to].worker?.send(payload);
   }
 
   clusterize(workers: WorkerItem[]) {
