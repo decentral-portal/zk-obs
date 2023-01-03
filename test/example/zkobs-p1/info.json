@@ -28,8 +28,33 @@
     },
     {
       "circuitName": "main-p5d-8-8-4-8",
-      "name": "2_empty-tx-p5-8-8-4-8",
-      "path": "/Users/abner.huang/Tkspring/zk-circom/build/zkobs-p1/2_empty-tx-p5-8-8-4-8-inputs.json"
+      "name": "2_deposit-acc1-exist-p5-8-8-4-8",
+      "path": "/Users/abner.huang/Tkspring/zk-circom/build/zkobs-p1/2_deposit-acc1-exist-p5-8-8-4-8-inputs.json"
+    },
+    {
+      "circuitName": "main-p5d-8-8-4-8",
+      "name": "3_deposit-acc2-nonexist-p5-8-8-4-8",
+      "path": "/Users/abner.huang/Tkspring/zk-circom/build/zkobs-p1/3_deposit-acc2-nonexist-p5-8-8-4-8-inputs.json"
+    },
+    {
+      "circuitName": "main-p5d-8-8-4-8",
+      "name": "4_withdraw-p5-8-8-4-8",
+      "path": "/Users/abner.huang/Tkspring/zk-circom/build/zkobs-p1/4_withdraw-p5-8-8-4-8-inputs.json"
+    },
+    {
+      "circuitName": "main-p5d-8-8-4-8",
+      "name": "5_acc1-order-8-8-4-8",
+      "path": "/Users/abner.huang/Tkspring/zk-circom/build/zkobs-p1/5_acc1-order-8-8-4-8-inputs.json"
+    },
+    {
+      "circuitName": "main-p5d-8-8-4-8",
+      "name": "6_acc2-order-8-8-4-8",
+      "path": "/Users/abner.huang/Tkspring/zk-circom/build/zkobs-p1/6_acc2-order-8-8-4-8-inputs.json"
+    },
+    {
+      "circuitName": "main-p5d-8-8-4-8",
+      "name": "7_acc2-order2-8-8-4-8",
+      "path": "/Users/abner.huang/Tkspring/zk-circom/build/zkobs-p1/7_acc2-order2-8-8-4-8-inputs.json"
     }
   ],
   "metadata": {
@@ -41,9 +66,9 @@
     },
     "TsTokenAddress": {
       "Unknown": "0",
-      "WETH": "6",
+      "WETH": "1",
+      "USDT": "2",
       "WBTC": "7",
-      "USDT": "8",
       "USDC": "9",
       "DAI": "10",
       "TslETH20221231": "46",

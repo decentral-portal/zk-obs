@@ -1,7 +1,7 @@
 {
   "oriTxNum": "0",
-  "stateRoot": "0x2f65f70e4240e94a44847a4896e6ef5c22eb1b9cf3a80d7c05aad932ea206480",
-  "accountTreeRoot": "0x2d7822d39ee700a4dc0bd23972d6e3f6e58fc92de6d38779d6ce53d0bddc4bac",
+  "stateRoot": "0x1ca6e27398a62ce9d259652e6770d9023b009cdc46ae547d94ed2aaca5223b9d",
+  "accountTreeRoot": "0x1277731a998c561b39b651657a022764970a5791755d5f99be4a539f420a6963",
   "defaultAccountLeafData": [
     "0",
     "0",
