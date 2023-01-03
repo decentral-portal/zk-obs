@@ -63,9 +63,12 @@ export class ProducerService {
 
   private prevJobId?: string;
   async dispatchPendingTransaction() {
-    console.log('==============dispatchPendingTransaction============')
+    console.log('==============dispatchPendingTransaction============');
     this.logger.log('dispatchPendingTransaction');
     const transactions = await this.txRepository.find({
+      select: {
+        txId: true,
+      },
       where: {
         txId: MoreThan(this.currentPendingTxId),
         txStatus: TS_STATUS.PENDING,
