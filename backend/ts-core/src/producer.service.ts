@@ -8,12 +8,19 @@ import { BlockInformation } from 'common/ts-typeorm/src/account/blockInformation
 import { TransactionInfo } from 'common/ts-typeorm/src/account/transactionInfo.entity';
 import { TS_STATUS } from 'common/ts-typeorm/src/account/tsStatus.enum';
 import { MoreThan, Repository } from 'typeorm';
-import { Queue } from 'bullmq';
+import { Queue, Job } from 'bullmq';
 import { TsWorkerName } from '../../ts-sdk/src/constant';
 import { BLOCK_STATUS } from '@common/ts-typeorm/account/blockStatus.enum';
+import { BullWorker, BullWorkerProcess } from '@anchan828/nest-bullmq';
 
-@Injectable({
-  scope: Scope.DEFAULT,
+// @Injectable({
+//   scope: Scope.DEFAULT,
+// })
+@BullWorker({
+  queueName: TsWorkerName.CORE,
+  options: {
+    concurrency: 1,
+  },
 })
 export class ProducerService {
   private currentPendingTxId = 0;
@@ -29,10 +36,22 @@ export class ProducerService {
     private readonly messageBrokerService: MessageBroker,
   ) {
     logger.log('DispatchService');
-    this.subscribe();
+    // this.subscribe();
+
   }
 
-  subscribe() {
+  @BullWorkerProcess({
+    autorun: true,
+  })
+  async process(job: Job<TransactionInfo>) {
+    const name = job.name;
+    console.log('==============process============', name)
+    if(name === 'TransactionInfo') {
+      await this.dispatchPendingTransaction();
+    }
+  }
+  async subscribe() {
+    await this.messageBrokerService.addChannels([CHANNEL.ORDER_CREATED, CHANNEL.ORDER_PROCCESSD, CHANNEL.ORDER_VERIFIED]);
     this.messageBrokerService.subscribe(CHANNEL.ORDER_CREATED, this.dispatchPendingTransaction.bind(this));
     this.messageBrokerService.subscribe(CHANNEL.ORDER_PROCCESSD, this.dispatchPeningBlock.bind(this));
     this.messageBrokerService.subscribe(CHANNEL.ORDER_VERIFIED, this.dispatchProvedBlock.bind(this));
@@ -44,6 +63,7 @@ export class ProducerService {
 
   private prevJobId?: string;
   async dispatchPendingTransaction() {
+    console.log('==============dispatchPendingTransaction============')
     this.logger.log('dispatchPendingTransaction');
     const transactions = await this.txRepository.find({
       where: {
@@ -60,21 +80,22 @@ export class ProducerService {
       for (let index = 0; index < transactions.length; index++) {
         const tx = transactions[index];
         const jobId = `${TsWorkerName.SEQUENCER}-${tx.txId}`;
-        console.log({
-          jobId,
-          prevJobId: this.prevJobId,
-        });
+        // console.log({
+        //   jobId,
+        //   prevJobId: this.prevJobId,
+        // });
         // const joba = await this.seqQueue.getJob(jobId);
         try {
-          const job = await this.seqQueue.add(tx.txId.toString(), tx, {
+          const job = await this.seqQueue.add(tx.txId.toString(), {
             jobId,
+            txId: tx.txId,
             // parent: this.prevJobId ? {
             //   id: this.prevJobId,
             //   queue: TsWorkerName.SEQUENCER,
             // } : undefined,
           });
-          this.prevJobId = this.seqQueue.toKey(job.id?.toString() || '');
-          this.logger.log(`JOB: ${job.id}`);
+          // this.prevJobId = this.seqQueue.toKey(job.id?.toString() || '');
+          // this.logger.log(`JOB: ${job.id}`);
         } catch (error) {
           console.error(error);
         }

@@ -15,6 +15,11 @@ import { WorkerService } from '@common/cluster/worker.service';
 import { firstValueFrom } from 'rxjs/internal/firstValueFrom';
 import { AccountInformation } from '@common/ts-typeorm/account/accountInformation.entity';
 import { TsTxType } from '@common/ts-typeorm/account/dto/ts-type';
+import { MessageBroker } from '@common/db-pubsub/ports/messageBroker';
+import { CHANNEL } from '@common/db-pubsub/domains/value-objects/pubSub.constants';
+import { TsWorkerName } from '@ts-sdk/constant';
+import { BullQueueInject } from '@anchan828/nest-bullmq';
+import { Queue } from 'bullmq';
 @Injectable({
   scope: Scope.DEFAULT,
 })
@@ -26,9 +31,12 @@ export class OperatorProducer {
     private readonly logger: PinoLoggerService,
     @InjectSignerProvider() private readonly ethersSigner: EthersSigner,
     @InjectContractProvider() private readonly ethersContract: EthersContract,
+    @BullQueueInject(TsWorkerName.CORE) private readonly coreQueue: Queue,
     @InjectRepository(TransactionInfo) private txRepository: Repository<TransactionInfo>,
     @InjectRepository(RollupInformation) private rollupInfoRepository: Repository<RollupInformation>,
     @InjectRepository(AccountInformation) private accountRepository: Repository<AccountInformation>,
+    private readonly messageBrokerService: MessageBroker,
+    
     private readonly connection: Connection,
     private readonly workerService: WorkerService,
   ) {
@@ -48,9 +56,9 @@ export class OperatorProducer {
     this.logger.log(`OperatorProducer.listenRegisterEvent contract=${this.contract.address}`);
     const filters = this.contract.filters.Register();
     const handler = (log: any) => {
-      console.log({
-        registerLog: log,
-      });
+      // console.log({
+      //   registerLog: log,
+      // });
       this.logger.log(`OperatorProducer.listenRegisterEvent log:${JSON.stringify(log)}`);
       this.handleRegisterEvent(log.args.sender, log.args.accountId, log.args.tsPubX, log.args.tsPubY, log.args.l2Addr, log);
     };
@@ -80,7 +88,7 @@ export class OperatorProducer {
       tsPubKeyY: tsPubY.toString(),
     };
     this.logger.log(`OperatorProducer.handleRegisterEvent txRegister:${JSON.stringify(txRegister)}`);
-    return await Promise.all([
+    await Promise.all([
       this.accountRepository.upsert(txRegister, ['L1Address']),
       this.txRepository.insert({
         reqType: Number(TsTxType.REGISTER),
@@ -92,6 +100,10 @@ export class OperatorProducer {
       }),
       // this.rollupInfoRepository.update({ id: 1 }, { lastSyncBlocknumberForRegisterEvent: blockNumber }),
     ]);
+    this.coreQueue.add('TransactionInfo', {
+      test: true
+    });
+    // this.messageBrokerService.publish(CHANNEL.ORDER_CREATED, {});
   }
 
   //! Deposit Event
@@ -102,9 +114,9 @@ export class OperatorProducer {
     // const { lastSyncBlocknumberForDepositEvent } = await this.rollupInfoRepository.findOneOrFail({ where: { id: 1 } });
     const handler = (log: any) => {
       this.logger.log(`OperatorProducer.listenDepositEvent log:${JSON.stringify(log)}`);
-      console.log({
-        depositLog: log,
-      });
+      // console.log({
+      //   depositLog: log,
+      // });
       this.handleDepositEvent(log.args.sender, log.args.accountId, log.args.tokenId, log.args.amount, log.transactionHash);
     };
     this.contract.queryFilter(filters, 0, 'latest').then((logs) => {
@@ -133,6 +145,10 @@ export class OperatorProducer {
       amount: BigInt(amount.toString()),
       arg0: BigInt(accountId.toString()),
     });
+    this.coreQueue.add('TransactionInfo', {
+      test: true
+    });
+    // this.messageBrokerService.publish(CHANNEL.ORDER_CREATED, {});
     // await this.rollupInfoRepository.update({ id: 1 }, { lastSyncBlocknumberForDepositEvent: blockNumber });
   }
 }

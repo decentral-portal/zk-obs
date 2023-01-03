@@ -13,6 +13,8 @@ import { TransactionInfo } from 'common/ts-typeorm/src/account/transactionInfo.e
 import { TsTypeOrmModule } from 'common/ts-typeorm/src/tstypeorm.module';
 import { WorkerModule } from '@common/cluster/cluster.module';
 import { WorkerService } from '@common/cluster/worker.service';
+import { TsRollupService } from '@ts-rollup-api/infrastructure/service/rollup.service';
+import { DatabasePubSubModule } from '@common/db-pubsub/db-pubsub.module';
 
 @Module({
   imports: [
@@ -20,7 +22,11 @@ import { WorkerService } from '@common/cluster/worker.service';
     LoggerModule,
     ScheduleModule.forRoot(),
     BullQueueModule,
-    BullModule.registerQueue(TsWorkerName.SEQUENCER),
+    BullModule.registerQueue({
+      queueName: TsWorkerName.SEQUENCER
+    }, {
+      queueName: TsWorkerName.CORE
+    }),
     TsTypeOrmModule,
     TypeOrmModule.forFeature(
       [
@@ -28,10 +34,12 @@ import { WorkerService } from '@common/cluster/worker.service';
         BlockInformation,
       ]),
     WorkerModule,
+    DatabasePubSubModule,
   ],
   controllers: [],
   providers: [
     SequencerConsumer,
+    TsRollupService,
     // SeqProducerService,
   ]
 })

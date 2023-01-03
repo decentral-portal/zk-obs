@@ -30,7 +30,7 @@ export class TsRollupService {
     this.logger.setContext('TsRollupService');
   }
 
-  async doTransaction(req: TransactionInfo): Promise<TsRollupCircuitInputItemType> {
+  async doTransaction(req: TransactionInfo) {
     return await this.rollup.doTransaction(req);
   }
 

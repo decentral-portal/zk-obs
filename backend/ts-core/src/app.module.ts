@@ -32,6 +32,9 @@ import { MainProcessModule } from '@common/cluster/cluster.module';
       ]),
     BullModule.registerQueue(
       {
+        queueName: TsWorkerName.CORE,
+      },
+      {
         queueName: TsWorkerName.SEQUENCER,
       }, {
         queueName: TsWorkerName.PROVER,

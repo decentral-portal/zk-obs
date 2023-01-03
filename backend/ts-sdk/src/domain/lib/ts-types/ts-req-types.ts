@@ -1,5 +1,5 @@
 import { toTreeLeaf } from '../ts-rollup/ts-helper';
-import { TsSystemAccountAddress, TsTokenAddress, TsTxType } from './ts-types';
+import { TsTokenAddress, TsTxType } from './ts-types';
 
 export type TsApiResponsePayload<T> = {
   status: number;

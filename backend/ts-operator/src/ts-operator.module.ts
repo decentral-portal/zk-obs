@@ -14,6 +14,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { TransactionInfo } from 'common/ts-typeorm/src/account/transactionInfo.entity';
 import { WorkerModule } from '@common/cluster/cluster.module';
 import { WorkerService } from '@common/cluster/worker.service';
+import { DatabasePubSubModule } from '@common/db-pubsub/db-pubsub.module';
 
 const localNetwork = {
   name: 'LOCAL',
@@ -27,7 +28,12 @@ const localNetwork = {
     ConfigModule,
     LoggerModule,
     BullQueueModule,
-    BullModule.registerQueue(TsWorkerName.OPERATOR),
+    BullModule.registerQueue({
+      queueName: TsWorkerName.CORE,
+    },
+    {
+      queueName: TsWorkerName.OPERATOR,
+    }),
     TsTypeOrmModule,
     TypeOrmModule.forFeature([RollupInformation, TransactionInfo]),
     EthersModule.forRootAsync({
@@ -45,9 +51,10 @@ const localNetwork = {
       }),
     }),
     WorkerModule,
+    DatabasePubSubModule,
   ],
   controllers: [],
-  providers: [OperatorConsumer, OperatorProducer],
+  providers: [OperatorConsumer, OperatorProducer,],
 })
 export class TsOperatorModule implements OnModuleInit {
   // eslint-disable-next-line no-empty-function

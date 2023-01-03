@@ -1,7 +1,7 @@
 import { TsWorkerName } from '@ts-sdk/constant';
 import { PinoLoggerService } from '@common/logger/adapters/real/pinoLogger.service';
-import { BullWorker, BullWorkerProcess } from '@anchan828/nest-bullmq';
-import { Job } from 'bullmq';
+import { BullWorker, BullWorkerProcess, BullQueueInject } from '@anchan828/nest-bullmq';
+import { Job, Queue } from 'bullmq';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BlockInformation } from 'common/ts-typeorm/src/account/blockInformation.entity';
 import { TransactionInfo } from 'common/ts-typeorm/src/account/transactionInfo.entity';
@@ -30,20 +30,24 @@ export class SequencerConsumer {
     autorun: true,
   })
   async process(job: Job<TransactionInfo>) {
-    this.logger.log(`SEQUENCER.process ${job.data.txId}`);
+    this.logger.log(`SEQUENCER.process ${job.data.txId} start`);
 
-    await this.txRepository.update(
-      {
+    const req = await this.txRepository.findOne({
+      where: {  
         txId: job.data.txId,
       },
-      {
-        txStatus: TS_STATUS.PROCESSING,
-      },
-    );
-    await delay(1000 * 1.5);
+    });
+    if(!req) {
+      this.logger.error(`SEQUENCER.process ${job.data.txId} not found`);
+      return false;
+    }
+    req.txStatus = TS_STATUS.PROCESSING;
+    this.txRepository.save(req);
+    await this.rollupService.doTransaction(req);
+    this.logger.log(`SEQUENCER.process ${job.data.txId} done`);
     await this.txRepository.update(
       {
-        txId: job.data.txId,
+        txId: req.txId,
       },
       {
         txStatus: TS_STATUS.L2EXECUTED,
