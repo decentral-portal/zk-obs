@@ -235,9 +235,23 @@ contract ZkOBS is Ownable {
             storedBlockHashes[committedBlockNum] == keccak256(abi.encode(lastCommittedBlock)),
             "Commited block inconsistency"
         );
-
+        console.log("in commitBlocks()");
         for (uint32 i = 0; i < newBlocks.length; ++i) {
+            console.log("[lastCommittedBlock]");
+            console.log("blockNum:");
+            console.log(lastCommittedBlock.blockNumber);
+            console.log("stateRoot:");
+            console.logBytes32(lastCommittedBlock.stateRoot);
+            console.log("commitment:");
+            console.logBytes32(lastCommittedBlock.commitment);
             lastCommittedBlock = _commitOneBlock(lastCommittedBlock, newBlocks[i]);
+            console.log("[newBlock]");
+            console.log("blockNum:");
+            console.log(lastCommittedBlock.blockNumber);
+            console.log("stateRoot:");
+            console.logBytes32(lastCommittedBlock.stateRoot);
+            console.log("commitment:");
+            console.logBytes32(lastCommittedBlock.commitment);
             committedL1RequestNum += lastCommittedBlock.l1RequestNum;
             storedBlockHashes[lastCommittedBlock.blockNumber] = keccak256(abi.encode(lastCommittedBlock));
             emit BlockCommitted(lastCommittedBlock.blockNumber);
@@ -327,29 +341,31 @@ contract ZkOBS is Ownable {
         CommitBlock memory newBlock,
         bytes memory offsetCommitment
     ) internal view returns (bytes32 commitment) {
-        bytes memory pubdata = abi.encodePacked(newBlock.publicData, offsetCommitment);
-        console.log("create block commitment");
-        //console.logBytes(abi.encodePacked(previousBlock.stateRoot, newBlock.newStateRoot, newBlock.newTsRoot, pubdata));
-        console.log("oriStateRoot:");
-        console.logBytes32(previousBlock.stateRoot);
-        console.log("newStateRoot:");
-        console.logBytes32(newBlock.newStateRoot);
-        console.log("newTsRoot:");
-        console.logBytes32(newBlock.newTsRoot);
-        console.log("");
-        console.log("isCriticalChunk:");
-        console.logBytes(pubdata);
+        bytes memory pubdata = abi.encodePacked(offsetCommitment, newBlock.publicData);
+        console.log("in createBlockCommitment()");
+        console.log("commitmentMessage:");
+        console.logBytes(abi.encodePacked(previousBlock.stateRoot, newBlock.newStateRoot, newBlock.newTsRoot, pubdata));
+        // console.log("oriStateRoot:");
+        // console.logBytes32(previousBlock.stateRoot);
+        // console.log("newStateRoot:");
+        // console.logBytes32(newBlock.newStateRoot);
+        // console.log("newTsRoot:");
+        // console.logBytes32(newBlock.newTsRoot);
+        // console.log("");
+        // console.log("isCriticalChunk:");
+        // console.logBytes(pubdata);
         commitment = sha256(
             abi.encodePacked(previousBlock.stateRoot, newBlock.newStateRoot, newBlock.newTsRoot, pubdata)
         );
-        console.log("calculated commitment:");
-        console.logBytes32(commitment);
-        console.log("uint256(commitment):");
-        console.log(uint256(commitment));
-        console.log("uint256(commitment) & INPUT_MASK:");
-        console.log(uint256(commitment) & INPUT_MASK);
+        // console.log("calculated commitment:");
+        // console.logBytes32(commitment);
+        // console.log("uint256(commitment):");
+        // console.log(uint256(commitment));
+        // console.log("uint256(commitment) & INPUT_MASK:");
+        // console.log(uint256(commitment) & INPUT_MASK);
     }
-
+// 0x0d6189feb875b747242eb678f56f3d907bc192e620231c7c04e7000829efcfb20d31a2ea0bd50134432c6d5c59ec5a680fce07665a4d78f68236907043d307bb1d7ceec9060995e2c3d935f6f9f998a8ffdbbc0072d4cd6c27172392543d9a7101000000000000000001000000640007000000000000000000000000009896807b81e481dc3124d55ffed523a839ee8446b648640000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+// 0x0d6189feb875b747242eb678f56f3d907bc192e620231c7c04e7000829efcfb20d31a2ea0bd50134432c6d5c59ec5a680fce07665a4d78f68236907043d307bb1d7ceec9060995e2c3d935f6f9f998a8ffdbbc0072d4cd6c27172392543d9a710100000000000000000100000064000700000000000000000000000000989680db3b49d1bdd96586f6c1d06cedc7946f0064f34a0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
     function proveBlocks(StoredBlock[] memory committedBlocks, Proof[] memory proof) external {
         console.log("in prove blocks");
         uint32 currentProvedBlockNum = provedBlockNum;

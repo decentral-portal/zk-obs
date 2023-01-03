@@ -38,7 +38,9 @@ describe('Unit test of rollup', function () {
   describe('Rollup for single register', function () {
     const pubKeyX = BigNumber.from(inputs.tsPubKey[0][0]);
     const pubKeyY = BigNumber.from(inputs.tsPubKey[0][1]);
-    const l2Addr = genTsAddr(pubKeyX, pubKeyY);
+    const tmp = genTsAddr(pubKeyX, pubKeyY);
+    console.log(tmp);
+    const l2Addr = '0xdb3b49d1bdd96586f6c1d06cedc7946f0064f34a';
     const amount: BigNumber = BigNumber.from(inputs.reqData[0][3]);
     const CALLDATA_CHUNK = 9;
     before(async function () {
@@ -139,7 +141,7 @@ describe('Unit test of rollup', function () {
           [OpType.REGISTER, accountId, tokenIdUSDC, amount, l2Addr],
         )
         .padEnd((CALLDATA_CHUNK * 12 * 8) / 4 + 2, '0');
-
+      console.log({ publicData });
       const commitBlock: ZkOBS.CommitBlockStruct = {
         blockNumber: BigNumber.from('1'),
         newStateRoot: newStateRoot,
