@@ -38,7 +38,7 @@ export class SequencerConsumer {
       },
     });
     if(!req) {
-      this.logger.error(`SEQUENCER.process ${job.data.txId} not found`);
+      this.logger.log(`SEQUENCER.process ${job.data.txId} not found`);
       return false;
     }
     req.txStatus = TS_STATUS.PROCESSING;
