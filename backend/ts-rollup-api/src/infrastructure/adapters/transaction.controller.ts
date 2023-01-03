@@ -30,6 +30,9 @@ import { ObsOrderEntity } from '@common/ts-typeorm/auctionOrder/obsOrder.entity'
 import { RegisterRequestDto } from '../dtos/RegisterRequest.dto';
 import { TransactionInfo } from '@common/ts-typeorm/account/transactionInfo.entity';
 import { GetTransactionRequestDto, GetTransactionResponseDto } from '../dtos/transactionInfo.dto';
+import { AccountLeafNode } from '@common/ts-typeorm/account/accountLeafNode.entity';
+import { AvailableService } from '../service/available.service';
+import { TokenInfo } from '../dtos/getAvailable.dto';
 
 @Controller('v1/ts/transaction')
 @ApiTags('Transaction')
@@ -41,6 +44,7 @@ export class TsTransactionController {
         private readonly commandBus: CommandBus,
         private readonly marketPairInfoService: MarketPairInfoService,
         private readonly connection: Connection,
+        private readonly availableService: AvailableService
   ) {}
     // @Post('withdraw')
     // @ApiOperation({})
@@ -116,6 +120,25 @@ export class TsTransactionController {
         txInfo["arg3"] = BigInt(dto.buyAmt);
       }
       console.log(txInfo);
+      const [accoutLeaf, currentAvailable] = await Promise.all([ this.connection.getRepository(AccountLeafNode).findOne({
+          where: {
+            leafId: dto.sender
+          }
+        }),
+        await this.availableService.getAvailableByAccountInfo({
+          accountId: dto.sender,
+          L1Address: '',
+          L2TokenAddrs: []
+        })
+      ]);
+      if (!accoutLeaf) {
+        throw new BadRequestException('account not exist');
+      }
+      const targetTokenInfo = currentAvailable.list.find((item: TokenInfo) => item.tokenAddr === dto.sellTokenId);
+      if (!targetTokenInfo || targetTokenInfo.amount  < dto.sellAmt) {
+        throw new BadRequestException('not enough availabe balance');
+      }
+      console.log(accoutLeaf);
       const orderId = await this.connection.transaction(async (manager) => { 
         const txInfoEntity = new TransactionInfo();
         txInfoEntity.reqType = txInfo.reqType;
@@ -138,6 +161,11 @@ export class TsTransactionController {
           remainMainQty: BigInt(remainMainQty),
           remainBaseQty: BigInt(remainBaseQty),
           price: formatPrice,
+        });
+        await this.connection.getRepository(AccountLeafNode).update({
+          leafId: dto.sender
+        }, {
+          nonce: BigInt(accoutLeaf.nonce) + 1n
         });
         const orderId = result.generatedMaps[0].id;
         return orderId;
