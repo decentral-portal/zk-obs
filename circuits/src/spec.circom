@@ -20,7 +20,7 @@ function MaxChunksPerReq(){
 }
 
 function NumOfReqs(){
-    return 10;
+    return 3;
 }
 function NumOfOrderUnits(){
     return NumOfReqs() * MaxOrderUnitsPerReq();
@@ -32,7 +32,7 @@ function NumOfTokenUnits(){
     return NumOfReqs() * MaxTokenUnitsPerReq();
 }
 function NumOfChunks(){
-    return 50;//NumOfReqs() * 3;//MaxChunksPerReq();
+    return 20;//NumOfReqs() * 3;//MaxChunksPerReq();
 }
 function NumOfOuts(){
     return (NumOfChunks() + 5) \ 6;

@@ -539,13 +539,13 @@ template DoReqSecondLimitExchange(){
     ImplyEq()(enabled, r_tokenRootFlow[0][0], r_oriAccountLeaf[0][ALIdxTokenRoot()]);
     ImplyEq()(enabled, r_tokenRootFlow[0][1], r_tokenRootFlow[1][0]);
     ImplyEq()(enabled, r_tokenRootFlow[1][1], r_newAccountLeaf[0][ALIdxTokenRoot()]);
-    ImplyEq()(enabled, r_tokenLeafId[0], r_oriOrderLeaf[0][OLIdxArg(3)]);
+    ImplyEq()(enabled, r_tokenLeafId[0], r_oriOrderLeaf[0][OLIdxArg(2)]);
     ImplyEq()(enabled, r_tokenLeafId[1], r_oriOrderLeaf[0][OLIdxL2TokenAddr()]);
 
     /* legality */
     ImplyEq()(enabled, channelIn[ReqIdxReqType()], ReqTypeNumSecondLimitOrder());
-    ImplyEq()(enabled, channelIn[ReqIdxL2TokenAddr()], r_oriOrderLeaf[0][ReqIdxArg(3)]);
-    ImplyEq()(enabled, channelIn[ReqIdxArg(3)], r_oriOrderLeaf[0][ReqIdxL2TokenAddr()]);
+    ImplyEq()(enabled, channelIn[ReqIdxL2TokenAddr()], r_oriOrderLeaf[0][ReqIdxArg(2)]);
+    ImplyEq()(enabled, channelIn[ReqIdxArg(2)], r_oriOrderLeaf[0][ReqIdxL2TokenAddr()]);
     ImplyEq()(enabled, 1, isMatched);
 
     /* correctness */
@@ -622,13 +622,14 @@ template DoReqSecondLimitEnd(){
 
     ImplyEq()(enabled, r_accountRootFlow[0][0], accountRootFlow[0]);
     ImplyEq()(enabled, r_accountRootFlow[0][1], accountRootFlow[1]);
-    ImplyEq()(enabled, r_accountLeafId[0], r_oriOrderLeaf[0][OLIdxL2AddrSigner()]);
+    ImplyEq()(enabled, r_accountLeafId[0], channelIn[OLIdxL2AddrSigner()]);
 
     ImplyEq()(enabled, r_tokenRootFlow[0][0], r_oriAccountLeaf[0][ALIdxTokenRoot()]);
     ImplyEq()(enabled, r_tokenRootFlow[0][1], r_tokenRootFlow[1][0]);
     ImplyEq()(enabled, r_tokenRootFlow[1][1], r_newAccountLeaf[0][ALIdxTokenRoot()]);
-    ImplyEq()(enabled, r_tokenLeafId[0], r_oriOrderLeaf[0][OLIdxL2TokenAddr()]);
-    ImplyEq()(enabled, r_tokenLeafId[1], r_oriOrderLeaf[0][OLIdxArg(3)]);
+    log("here,", channelIn[OLIdxArg(3)], channelIn[OLIdxL2TokenAddr()]);
+    ImplyEq()(enabled, r_tokenLeafId[0], channelIn[OLIdxArg(2)]);
+    ImplyEq()(enabled, r_tokenLeafId[1], channelIn[OLIdxL2TokenAddr()]);
 
     /* legality */
     ImplyEq()(enabled, channelIn[ReqIdxReqType()], ReqTypeNumSecondLimitOrder());
