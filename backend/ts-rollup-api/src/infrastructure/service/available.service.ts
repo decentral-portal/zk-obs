@@ -1,4 +1,5 @@
 import { AccountInformation } from '@common/ts-typeorm/account/accountInformation.entity';
+import { TokenLeafNode } from '@common/ts-typeorm/account/tokenLeafNode.entity';
 import { AvailableViewEntity } from '@common/ts-typeorm/auctionOrder/availableView.entity';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -12,7 +13,9 @@ export class AvailableService {
     @InjectRepository(AvailableViewEntity)
     private readonly availableViewRepository: Repository<AvailableViewEntity>,
     @InjectRepository(AccountInformation)
-    private readonly accountInfoRepository: Repository<AccountInformation>
+    private readonly accountInfoRepository: Repository<AccountInformation>,
+    @InjectRepository(TokenLeafNode)
+    private readonly tokenLeafNodeRepository: Repository<TokenLeafNode>
   ) {}
 
   async getAvailableByAccountInfo(dto: GetAvailableRequestDto): Promise<GetAvailableResponseDto> {
@@ -47,9 +50,29 @@ export class AvailableService {
         accountId: accountId
       }
     });
-    return {
+    const txBasicResult = (dto.L2TokenAddrs && dto.L2TokenAddrs.length !== 0)? 
+    await this.tokenLeafNodeRepository.find({
+      select: ['leafId', 'availableAmt', 'lockedAmt'],
+      where: {
+        leafId: In(dto.L2TokenAddrs),
+        accountId: accountId
+      }
+    }):
+    await this.tokenLeafNodeRepository.find({
+      select: ['leafId', 'availableAmt', 'lockedAmt'],
+      where: {
+        accountId: accountId
+      }
+    }); 
+    return (result.length !== 0)? {
       list: result.map(item => ({
         tokenAddr: item.tokenId,
+        amount: item.availableAmt.toString(),
+        lockAmt: item.lockedAmt.toString()
+      }))
+    }: {
+      list: txBasicResult.map(item => ({
+        tokenAddr: item.leafId,
         amount: item.availableAmt.toString(),
         lockAmt: item.lockedAmt.toString()
       }))
