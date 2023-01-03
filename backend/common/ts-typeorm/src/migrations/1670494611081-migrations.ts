@@ -49,7 +49,7 @@ export class migrations1670494611081 implements MigrationInterface {
           isNullable: false,
           default: 'now()' 
         }, {
-          type: 'time without time zone',
+          type: 'timestamp without time zone',
           name: 'updatedAt',
           isNullable: false,
           default: 'now()' 

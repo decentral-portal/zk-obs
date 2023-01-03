@@ -42,7 +42,7 @@ export class TsTokenTreeService extends TsMerkleTree<TokenLeafNode> {
     console.time('updateLeaf for token tree');
     const prf = this.getProofIds(leafId);
     const id = this.getLeafIdInTree(leafId);
-    const leafHash = toTreeLeaf([BigInt(value.L2TokenAddr), BigInt(value.lockedAmt), BigInt(value.availableAmt)]);
+    const leafHash = toTreeLeaf([BigInt(value.leafId), BigInt(value.lockedAmt), BigInt(value.availableAmt)]);
     await this.connection.transaction(async (manager) => {
       const accountId = value.accountId;
       // update leaf

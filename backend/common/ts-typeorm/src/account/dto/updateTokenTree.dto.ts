@@ -1,7 +1,12 @@
+import { ApiProperty } from "@nestjs/swagger";
+
 export class UpdateTokenTreeDto {
-  // leafId!: string;
-  L2TokenAddr!: string;
+  @ApiProperty()
   lockedAmt!: string;
+  @ApiProperty()
   availableAmt!: string;
+  @ApiProperty()
+  leafId!: string;
+  @ApiProperty()
   accountId!: string;
 }

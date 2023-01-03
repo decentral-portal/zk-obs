@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { TsTokenAddress, TsTokenInfo, TsTxType } from '@ts-sdk/domain/lib/ts-types/ts-types';
 
 export class TokenInfoType {
@@ -10,97 +10,112 @@ export class TokenInfoType {
   lockAmt!: string;
 }
 export class AccountPreLoginDto {
-    @ApiProperty()
-      L1Address!: string;
+  @ApiProperty()
+  L1Address!: string;
 }
 
 export class AccountPreLoginResponse {
-    @ApiProperty()
-      L1Address!: string;
-    @ApiProperty()
-      expiredTime!: number;
-    @ApiProperty()
-      salt!: string;
+  @ApiProperty()
+  L1Address!: string;
+  @ApiProperty()
+  expiredTime!: number;
+  @ApiProperty()
+  salt!: string;
 }
 
 export class AccountLoginDto {
-    @ApiProperty({
-      required: true,
-    })
-      L1Address!: string;
-    @ApiProperty()
-      expiredTime!: number;
-    @ApiProperty()
-      salt!: string;
-    @ApiProperty()
-      signature!: string;
+  @ApiProperty({
+    required: true,
+  })
+  L1Address!: string;
+  @ApiProperty()
+  expiredTime!: number;
+  @ApiProperty()
+  salt!: string;
+  @ApiProperty()
+  signature!: string;
 }
 export class AccountLoginResponse {
-    @ApiProperty()
-      L1Address!: string;
-    @ApiProperty()
-      accountId!: string;
-    @ApiProperty()
-      expiredTime!: number;
-    @ApiProperty()
-      token!: string;
+  @ApiProperty()
+  L1Address!: string;
+  @ApiProperty()
+  accountId!: string;
+  @ApiProperty()
+  expiredTime!: number;
+  @ApiProperty()
+  token!: string;
 }
 
 
 export class AccountBalanceQueryDto {
-    @ApiProperty({
-      required: false,
-      isArray: true,
-      type: [String],
-    })
-    L2TokenAddr?: string[];
-    @ApiProperty({ required: false})
-    L1Address?: string;
-    @ApiProperty({ required: false})
-    accountId?: string;
+  @ApiProperty({
+    required: false,
+    isArray: true,
+    type: [String],
+  })
+  L2TokenAddr?: string[];
+  @ApiProperty({ required: false})
+  L1Address?: string;
+  @ApiProperty({ required: false})
+  accountId?: string;
 }
 
-export class AccountBalanceResponse {
-    @ApiProperty({
-      isArray: true,
-      type: TokenInfoType, // TODO: fix this
-    })
-      list!: TsTokenInfo[];
-}
+
 
 export class AccountQueryDto {
-    @ApiProperty({ required: false})
-      L1Address?: string;
-    @ApiProperty({ required: false})
-      accountId?: string;
+  @ApiPropertyOptional({
+    type: 'string'
+  })
+  L1Address!: string | null;
+  @ApiPropertyOptional({
+    type: 'string'
+  })
+  accountId!: string | null;
 }
 
 // TODO: Account Infomation
 export class AccountInformation {
-    @ApiProperty({ required: false})
-      name!: string;
-    @ApiProperty({ required: false})
-      mail!: string;
-    @ApiProperty({ required: false})
-      socialId!: string;
-    @ApiProperty({ required: false})
-      createdTime!: number;
-    @ApiProperty({ required: false})
-      updatedTime!: number;
+  @ApiProperty({ required: false})
+  name!: string;
+  @ApiProperty({ required: false})
+  mail!: string;
+  @ApiPropertyOptional({ required: false})
+  socialId!: string | null;
+  @ApiProperty({ required: false})
+  createdTime!: number;
+  @ApiProperty({ required: false})
+  updatedTime!: number;
 }
-
+export class AccountInfoDto {
+  @ApiProperty()
+  L1Address!: string;
+  @ApiProperty()
+  accountId!: string;
+  @ApiProperty()
+  nonce!: string;
+  @ApiPropertyOptional({ required: false})
+  name!: string;
+  @ApiPropertyOptional({ required: false})
+  mail!: string;
+  @ApiPropertyOptional({ required: false})
+  socialId!: string | null;
+  @ApiProperty({ required: false})
+  createdTime!: number;
+  @ApiProperty({ required: false})
+  updatedTime!: number;
+}
 export class AccountInfoResponse extends AccountInformation {
-    @ApiProperty()
-      L1Address!: string;
-    @ApiProperty()
-      accountId!: string;
-    @ApiProperty()
-      nonce!: string;
-    @ApiProperty({
-      isArray: true,
-      type: TokenInfoType,
-    })
-    tokenLeafs!: TsTokenInfo[];
+  @ApiProperty()
+    L1Address!: string;
+  @ApiProperty()
+    accountId!: string;
+  @ApiProperty()
+    nonce!: string;
+  @ApiProperty({
+    isArray: true,
+    type: TokenInfoType,
+  })
+  tokenLeafs!: TokenInfoType[];
 }
 
 export class AccountLoginHistoryQueryDto {

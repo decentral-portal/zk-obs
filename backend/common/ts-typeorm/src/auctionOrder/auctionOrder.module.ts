@@ -11,6 +11,7 @@ import { CandleStickEntity } from './candleStick.entity';
 import { ObsOrderLeafMerkleTreeNode } from './obsOrderLeafMerkleTreeNode.entity';
 import { MarketPairInfoEntity } from './marketPairInfo.entity';
 import { MarketPairInfoService } from './marketPairInfo.service';
+import { AvailableViewEntity } from './availableView.entity';
 
 @Global()
 @Module({
@@ -24,6 +25,7 @@ import { MarketPairInfoService } from './marketPairInfo.service';
     MarketPairInfoEntity,
     CandleStickEntity, 
     AuctionBondTokenEntity,
+    AvailableViewEntity
   ])],
   providers: [ConfigService, MarketPairInfoService],
   exports: [TypeOrmModule, MarketPairInfoService]

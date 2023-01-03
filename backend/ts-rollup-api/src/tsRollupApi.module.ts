@@ -17,6 +17,8 @@ import { L2BalanceRepository } from '@ts-rollup-api/infrastructure/ports/L2Balan
 import { CheckWithdrawOrderGuard } from '@ts-rollup-api/infrastructure/guards/check-withdraw-order.guard';
 import { WebSocketModule } from '@common/websocket/websocket.module';
 import { BlockInformationController } from './infrastructure/adapters/blockInformation.controller';
+import { AvailableService } from './infrastructure/service/available.service';
+import { AccountInfoService } from './infrastructure/service/accountInfo.service';
 
 const controllers = [
   TsAccountController,
@@ -25,9 +27,10 @@ const controllers = [
 ];
 
 
-// const services: Provider[] = [
-//   TsRollupService,
-// ];
+const services: Provider[] = [
+  AvailableService,
+  AccountInfoService
+];
 @Module({
   controllers,
   imports: [
@@ -44,7 +47,7 @@ const controllers = [
   ],
   providers: [
     ...controllers,
-    // ...services,
+    ...services,
     // CheckLendOrderGuard,
     // CheckWithdrawOrderGuard,
     // {

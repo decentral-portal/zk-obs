@@ -27,7 +27,7 @@ export class migrations1669796786249 implements MigrationInterface {
           isNullable: false,
           default: 'now()' 
         }, {
-          type: 'time without time zone',
+          type: 'timestamp without time zone',
           name: 'updatedAt',
           isNullable: false,
           default: 'now()' 
