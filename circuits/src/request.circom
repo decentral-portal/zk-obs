@@ -535,7 +535,6 @@ template DoReqSecondLimitExchange(){
     ImplyEq()(enabled, 1, isMatched);
 
     /* correctness */
-        //to-do: remove order if cumSellAmt == sellAmt;
     signal isEqual <== IsEqual()([makerSellAmt, r_oriOrderLeaf[0][OLIdxAccumulatedSellAmt()] + matchedSellAmt]);
     for(var i = 0; i < LenOfRequest(); i++)
         ImplyEq()(enabled, r_newOrderLeaf[0][i], (1 - isEqual) * r_oriOrderLeaf[0][i]);
@@ -764,10 +763,10 @@ template DoReqSecondMarketExchange(){
         //to-do: remove order if cumSellAmt == sellAmt;
     signal isEqual <== IsEqual()([makerSellAmt, r_oriOrderLeaf[0][OLIdxAccumulatedSellAmt()] + matchedSellAmt]);
     for(var i = 0; i < LenOfRequest(); i++)
-        ImplyEq()(enabled, r_newOrderLeaf[0][i], isEqual * r_oriOrderLeaf[0][i]);
-    ImplyEq()(enabled, r_newOrderLeaf[0][OLIdxTxId()], isEqual * r_oriOrderLeaf[0][OLIdxTxId()]);
-    ImplyEq()(enabled, r_newOrderLeaf[0][OLIdxAccumulatedSellAmt()], isEqual * r_oriOrderLeaf[0][OLIdxAccumulatedSellAmt()] + matchedSellAmt);
-    ImplyEq()(enabled, r_newOrderLeaf[0][OLIdxAccumulatedBuyAmt() ], isEqual * r_oriOrderLeaf[0][OLIdxAccumulatedBuyAmt() ] + matchedBuyAmt );
+        ImplyEq()(enabled, r_newOrderLeaf[0][i], (1 - isEqual) * r_oriOrderLeaf[0][i]);
+    ImplyEq()(enabled, r_newOrderLeaf[0][OLIdxTxId()], (1 - isEqual) * r_oriOrderLeaf[0][OLIdxTxId()]);
+    ImplyEq()(enabled, r_newOrderLeaf[0][OLIdxAccumulatedSellAmt()], (1 - isEqual) * (r_oriOrderLeaf[0][OLIdxAccumulatedSellAmt()] + matchedSellAmt));
+    ImplyEq()(enabled, r_newOrderLeaf[0][OLIdxAccumulatedBuyAmt() ], (1 - isEqual) * (r_oriOrderLeaf[0][OLIdxAccumulatedBuyAmt() ] + matchedBuyAmt ));
     
     ImplyEq()(enabled, r_newAccountLeaf[0][ALIdxTsAddr()], r_oriAccountLeaf[0][ALIdxTsAddr()]);
     ImplyEq()(enabled, r_newAccountLeaf[0][ALIdxNonce()], r_oriAccountLeaf[0][ALIdxNonce()]);
