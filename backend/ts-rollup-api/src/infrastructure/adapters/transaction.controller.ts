@@ -133,10 +133,12 @@ export class TsTransactionController {
         })
       ]);
       if (!accoutLeaf) {
+        console.log('account not exist');
         throw new BadRequestException('account not exist');
       }
       const targetTokenInfo = currentAvailable.list.find((item: TokenInfo) => item.tokenAddr === dto.sellTokenId);
       if (!targetTokenInfo || targetTokenInfo.amount  < dto.sellAmt) {
+        console.log('not enough availabe balance', targetTokenInfo, dto.sellAmt);
         throw new BadRequestException('not enough availabe balance');
       }
       console.log(accoutLeaf);
