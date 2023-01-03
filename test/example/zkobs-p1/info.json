@@ -6,6 +6,7 @@
     "token_tree_height": 4,
     "nullifier_tree_height": 8,
     "numOfReqs": 1,
+    "numOfChunks": 9,
     "register_batch_size": 1,
     "l2_token_addr_size": 32,
     "auction_market_count": 8,
@@ -55,6 +56,11 @@
       "circuitName": "main-p5d-8-8-4-8",
       "name": "7_order-acc2-usdt2eth-8-8-4-8",
       "path": "/Users/abner.huang/Tkspring/zk-circom/build/zkobs-p1/7_order-acc2-usdt2eth-8-8-4-8-inputs.json"
+    },
+    {
+      "circuitName": "main-p5d-8-8-4-8",
+      "name": "8_noop-tx-8-8-4-8",
+      "path": "/Users/abner.huang/Tkspring/zk-circom/build/zkobs-p1/8_noop-tx-8-8-4-8-inputs.json"
     }
   ],
   "metadata": {
