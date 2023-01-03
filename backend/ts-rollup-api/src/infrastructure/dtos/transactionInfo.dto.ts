@@ -7,6 +7,8 @@ export class GetTransactionRequestDto {
 export class GetTransactionResponseDto {
   @ApiProperty()
   txId!: string;
+  @ApiProperty()
+  reqType!: string;
   @ApiPropertyOptional()
   blockNumber!: string|null;
   @ApiProperty()

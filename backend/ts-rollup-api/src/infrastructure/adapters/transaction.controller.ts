@@ -174,6 +174,7 @@ export class TsTransactionController {
     }
     return {
       txId: result.txId.toString(),
+      reqType: result.reqType.toString(),
       blockNumber: (result.blockNumber == null)? null : result.blockNumber.toString(), 
       accountId: result.accountId.toString(),
       accumulatedBuyAmt: result.accumulatedBuyAmt.toString(),
