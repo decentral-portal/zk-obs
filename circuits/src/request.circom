@@ -295,7 +295,7 @@ template DoReqCancel(){
     /* conn to the units*/
     ImplyEq()(enabled, r_orderRootFlow[0][0], orderRootFlow[0]);
     ImplyEq()(enabled, r_orderRootFlow[0][1], orderRootFlow[1]);
-    ImplyEq()(enabled, r_orderLeafId[0], reqData[ReqIdxArg(4)]);
+    ImplyEq()(enabled, r_orderLeafId[0], reqData[ReqIdxArg(1)]);
 
     ImplyEq()(enabled, r_accountRootFlow[0][0], accountRootFlow[0]);
     ImplyEq()(enabled, r_accountRootFlow[0][1], accountRootFlow[1]);
@@ -314,8 +314,8 @@ template DoReqCancel(){
     ImplyEq()(enabled, r_newAccountLeaf[0][ALIdxTsAddr()], r_oriAccountLeaf[0][ALIdxTsAddr()]);
     ImplyEq()(enabled, r_newAccountLeaf[0][ALIdxNonce()], r_oriAccountLeaf[0][ALIdxNonce()]);
     
-    ImplyEq()(enabled, r_newTokenLeaf[0][TLIdxAvlAmt()], r_oriTokenLeaf[0][TLIdxAvlAmt()] + r_oriOrderLeaf[0][OLIdxAmount()]); 
-    ImplyEq()(enabled, r_newTokenLeaf[0][TLIdxLockedAmt()], r_oriTokenLeaf[0][TLIdxLockedAmt()] - r_oriOrderLeaf[0][OLIdxAmount()]);
+    ImplyEq()(enabled, r_newTokenLeaf[0][TLIdxAvlAmt()], r_oriTokenLeaf[0][TLIdxAvlAmt()] + reqData[ReqIdxAmount()]); 
+    ImplyEq()(enabled, r_newTokenLeaf[0][TLIdxLockedAmt()], r_oriTokenLeaf[0][TLIdxLockedAmt()] - reqData[ReqIdxAmount()]);
 }
 template DoReqSecondLimitOrder(){
     signal input enabled;
@@ -369,11 +369,8 @@ template DoReqSecondLimitOrder(){
     /* legality */
     ImplyEq()(enabled, r_oriAccountLeaf[0][ALIdxTsAddr()], TsPubKey2TsAddr()(tsPubKey));
     ImplyEq()(enabled, r_oriOrderLeaf[0][OLIdxReqType()], ReqTypeNumUnknow());
-    ImplyEq()(enabled, r_oriAccountLeaf[0][ALIdxNonce()], reqData[ReqIdxNonce()]);
-    ImplyEq()(enabled, LessThan(BitsAmount())(
-        [reqData[ReqIdxAmount()] + (1 << (BitsAmount() - 1)), 
-        r_oriTokenLeaf[0][TLIdxAvlAmt()] + (1 << (BitsAmount() - 1))]
-        ), 1); 
+    ImplyEq()(enabled, r_oriAccountLeaf[0][ALIdxNonce()], reqData[ReqIdxNonce()] + 1);
+    ImplyEq()(enabled, LessThan(BitsAmount())([reqData[ReqIdxAmount()] + (1 << (BitsAmount() - 1)), r_oriTokenLeaf[0][TLIdxAvlAmt()] + (1 << (BitsAmount() - 1))]), 1); 
     
     /* correctness */
     for(var i = 0; i < LenOfRequest(); i++)
@@ -384,7 +381,6 @@ template DoReqSecondLimitOrder(){
 
     ImplyEq()(enabled, r_newAccountLeaf[0][ALIdxTsAddr()], r_oriAccountLeaf[0][ALIdxTsAddr()]);
     ImplyEq()(enabled, r_newAccountLeaf[0][ALIdxNonce()], r_oriAccountLeaf[0][ALIdxNonce()] + 1);
-
     
     ImplyEq()(enabled, r_newTokenLeaf[0][TLIdxAvlAmt()], r_oriTokenLeaf[0][TLIdxAvlAmt()] - reqData[ReqIdxAmount()]); 
     ImplyEq()(enabled, r_newTokenLeaf[0][TLIdxLockedAmt()], r_oriTokenLeaf[0][TLIdxLockedAmt()] + reqData[ReqIdxAmount()]); 
@@ -429,7 +425,7 @@ template DoReqSecondLimitStart(){
     /* conn to the units*/
     ImplyEq()(enabled, r_orderRootFlow[0][0], orderRootFlow[0]);
     ImplyEq()(enabled, r_orderRootFlow[0][1], orderRootFlow[1]);
-    ImplyEq()(enabled, r_orderLeafId[0], reqData[ReqIdxArg(4)]);
+    ImplyEq()(enabled, r_orderLeafId[0], reqData[ReqIdxArg(1)]);
 
     ImplyEq()(enabled, accountRootFlow[0], accountRootFlow[1]);
 
@@ -517,7 +513,7 @@ template DoReqSecondLimitExchange(){
     /* conn to the units*/
     ImplyEq()(enabled, r_orderRootFlow[0][0], orderRootFlow[0]);
     ImplyEq()(enabled, r_orderRootFlow[0][1], orderRootFlow[1]);
-    ImplyEq()(enabled, r_orderLeafId[0], reqData[ReqIdxArg(4)]);
+    ImplyEq()(enabled, r_orderLeafId[0], reqData[ReqIdxArg(1)]);
 
     ImplyEq()(enabled, r_accountRootFlow[0][0], accountRootFlow[0]);
     ImplyEq()(enabled, r_accountRootFlow[0][1], accountRootFlow[1]);
@@ -606,7 +602,7 @@ template DoReqSecondLimitEnd(){
     /* conn to the units*/
     ImplyEq()(enabled, r_orderRootFlow[0][0], orderRootFlow[0]);
     ImplyEq()(enabled, r_orderRootFlow[0][1], orderRootFlow[1]);
-    ImplyEq()(enabled, r_orderLeafId[0], reqData[ReqIdxArg(4)]);
+    ImplyEq()(enabled, r_orderLeafId[0], reqData[ReqIdxArg(1)]);
 
     ImplyEq()(enabled, r_accountRootFlow[0][0], accountRootFlow[0]);
     ImplyEq()(enabled, r_accountRootFlow[0][1], accountRootFlow[1]);
@@ -744,7 +740,7 @@ template DoReqSecondMarketExchange(){
     /* conn to the units*/
     ImplyEq()(enabled, r_orderRootFlow[0][0], orderRootFlow[0]);
     ImplyEq()(enabled, r_orderRootFlow[0][1], orderRootFlow[1]);
-    ImplyEq()(enabled, r_orderLeafId[0], reqData[ReqIdxArg(4)]);
+    ImplyEq()(enabled, r_orderLeafId[0], reqData[ReqIdxArg(1)]);
 
     ImplyEq()(enabled, r_accountRootFlow[0][0], accountRootFlow[0]);
     ImplyEq()(enabled, r_accountRootFlow[0][1], accountRootFlow[1]);
