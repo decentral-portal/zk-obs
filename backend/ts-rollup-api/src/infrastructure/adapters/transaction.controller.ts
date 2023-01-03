@@ -149,7 +149,7 @@ export class TsTransactionController {
         txInfoEntity.arg2 = txInfo.arg2;
         txInfoEntity.arg3 = txInfo.arg3;
         const txResult = await manager.getRepository(TransactionInfo).save(txInfoEntity);
-        const result = await this.connection.getRepository(ObsOrderEntity).insert({
+        const result = await manager.getRepository(ObsOrderEntity).insert({
           txId: txResult.txId,
           reqType: Number(dto.reqType),
           accountId: BigInt(dto.sender),
@@ -162,7 +162,7 @@ export class TsTransactionController {
           remainBaseQty: BigInt(remainBaseQty),
           price: formatPrice,
         });
-        await this.connection.getRepository(AccountLeafNode).update({
+        await manager.getRepository(AccountLeafNode).update({
           leafId: dto.sender
         }, {
           nonce: BigInt(accoutLeaf.nonce) + 1n
