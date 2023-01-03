@@ -31,7 +31,7 @@ export class AccountInformation extends BaseTimeEntity {
     nullable: true,
     unique: false,
   })
-  email?: string;
+  email!: string;
   @Column({
     type: 'varchar',
     name: 'lastedLoginIp',
