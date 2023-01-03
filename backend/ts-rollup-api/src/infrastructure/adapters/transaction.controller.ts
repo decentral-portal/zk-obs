@@ -137,7 +137,7 @@ export class TsTransactionController {
         throw new BadRequestException('account not exist');
       }
       const targetTokenInfo = currentAvailable.list.find((item: TokenInfo) => item.tokenAddr === dto.sellTokenId);
-      if (!targetTokenInfo || targetTokenInfo.amount  < dto.sellAmt) {
+      if (!targetTokenInfo || BigInt(targetTokenInfo.amount) < BigInt(dto.sellAmt)) {
         console.log('not enough availabe balance', targetTokenInfo, dto.sellAmt);
         throw new BadRequestException('not enough availabe balance');
       }
