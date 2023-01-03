@@ -1,9 +1,19 @@
 import { ethers } from 'ethers';
 
-export function stateToCommitment(state: any) {
+export function stateToCommitment({
+  oriStateRoot,
+  newStateRoot,
+  newTsRoot,
+  pubdata,
+}: {
+  oriStateRoot: string;
+  newStateRoot: string;
+  newTsRoot: string;
+  pubdata: string;
+}) {
   const commitmentMessage = ethers.utils.solidityPack(
     ['bytes32', 'bytes32', 'bytes32', 'bytes'],
-    [state.oriStateRoot, state.newStateRoot, state.newTsRoot, state.pubdata],
+    [oriStateRoot, newStateRoot, newTsRoot, pubdata],
   );
   const commitmentHashOrigin = ethers.utils.sha256(commitmentMessage);
 
