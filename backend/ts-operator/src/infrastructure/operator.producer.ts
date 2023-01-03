@@ -14,6 +14,7 @@ import { RollupInformation } from 'common/ts-typeorm/src/rollup/rollupInformatio
 import { WorkerService } from '@common/cluster/worker.service';
 import { firstValueFrom } from 'rxjs/internal/firstValueFrom';
 import { AccountInformation } from '@common/ts-typeorm/account/accountInformation.entity';
+import { TsTxType } from '@common/ts-typeorm/account/dto/ts-type';
 @Injectable({
   scope: Scope.DEFAULT,
 })
@@ -82,6 +83,7 @@ export class OperatorProducer {
     return await Promise.all([
       this.accountRepository.upsert(txRegister, ['L1Address']),
       this.txRepository.insert({
+        reqType: Number(TsTxType.REGISTER),
         accountId: 0n,
         tokenId: 0n,
         amount: 0n,
@@ -126,6 +128,7 @@ export class OperatorProducer {
     this.logger.log(`OperatorProducer.handleDepositEvent txDeposit:${JSON.stringify({ tokenId, amount, accountId })}`);
 
     await this.txRepository.insert({
+      reqType: Number(TsTxType.DEPOSIT),
       tokenId: BigInt(tokenId.toString()),
       amount: BigInt(amount.toString()),
       arg0: BigInt(accountId.toString()),
