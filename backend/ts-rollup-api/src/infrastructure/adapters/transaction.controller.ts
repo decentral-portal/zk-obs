@@ -121,11 +121,12 @@ export class TsTransactionController {
       }
       console.log(txInfo);
       const [accoutLeaf, currentAvailable] = await Promise.all([
-        this.connection.getRepository(AccountLeafNode).createQueryBuilder('user')
-          .useTransaction(true)
-          .setLock('pessimistic_write')
-          .where('user.accountId = :accountId', { accountId: dto.sender }).getOne(),
-        await this.availableService.getAvailableByAccountInfo({
+        this.connection.getRepository(AccountLeafNode).findOne({ 
+          where: {
+            leafId: dto.sender 
+          }
+        }),
+        this.availableService.getAvailableByAccountInfo({
           accountId: dto.sender,
           L1Address: '',
           L2TokenAddrs: []
