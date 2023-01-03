@@ -10,7 +10,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       useFactory: async (configService: ConfigService) => ({
         options: {
           connection: {
-            host: configService.get('BULL_QUEUE_REDIS_HOST'),
+            host: configService.get<string>('BULL_QUEUE_REDIS_HOST', 'localhost'),
             port: configService.get<number>('BULL_QUEUE_REDIS_PORT', 6379),
           }
         },
