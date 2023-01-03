@@ -10,7 +10,6 @@
 // import { AuctionBondTokenEntity } from '@common/ts-typeorm/auctionOrder/auctionBondToken.entity';
 // import { PaginationDto } from '@ts-rollup-api/infrastructure/dtos/common.dto';
 // import { BondTokensResponse, RollupAuctionBorrowDto, RollupAuctionCancelDto, RollupAuctionLendDto, RollupAuctionRecipt } from '@ts-rollup-api/infrastructure/dtos/transaction.dto';
-// import { TsRollupService } from '@ts-rollup-api/infrastructure/service/rollup.service';
 
 
 // @Controller('v1/ts/auction')

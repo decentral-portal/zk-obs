@@ -1,6 +1,6 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { TsTxType } from '@ts-sdk/domain/lib/ts-types/ts-types';
+import {  } from '@ts-sdk/domain/lib/ts-types/ts-types';
 // import { CircuitName } from 'common/ts-typeorm/src/account/blockInformation.entity';
 import { TS_STATUS } from 'common/ts-typeorm/src/account/tsStatus.enum';
 import { BlockInformationDto, BlockInformationPagination, BlockInformationWithTxDto, TransactionInfoDto } from '../dtos/block.dto';

@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { TsMarketPair } from '@ts-rollup-api/domain/value-objects/tsMarketPair.enum';
 import { TsSide } from '@ts-rollup-api/domain/value-objects/tsSide.enum';
-import { TsTxType } from '@ts-rollup-api/domain/value-objects/tsTxType.enum';
+import { TsTxType } from '@ts-sdk/domain/lib/ts-types/ts-types';
 import { boolean } from 'io-ts';
 
 export class OrderInformationDto {

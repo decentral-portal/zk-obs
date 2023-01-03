@@ -4,7 +4,6 @@ import { AccountQueryDto, AccountInfoResponse } from '../dtos/accounts.dto';
 import { GetAvailableRequestDto, GetAvailableResponseDto } from '../dtos/getAvailable.dto';
 import { AccountInfoService } from '../service/accountInfo.service';
 import { AvailableService } from '../service/available.service';
-// import { TsRollupService } from '../service/rollup.service';
 
 @Controller('v1/ts/account')
 @ApiTags('Account')
@@ -13,37 +12,6 @@ export class TsAccountController {
     private readonly availableService: AvailableService,
     private readonly accountInfoService: AccountInfoService
   ) {}
-  // constructor(
-  //   // private readonly tsRollupService: TsRollupService,
-  // ) { }
-
-  //   @Post('pre-login')
-  //   @ApiOperation({
-  //     summary: 'TODO',
-  //   })
-  //   @ApiCreatedResponse({
-  //     type: AccountPreLoginResponse,
-  //   })
-  // async preLogin(@Query() dto: AccountPreLoginDto): Promise<AccountPreLoginResponse> {
-  //   return {
-  //     L1Address: dto.L1Address,
-  //     expiredTime: Date.now() + 1000 * 60 * 5,
-  //     salt: Math.round(Math.random() * 10 ** 10).toString(),
-  //   };
-  // }
-
-    // @Post('wallet-login')
-    // @ApiOperation({
-    //   summary: 'TODO',
-    //   description: 'login via ECDSA signature',
-    // })
-    // @ApiCreatedResponse({
-    //   type: AccountLoginResponse,
-    // })
-    // async walletLogin(@Body() dto: AccountLoginDto) {
-    //   return 'login';
-    // }
-
     @Get('available')
     @ApiOperation({
       summary: 'get L2 available list',
@@ -51,9 +19,9 @@ export class TsAccountController {
     @ApiCreatedResponse({
       type: GetAvailableResponseDto,
     })
-    async getAvailable(@Query() dto: GetAvailableRequestDto) {
-      return await this.availableService.getAvailableByAccountInfo(dto);
-    }
+  async getAvailable(@Query() dto: GetAvailableRequestDto) {
+    return await this.availableService.getAvailableByAccountInfo(dto);
+  }
 
     @Get('profile')
     @ApiOperation({
@@ -63,7 +31,7 @@ export class TsAccountController {
       type: AccountInfoResponse,
     })
     async getAccountInfo(@Query() dto: AccountQueryDto): Promise<AccountInfoResponse> {
-      let queryInfo: {
+      const queryInfo: {
         L1Address: string,
         accountId: string
         L2TokenAddrs: string[]
@@ -71,13 +39,13 @@ export class TsAccountController {
         L1Address: '',
         accountId: '', 
         L2TokenAddrs: []
-      }
+      };
       console.log(dto);
       if (dto.L1Address) {
-        queryInfo.L1Address = dto.L1Address
+        queryInfo.L1Address = dto.L1Address;
       }
       if (dto.accountId) {
-        queryInfo.accountId = dto.accountId    
+        queryInfo.accountId = dto.accountId; 
       }
       const [accountInfo, tokenInfo] = await Promise.all([
         this.accountInfoService.getAccountInfo(dto),
@@ -86,7 +54,7 @@ export class TsAccountController {
       return {
         ...accountInfo,
         tokenLeafs: tokenInfo.list
-      }
+      };
     //   if(dto.accountId || dto.L1Address) {
     //     try {
     //       const acc = dto.accountId
@@ -111,35 +79,4 @@ export class TsAccountController {
     //   throw new BadRequestException('accountId or L1Address is required');
     }
 
-    // @Post('update-profile')
-    // @ApiOperation({
-    //   summary: 'TODO',
-    // })
-    // @ApiOkResponse()
-    // async updateAccountInfo(@Body() dto: AccountUpdateDto) {
-    // }
-
-    // @Get('login-history')
-    // @ApiOperation({
-    //   summary: 'TODO',
-    // })
-    // @ApiCreatedResponse({
-    //   type: AccountLoginHistoryResponse,
-    // })
-    // async getLoginHistory(@Query() dto: AccountLoginHistoryQueryDto) {
-    //   return 'getLoginHistory';
-    // }
-
-    // @Get('tx-history')
-    // @ApiOperation({
-    //   summary: 'TODO',
-    // })
-    // @ApiCreatedResponse({
-    //   type: L2TransactionHistoryResponse,
-    // })
-    // async getL2TransactionHistory(@Query() dto: AccountTxHistoryDto) {
-    //   return 'getL2TransactionHistory';
-    // }
-
-    
 }

@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { TsTokenAddress, TsTokenInfo, TsTxType } from '@ts-sdk/domain/lib/ts-types/ts-types';
+import { TsTxType } from '@ts-sdk/domain/lib/ts-types/ts-types';
 
 export class TokenInfoType {
   @ApiProperty()

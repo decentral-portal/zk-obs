@@ -1,4 +1,4 @@
-import { toTsTokenAddressFromStr, toTsTxType } from '@common/ts-typeorm/account/dto/ts-type';
+import { toTsTokenAddressFromStr } from '@common/ts-typeorm/account/dto/ts-type';
 import { BadRequestException, Controller, Get, Logger, Param, Query } from '@nestjs/common';
 import { L2BalanceRepository } from '../ports/L2Balance.repository';
 

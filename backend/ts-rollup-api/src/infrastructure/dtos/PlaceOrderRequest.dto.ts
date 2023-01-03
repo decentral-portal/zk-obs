@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { TsTxType } from '@ts-rollup-api/domain/value-objects/tsTxType.enum';
 
 export class EdDSASignatureRequestType {
   @ApiProperty({
@@ -8,7 +7,7 @@ export class EdDSASignatureRequestType {
     maxItems: 2,
     minItems: 2
   })
-  R8!: String[];
+  R8!: string[];
   @ApiProperty()
   S!: string;
 }
