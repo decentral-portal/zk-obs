@@ -228,23 +228,13 @@ export class TransactionInfo extends BaseTimeEntity {
     referencedColumnName: 'txId',
   })
   matchedOrder!: MatchObsOrderEntity | null;
-<<<<<<< HEAD
-  @OneToOne(() => MatchObsOrderEntity, (matchedObsOrder: MatchObsOrderEntity) => matchedObsOrder.matchedTx2)
-  @JoinColumn({
-    name: 'txId',
-    referencedColumnName: 'txId2',
-  })
-  matchedOrder2!: MatchObsOrderEntity | null;
-
   get tokenAddr(): TsTokenAddress {
     return this.tokenId.toString() as TsTokenAddress;
   }
-=======
   // @OneToOne(() => MatchObsOrderEntity, (matchedObsOrder: MatchObsOrderEntity) => matchedObsOrder.matchedTx2)
   // @JoinColumn({
   //   name: 'txId',
   //   referencedColumnName: 'txId2',
   // })
   // matchedOrder2!: MatchObsOrderEntity | null;
->>>>>>> c1f79a8 (feat(add obsStateTree update): add update state tree logic)
 }
