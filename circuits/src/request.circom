@@ -622,6 +622,7 @@ template DoReqSecondLimitEnd(){
         ImplyEq()(enabled, r_oriOrderLeaf[0][i], 0);
     
     /* correctness */
+    ImplyEq()(enabled, channelIn[ReqIdxReqType()], ReqTypeNumSecondLimitOrder());
     signal isEqual <== IsEqual()([channelIn[OLIdxAmount()], channelIn[OLIdxAccumulatedSellAmt()]]);
     for(var i = 0; i < LenOfOL(); i++)
         ImplyEq()(enabled, r_newOrderLeaf[0][i], channelIn[i] * (1 - isEqual));
