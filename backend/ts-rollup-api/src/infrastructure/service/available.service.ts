@@ -63,19 +63,30 @@ export class AvailableService {
       where: {
         accountId: accountId
       }
-    }); 
-    return (result.length !== 0)? {
-      list: result.map(item => ({
-        tokenAddr: item.tokenId,
-        amount: item.availableAmt.toString(),
-        lockAmt: item.lockedAmt.toString()
-      }))
-    }: {
+    });
+    return (result.length == 0)? {
       list: txBasicResult.map(item => ({
         tokenAddr: item.leafId,
         amount: item.availableAmt.toString(),
         lockAmt: item.lockedAmt.toString()
       }))
-    };
+    } : {
+      list: txBasicResult.map(item => {
+        const available = result.find(item2 => item2.tokenId == item.leafId);
+        if (available != undefined) {
+          return {
+            tokenAddr: item.leafId,
+            amount: available.availableAmt.toString(),
+            lockAmt: available.lockedAmt.toString()
+          }
+        } else {
+          return {
+            tokenAddr: item.leafId,
+            amount: item.availableAmt.toString(),
+            lockAmt: item.lockedAmt.toString()
+          }
+        }
+      })
+    }
   }
 }

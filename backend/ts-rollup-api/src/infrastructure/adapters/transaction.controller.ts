@@ -120,11 +120,11 @@ export class TsTransactionController {
         txInfo["arg3"] = BigInt(dto.buyAmt);
       }
       console.log(txInfo);
-      const [accoutLeaf, currentAvailable] = await Promise.all([ this.connection.getRepository(AccountLeafNode).findOne({
-          where: {
-            leafId: dto.sender
-          }
-        }),
+      const [accoutLeaf, currentAvailable] = await Promise.all([
+        this.connection.getRepository(AccountLeafNode).createQueryBuilder('user')
+          .useTransaction(true)
+          .setLock('pessimistic_write')
+          .where('user.accountId = :accountId', { accountId: dto.sender }).getOne(),
         await this.availableService.getAvailableByAccountInfo({
           accountId: dto.sender,
           L1Address: '',
