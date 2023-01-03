@@ -1,0 +1,10 @@
+{
+  "oriStateRoot": "0x056e85ec9bcff330fc136fa649e0e13d929065027508ecf6ef56ff0e9beb22a8",
+  "newStateRoot": "0x2818f7434a959a037fff420c8319430ad39ac32e1d5169e4ce463fdd96003ba7",
+  "oriTsRoot": "0x1bfe57fb8b1cd4769de29001976f0e6ab87c9149f8510d1d6b3f24b2aaf3c1dd",
+  "newTsRoot": "0x25cd1f837d0561741ee6369aa11928043b940810903113090a3b25be045e8299",
+  "pubdata": "0x0000",
+  "newAccountRoot": "0x1ba1fb854fa822d95bbf60da49f43afa33bacc964cc4727cd34f982729f1d53e",
+  "isCriticalChunk": "0x00",
+  "o_chunk": "0x00"
+}
