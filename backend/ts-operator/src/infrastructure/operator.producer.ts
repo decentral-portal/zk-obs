@@ -39,6 +39,7 @@ export class OperatorProducer {
       contract: this.contract.address,
     });
     this.listenRegisterEvent();
+    this.listenDepositEvent(); //! new
   }
 
   async listenRegisterEvent() {
@@ -46,12 +47,12 @@ export class OperatorProducer {
     this.logger.log(`OperatorProducer.listenRegisterEvent contract=${this.contract.address}`);
     const filters = this.contract.filters.Register();
     const handler = (log: any) => {
-      this.handleRegisterEvent(log.args.L1Addr, log.args.L2Addr, log.args.TSPubKey, log.args.tsAddr, log.transactionHash);
+      this.handleRegisterEvent(log.args.sender, log.args.accountId, log.args.tsPubX, log.args.tsPubY, log.args.tsAddr, log.transactionHash);
     };
     this.contract.on(filters, handler.bind(this));
   }
 
-  async handleRegisterEvent(l1Addr: string, l2Addr: BigNumber, tsPubKey: [BigNumber, BigNumber], tsAddr: BigNumber, tx: TransactionResponse) {
+  async handleRegisterEvent(sender: string, accountId: BigNumber, tsPubX: BigNumber, tsPubY: BigNumber, tsAddr: BigNumber, tx: TransactionResponse) {
     const rollupInfo = await this.rollupInfoRepository.findOneOrFail({ where: { id: 1 } });
     const { blockNumber = 0 } = tx;
 
@@ -61,25 +62,57 @@ export class OperatorProducer {
       );
       return;
     }
-    // TODO: 1. upsert AccountInformation
-    this.accountRepository.upsert(
-      {
-        L1Address: l1Addr,
-        accountId: l2Addr.toString(),
-        tsPubKeyX: tsPubKey[0].toString(),
-        tsPubKeyY: tsPubKey[1].toString(),
-      },
-      ['L1Address'],
-    );
-    // TODO: 2. insert TransactionInfo
-    this.txRepository.insert({
-      accountId: 0n,
-      tokenId: 0n,
-      amount: 0n,
-      arg0: BigInt(l2Addr.toString()),
-      arg1: BigInt(tsAddr.toString()),
+    await this.connection.transaction(async (manager) => {
+      return await Promise.all([
+        this.accountRepository.upsert(
+          {
+            L1Address: sender,
+            accountId: accountId.toString(),
+            tsPubKeyX: tsPubX.toString(),
+            tsPubKeyY: tsPubY.toString(),
+          },
+          ['L1Address'],
+        ),
+        this.txRepository.insert({
+          accountId: 0n,
+          tokenId: 0n,
+          amount: 0n,
+          arg0: BigInt(accountId.toString()),
+          arg1: BigInt(tsAddr.toString()),
+        }),
+        this.rollupInfoRepository.update({ id: 1 }, { lastSyncBlocknumberForRegisterEvent: blockNumber }),
+      ]);
     });
-    this.rollupInfoRepository.update({ id: 1 }, { lastSyncBlocknumberForRegisterEvent: blockNumber });
-    this.logger.log(`OperatorProducer.listenRegisterEvent ${l1Addr} ${l2Addr} ${tsPubKey}`);
+    this.logger.log(`OperatorProducer.listenRegisterEvent ${sender} ${accountId} ${tsPubX} ${tsPubY} ${tsAddr}`);
+  }
+
+  //! Deposit Event
+  async listenDepositEvent() {
+    await firstValueFrom(this.workerService.onReadyObserver);
+    this.logger.log(`OperatorProducer.listenDepositEvent contract=${this.contract.address}`);
+    const filters = this.contract.filters.Deposit();
+    const handler = (log: any) => {
+      this.handleDepositEvent(log.args.sender, log.args.accountId, log.args.tokenId, log.args.amount, log.transactionHash);
+    };
+    this.contract.on(filters, handler.bind(this));
+  }
+
+  async handleDepositEvent(sender: string, accountId: BigNumber, tokenId: BigNumber, amount: BigNumber, tx: TransactionResponse) {
+    const rollupInfo = await this.rollupInfoRepository.findOneOrFail({ where: { id: 1 } });
+    const { blockNumber = 0 } = tx;
+
+    if (blockNumber <= rollupInfo.lastSyncBlocknumberForDepositEvent) {
+      this.logger.log(
+        `OperatorProducer.listenDepositEvent skip blockNumber=${blockNumber} lastSyncBlocknumberForDepositEvent=${rollupInfo.lastSyncBlocknumberForDepositEvent}`,
+      );
+      return;
+    }
+    // TODO: insert TransactionInfo
+    this.txRepository.insert({
+      tokenId: BigInt(tokenId.toString()),
+      amount: BigInt(amount.toString()),
+      arg0: BigInt(accountId.toString()), //TODO check args
+    });
+    this.logger.log(`OperatorProducer.listenRegisterEvent ${sender} ${accountId} ${tokenId} ${amount}`);
   }
 }

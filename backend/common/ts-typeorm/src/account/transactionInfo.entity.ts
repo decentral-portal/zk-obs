@@ -151,7 +151,7 @@ export class TransactionInfo extends BaseTimeEntity {
     name: 'tsPubKeyX',
     length: '100',
     nullable: false,
-    default: `'0'`,
+    default: "'0'",
   })
   tsPubKeyX!: string;
   @Column({
@@ -159,7 +159,7 @@ export class TransactionInfo extends BaseTimeEntity {
     name: 'tsPubKeyY',
     length: '100',
     nullable: false,
-    default: `'0'`,
+    default: "'0'",
   })
   tsPubKeyY!: string;
   @Column({
