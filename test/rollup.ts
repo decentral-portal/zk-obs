@@ -30,6 +30,12 @@ import calldata4 from '/Users/aaronliang/Documents/TKspring/zk-obs/test/example/
 import inputs5 from '/Users/aaronliang/Documents/TKspring/zk-obs/test/example/zkobs-p1/5_order-acc1-eth2usdt-8-8-4-8-inputs.json';
 import root5 from '/Users/aaronliang/Documents/TKspring/zk-obs/test/example/zkobs-p1/5_order-acc1-eth2usdt-8-8-4-8-commitment.json';
 import calldata5 from '/Users/aaronliang/Documents/TKspring/zk-obs/test/example/zkobs-p1/5_order-acc1-eth2usdt-8-8-4-8-calldata-raw.json';
+import inputs6 from '/Users/aaronliang/Documents/TKspring/zk-obs/test/example/zkobs-p1/6_order-acc2-usdt2eth-8-8-4-8-inputs.json';
+import root6 from '/Users/aaronliang/Documents/TKspring/zk-obs/test/example/zkobs-p1/6_order-acc2-usdt2eth-8-8-4-8-commitment.json';
+import calldata6 from '/Users/aaronliang/Documents/TKspring/zk-obs/test/example/zkobs-p1/6_order-acc2-usdt2eth-8-8-4-8-calldata-raw.json';
+import inputs7 from '/Users/aaronliang/Documents/TKspring/zk-obs/test/example/zkobs-p1/7_order-acc2-usdt2eth-8-8-4-8-inputs.json';
+import root7 from '/Users/aaronliang/Documents/TKspring/zk-obs/test/example/zkobs-p1/7_order-acc2-usdt2eth-8-8-4-8-commitment.json';
+import calldata7 from '/Users/aaronliang/Documents/TKspring/zk-obs/test/example/zkobs-p1/7_order-acc2-usdt2eth-8-8-4-8-calldata-raw.json';
 
 describe('Unit test of rollup', function () {
   enum OpType {
@@ -992,6 +998,214 @@ describe('Unit test of rollup', function () {
     });
 
     it('Execute Acc1 place order to buy USDC with ETH', async function () {
+      // execute blocks
+      const oriTotalExecutedBlocks = await zkOBS.executedBlockNum();
+      let pendingBlocks: ZkOBS.ExecuteBlockStruct[];
+      let pendingRollupTxPubdata: any[] = [];
+      const executeBlock: ZkOBS.ExecuteBlockStruct = {
+        storedBlock: lastCommittedBlock,
+        pendingRollupTxPubdata: pendingRollupTxPubdata,
+      };
+      pendingBlocks = [executeBlock];
+      await zkOBS.executeBlocks(pendingBlocks);
+      const newTotalExecutedBlocks = await zkOBS.executedBlockNum();
+      expect(newTotalExecutedBlocks - oriTotalExecutedBlocks).to.be.eq(
+        pendingBlocks.length,
+      );
+    });
+  });
+
+  describe('Rollup for Acc2 place order to buy USDC with ETH', function () {
+    const {
+      pubKeyX,
+      pubKeyY,
+      amount,
+      oriStateRoot,
+      newStateRoot,
+      newTsRoot,
+      commitmentHashOrigin,
+      proof_a,
+      proof_b,
+      proof_c,
+      proof_commitment,
+    } = getRollupData(inputs6, root6, calldata6);
+
+    it('Commit Acc2 place order to buy ETH with USDC', async function () {
+      zkOBS = zkOBS.connect(operator);
+
+      const newBlocks: ZkOBS.CommitBlockStruct[] = [];
+      const tokenIdUSDC = await zkOBS.tokenIdOf(zkUSDC.address);
+      const accountId = await zkOBS.accountIdOf(await user2.getAddress());
+      const publicData = ethers.utils
+        .solidityPack(
+          ['uint8', 'uint32', 'uint16', 'uint40'],
+          [
+            OpType.SECONDLIMITORDER,
+            accountId,
+            tokenIdUSDC,
+            amountToTxAmountV3_40bit(BigInt(amount.toString())),
+          ],
+        )
+        .padEnd((CALLDATA_CHUNK * 12 * 8) / 4 + 2, '0');
+
+      commitBlock = {
+        blockNumber: BigNumber.from(lastCommittedBlock.blockNumber).add(1),
+        newStateRoot: newStateRoot,
+        newTsRoot: newTsRoot,
+        publicData: publicData,
+        publicDataOffsets: [],
+        timestamp: Date.now(),
+      };
+
+      newBlocks.push(commitBlock);
+      const oriTotalCommittedBlocks = await zkOBS.committedBlockNum();
+      await zkOBS.commitBlocks(lastCommittedBlock, newBlocks);
+      const newTotalCommittedBlocks = await zkOBS.committedBlockNum();
+      expect(newTotalCommittedBlocks - oriTotalCommittedBlocks).to.be.eq(
+        newBlocks.length,
+      );
+    });
+
+    it('Prove Acc2 place order to buy ETH with USDC', async function () {
+      // prove blocks
+      const oriTotalProvedBlocks = await zkOBS.provedBlockNum();
+
+      const committedBlocks: ZkOBS.StoredBlockStruct[] = [];
+      const commitedBlock: ZkOBS.StoredBlockStruct = {
+        blockNumber: commitBlock.blockNumber,
+        stateRoot: commitBlock.newStateRoot,
+        l1RequestNum: 0,
+        pendingRollupTxHash: emptyHash,
+        commitment: commitmentHashOrigin,
+        timestamp: commitBlock.timestamp,
+      };
+      lastCommittedBlock = commitedBlock;
+      committedBlocks.push(commitedBlock);
+      const proofs: ZkOBS.ProofStruct[] = [];
+      const proof: ZkOBS.ProofStruct = {
+        a: [proof_a[0], proof_a[1]],
+        b: [
+          [proof_b[0][0], proof_b[0][1]],
+          [proof_b[1][0], proof_b[1][1]],
+        ],
+        c: [proof_c[0], proof_c[1]],
+        commitment: [proof_commitment[0]],
+      };
+      proofs.push(proof);
+
+      await zkOBS.proveBlocks(committedBlocks, proofs);
+
+      const newTotalProvedBlocks = await zkOBS.provedBlockNum();
+      expect(newTotalProvedBlocks - oriTotalProvedBlocks).to.be.eq(
+        committedBlocks.length,
+      );
+    });
+
+    it('Execute Acc2 place order to buy ETH with USDC', async function () {
+      // execute blocks
+      const oriTotalExecutedBlocks = await zkOBS.executedBlockNum();
+      let pendingBlocks: ZkOBS.ExecuteBlockStruct[];
+      let pendingRollupTxPubdata: any[] = [];
+      const executeBlock: ZkOBS.ExecuteBlockStruct = {
+        storedBlock: lastCommittedBlock,
+        pendingRollupTxPubdata: pendingRollupTxPubdata,
+      };
+      pendingBlocks = [executeBlock];
+      await zkOBS.executeBlocks(pendingBlocks);
+      const newTotalExecutedBlocks = await zkOBS.executedBlockNum();
+      expect(newTotalExecutedBlocks - oriTotalExecutedBlocks).to.be.eq(
+        pendingBlocks.length,
+      );
+    });
+  });
+
+  describe('Rollup for Acc2 place order to buy USDC with ETH', function () {
+    const {
+      pubKeyX,
+      pubKeyY,
+      amount,
+      oriStateRoot,
+      newStateRoot,
+      newTsRoot,
+      commitmentHashOrigin,
+      proof_a,
+      proof_b,
+      proof_c,
+      proof_commitment,
+    } = getRollupData(inputs7, root7, calldata7);
+
+    it('Commit Acc2 place order to buy ETH with USDC', async function () {
+      zkOBS = zkOBS.connect(operator);
+
+      const newBlocks: ZkOBS.CommitBlockStruct[] = [];
+      const tokenIdUSDC = await zkOBS.tokenIdOf(zkUSDC.address);
+      const accountId = await zkOBS.accountIdOf(await user2.getAddress());
+      const publicData = ethers.utils
+        .solidityPack(
+          ['uint8', 'uint32', 'uint16', 'uint40'],
+          [
+            OpType.SECONDLIMITORDER,
+            accountId,
+            tokenIdUSDC,
+            amountToTxAmountV3_40bit(BigInt(amount.toString())),
+          ],
+        )
+        .padEnd((CALLDATA_CHUNK * 12 * 8) / 4 + 2, '0');
+
+      commitBlock = {
+        blockNumber: BigNumber.from(lastCommittedBlock.blockNumber).add(1),
+        newStateRoot: newStateRoot,
+        newTsRoot: newTsRoot,
+        publicData: publicData,
+        publicDataOffsets: [],
+        timestamp: Date.now(),
+      };
+
+      newBlocks.push(commitBlock);
+      const oriTotalCommittedBlocks = await zkOBS.committedBlockNum();
+      await zkOBS.commitBlocks(lastCommittedBlock, newBlocks);
+      const newTotalCommittedBlocks = await zkOBS.committedBlockNum();
+      expect(newTotalCommittedBlocks - oriTotalCommittedBlocks).to.be.eq(
+        newBlocks.length,
+      );
+    });
+
+    it('Prove Acc2 place order to buy ETH with USDC', async function () {
+      // prove blocks
+      const oriTotalProvedBlocks = await zkOBS.provedBlockNum();
+
+      const committedBlocks: ZkOBS.StoredBlockStruct[] = [];
+      const commitedBlock: ZkOBS.StoredBlockStruct = {
+        blockNumber: commitBlock.blockNumber,
+        stateRoot: commitBlock.newStateRoot,
+        l1RequestNum: 0,
+        pendingRollupTxHash: emptyHash,
+        commitment: commitmentHashOrigin,
+        timestamp: commitBlock.timestamp,
+      };
+      lastCommittedBlock = commitedBlock;
+      committedBlocks.push(commitedBlock);
+      const proofs: ZkOBS.ProofStruct[] = [];
+      const proof: ZkOBS.ProofStruct = {
+        a: [proof_a[0], proof_a[1]],
+        b: [
+          [proof_b[0][0], proof_b[0][1]],
+          [proof_b[1][0], proof_b[1][1]],
+        ],
+        c: [proof_c[0], proof_c[1]],
+        commitment: [proof_commitment[0]],
+      };
+      proofs.push(proof);
+
+      await zkOBS.proveBlocks(committedBlocks, proofs);
+
+      const newTotalProvedBlocks = await zkOBS.provedBlockNum();
+      expect(newTotalProvedBlocks - oriTotalProvedBlocks).to.be.eq(
+        committedBlocks.length,
+      );
+    });
+
+    it('Execute Acc2 place order to buy ETH with USDC', async function () {
       // execute blocks
       const oriTotalExecutedBlocks = await zkOBS.executedBlockNum();
       let pendingBlocks: ZkOBS.ExecuteBlockStruct[];
