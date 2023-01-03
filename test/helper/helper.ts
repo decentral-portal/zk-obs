@@ -73,3 +73,16 @@ export function getRollupData(inputs: any, root: any, calldata: any) {
     proof_commitment,
   };
 }
+
+export function amountToTxAmountV3_40bit(number: bigint): bigint {
+  // 48bit
+  let val_exp = 0n;
+  if (number === 0n) {
+    return 0n;
+  }
+  while (number % 10n === 0n) {
+    number /= 10n;
+    val_exp += 1n;
+  }
+  return number + (val_exp << 35n);
+}
