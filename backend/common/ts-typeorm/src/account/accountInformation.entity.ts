@@ -101,8 +101,8 @@ export class AccountInformation extends BaseTimeEntity {
   })
   tsPubKeyY!: string;
   // relations
-  @OneToOne(() => AccountMerkleTreeNode, (accountMerkleTreeNode: AccountMerkleTreeNode) => accountMerkleTreeNode.leaf)
-  accountMerkleTreeNode!: AccountMerkleTreeNode;
+  // @OneToOne(() => AccountMerkleTreeNode, (accountMerkleTreeNode: AccountMerkleTreeNode) => accountMerkleTreeNode.leaf)
+  // accountMerkleTreeNode!: AccountMerkleTreeNode;
   // @OneToMany(
   //   () => AuctionOrderLeafNode,
   //   (auctionOrderLeafNode:AuctionOrderLeafNode) => auctionOrderLeafNode.L2AddrFromAccount

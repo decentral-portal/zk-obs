@@ -29,18 +29,18 @@ export class AccountMerkleTreeNode {
     nullable: true,
   })
   leafId!: bigint|null;
-  @OneToOne(
-    () => AccountInformation, // mapType
-    (accountInformation: AccountInformation) => accountInformation.accountMerkleTreeNode , // map attribute
-    { onDelete: 'RESTRICT', onUpdate: 'CASCADE' } 
-  )
-  @JoinColumn([{ name: 'leafId', referencedColumnName: 'accountId' }])
-  leaf!: AccountInformation;
-  @OneToMany(
-    () => TokenMerkleTreeNode,
-    (tokenMerkleTreeNode: TokenMerkleTreeNode) => tokenMerkleTreeNode.accountRoot
-  )
-  tokenMerkleTreeNodes!: TokenMerkleTreeNode[];
+  // @OneToOne(
+  //   () => AccountInformation, // mapType
+  //   (accountInformation: AccountInformation) => accountInformation.accountMerkleTreeNode , // map attribute
+  //   { onDelete: 'RESTRICT', onUpdate: 'CASCADE' } 
+  // )
+  // @JoinColumn([{ name: 'leafId', referencedColumnName: 'accountId' }])
+  // leaf!: AccountInformation;
+  // @OneToMany(
+  //   () => TokenMerkleTreeNode,
+  //   (tokenMerkleTreeNode: TokenMerkleTreeNode) => tokenMerkleTreeNode.accountRoot
+  // )
+  // tokenMerkleTreeNodes!: TokenMerkleTreeNode[];
   @OneToOne(
     () =>  AccountLeafNode,
     (accountLeafNode: AccountLeafNode) => accountLeafNode.accountMerkleTreeNode

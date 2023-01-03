@@ -89,7 +89,7 @@ export class TsAccountTreeService extends TsMerkleTree<AccountLeafNode>{
     // }
     console.timeEnd('updateLeaf for account tree');
   }
-  async getLeaf(leaf_id: bigint, otherPayload: any): Promise<AccountLeafNode | null> {
+  async getLeaf(leaf_id: bigint, otherPayload: any): Promise<AccountLeafNode> {
     const result = await this.accountLeafNodeRepository.findOneBy({leafId: leaf_id.toString()});
     if (result == null) {
       // check level
@@ -110,7 +110,7 @@ export class TsAccountTreeService extends TsMerkleTree<AccountLeafNode>{
           nonce: 0n,
         });
       });
-      return await this.accountLeafNodeRepository.findOneBy({leafId: leaf_id.toString()});   
+      return await this.accountLeafNodeRepository.findOneByOrFail({leafId: leaf_id.toString()});   
     }
     return result;  
   }

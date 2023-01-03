@@ -42,13 +42,13 @@ export class TokenMerkleTreeNode {
   })
   leafId!: string|null;
   // relations
-  @ManyToOne(
-    () => AccountMerkleTreeNode,
-    (accountMerkleTreeNode: AccountMerkleTreeNode) => accountMerkleTreeNode.tokenMerkleTreeNodes,
-    { onDelete: 'RESTRICT', onUpdate: 'CASCADE' }
-  )
-  @JoinColumn({ name: 'accountId', referencedColumnName: 'leafId' })
-  accountRoot!: AccountMerkleTreeNode;
+  // @ManyToOne(
+  //   () => AccountMerkleTreeNode,
+  //   (accountMerkleTreeNode: AccountMerkleTreeNode) => accountMerkleTreeNode.tokenMerkleTreeNodes,
+  //   { onDelete: 'RESTRICT', onUpdate: 'CASCADE' }
+  // )
+  // @JoinColumn({ name: 'accountId', referencedColumnName: 'leafId' })
+  // accountRoot!: AccountMerkleTreeNode;
   @OneToOne(
     () => TokenLeafNode,
     (tokenLeafNode: TokenLeafNode) => tokenLeafNode.tokenMerkleNode

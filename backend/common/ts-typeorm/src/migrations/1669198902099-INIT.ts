@@ -160,16 +160,16 @@ export class INIT_1669198902099 implements MigrationInterface {
           },
         ],
         schema: 'public',
-        foreignKeys: [
-          {
-            name: 'leaf',
-            columnNames: ['leafId'],
-            referencedColumnNames: ['accountId'],
-            referencedTableName: 'AccountInformation',
-            onDelete: 'RESTRICT',
-            onUpdate: 'CASCADE',
-          },
-        ],
+        // foreignKeys: [
+        //   {
+        //     name: 'leaf',
+        //     columnNames: ['leafId'],
+        //     referencedColumnNames: ['accountId'],
+        //     referencedTableName: 'AccountInformation',
+        //     onDelete: 'RESTRICT',
+        //     onUpdate: 'CASCADE',
+        //   },
+        // ],
       }),
     );
     await queryRunner.createTable(
@@ -257,16 +257,16 @@ export class INIT_1669198902099 implements MigrationInterface {
           },
         ],
         schema: 'public',
-        foreignKeys: [
-          {
-            name: 'accountId',
-            columnNames: ['accountId'],
-            referencedColumnNames: ['leafId'],
-            referencedTableName: 'AccountMerkleTreeNode',
-            onDelete: 'RESTRICT',
-            onUpdate: 'CASCADE',
-          },
-        ],
+        // foreignKeys: [
+        //   {
+        //     name: 'accountId',
+        //     columnNames: ['accountId'],
+        //     referencedColumnNames: ['leafId'],
+        //     referencedTableName: 'AccountMerkleTreeNode',
+        //     onDelete: 'RESTRICT',
+        //     onUpdate: 'CASCADE',
+        //   },
+        // ],
         uniques: [
           {
             name: 'uniqueTokenLeafNode',

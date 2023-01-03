@@ -124,13 +124,13 @@ export class MatchObsOrderEntity {
     referencedColumnName: 'txId'   
   })
   matchedTx!: TransactionInfo | null;
-  @OneToOne(
-    () => TransactionInfo,
-    (transaction: TransactionInfo) => transaction.matchedOrder2,
-  )
-  @JoinColumn({
-    name: 'txId2',
-    referencedColumnName: 'txId'   
-  })
-  matchedTx2!: TransactionInfo | null;
+  // @OneToOne(
+  //   () => TransactionInfo,
+  //   (transaction: TransactionInfo) => transaction.matchedOrder2,
+  // )
+  // @JoinColumn({
+  //   name: 'txId2',
+  //   referencedColumnName: 'txId'   
+  // })
+  // matchedTx2!: TransactionInfo | null;
 }

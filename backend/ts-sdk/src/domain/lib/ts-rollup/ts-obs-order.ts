@@ -99,3 +99,49 @@ export class TsAuctionEmptyOrder implements ITsAuctionOrder {
   }
 }
 
+
+// TODO: maturityToTsl
+// export function maturityToTsl(underlying: TsTokenAddress, maturityDate: string): TsTokenAddress {
+//   const map: any = {
+//     [TsTokenAddress.WETH]: TsTokenAddress.TslETH20221231,
+//     [TsTokenAddress.WBTC]: TsTokenAddress.TslBTC20221231,
+//     [TsTokenAddress.USDT]: TsTokenAddress.TslUSDT20221231,
+//     [TsTokenAddress.USDC]: TsTokenAddress.TslUSDC20221231,
+//     [TsTokenAddress.DAI]: TsTokenAddress.TslDAI20221231,
+//   };
+ 
+//   if(map[underlying]) {
+//     return map[underlying];
+//   }
+//   console.error(underlying, 'maturityToTsl: not supported');
+//   throw new Error('invalid underlying token');
+// }
+
+// export function tslToInfo(tslToken: TsTokenAddress) {
+//   const map: any = {
+//     [TsTokenAddress.TslETH20221231]: {
+//       underlying: TsTokenAddress.WETH,
+//       maturityDate: 19357n,
+//     },
+//     [TsTokenAddress.TslBTC20221231]: {
+//       underlying: TsTokenAddress.WBTC,
+//       maturityDate: 19357n,
+//     },
+//     [TsTokenAddress.TslUSDT20221231]: {
+//       underlying: TsTokenAddress.USDT,
+//       maturityDate: 19357n,
+//     },
+//     [TsTokenAddress.TslUSDC20221231]: {
+//       underlying: TsTokenAddress.USDC,
+//       maturityDate: 19357n,
+//     },
+//     [TsTokenAddress.TslDAI20221231]: {
+//       underlying: TsTokenAddress.DAI,
+//       maturityDate: 19357n,
+//     },
+//   };
+//   if(map[tslToken]) {
+//     return map[tslToken];
+//   }
+//   throw new Error('invalid tsl token');
+// }

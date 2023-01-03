@@ -8,6 +8,8 @@ import { MarketSellBuyPair } from '../auctionOrder/dto/MarketPairInfo.dto';
 import { TsSide } from '../auctionOrder/tsSide.enum';
 import { ObsOrderTreeService } from '../auctionOrder/obsOrderTree.service';
 import { UpdateObsOrderTreeDto } from '../auctionOrder/dto/updateObsOrderTree.dto';
+import { UpdateObsStateTreeDto } from './dto/updateObsStateTree.dto';
+import { ObsMerkleTreeService } from './obsMerkleTreeService';
 
 @Controller('merkleTree')
 export class MerkleTreeController {
@@ -19,6 +21,7 @@ export class MerkleTreeController {
     private readonly tsTokenTreeService: TsTokenTreeService,
     private readonly marketPairInfoService: MarketPairInfoService,
     private readonly obsOrderTreeService: ObsOrderTreeService,
+    private readonly obsStateTreeService: ObsMerkleTreeService,
   ) {
     this.tsAccountTreeService.getCurrentLeafIdCount().then((id) => {
       this.accountLeafId = BigInt(id)+ 100n;
@@ -53,6 +56,17 @@ export class MerkleTreeController {
       updateObsOrderTreeDto
     );
     console.timeEnd('controller updateObsOrderTree');
+  }
+  @Post('updateObsStateTree')
+  async updateObsStateTree(@Body() updateObsStateTreeDto: UpdateObsStateTreeDto) {
+    console.time('controller updateObsStateTree');
+    await this.obsStateTreeService.updateStateTree(
+      BigInt(updateObsStateTreeDto.accountId),
+      BigInt(updateObsStateTreeDto.tokenId),
+      BigInt(updateObsStateTreeDto.lockedAmt),
+      BigInt(updateObsStateTreeDto.availableAmt),
+    );
+    console.timeEnd('controller updateObsStateTree');
   }
   @Get('marketPairInfo')
   async getMarketPairInfo(@Query() dto: MarketSellBuyPair) {
