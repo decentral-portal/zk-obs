@@ -1075,15 +1075,7 @@ export class INIT_1669198902099 implements MigrationInterface {
             referencedTableName: 'TransactionInfo',
             onUpdate: 'CASCADE',
             onDelete: 'RESTRICT',
-          },
-          {
-            name: 'matchedTx2',
-            columnNames: ['txId2'],
-            referencedColumnNames: ['txId'],
-            referencedTableName: 'TransactionInfo',
-            onUpdate: 'CASCADE',
-            onDelete: 'RESTRICT',
-          },
+          }
         ],
       }),
     );

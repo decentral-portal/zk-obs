@@ -39,7 +39,7 @@ export class RollupInformation {
 
   @Column({
     type: 'decimal',
-    name: 'accountId',
+    name: 'currentOrderId',
     precision: 86,
     scale: 0,
     nullable: false,

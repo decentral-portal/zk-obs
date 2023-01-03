@@ -127,10 +127,6 @@ export class MatchObsOrderEntity {
   @OneToOne(
     () => TransactionInfo,
     (transaction: TransactionInfo) => transaction.matchedOrder2,
-    {
-      onDelete: 'RESTRICT',
-      onUpdate: 'CASCADE'
-    }
   )
   @JoinColumn({
     name: 'txId2',
