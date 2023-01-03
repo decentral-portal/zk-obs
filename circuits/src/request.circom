@@ -70,7 +70,9 @@ template DoReqUnknow(){
 
     signal output channelOut[LenOfChannel()] <== [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     signal output resData[LenOfResponse()] <== [0, 0];
-    channelIn === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    
+    for(var i = 0; i < LenOfChannel(); i++)
+        ImplyEq()(enabled, channelIn[i], 0);
     
 
     /* enabled be a boolean */
@@ -112,7 +114,9 @@ template DoReqRegister(){
 
     signal output channelOut[LenOfChannel()] <== [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     signal output resData[LenOfResponse()] <== [0, 0];
-    channelIn === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    
+    for(var i = 0; i < LenOfChannel(); i++)
+        ImplyEq()(enabled, channelIn[i], 0);
     
 
     /* enabled be a boolean */
@@ -170,7 +174,9 @@ template DoReqDeposit(){
 
     signal output channelOut[LenOfChannel()] <== [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     signal output resData[LenOfResponse()] <== [0, 0];
-    channelIn === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    
+    for(var i = 0; i < LenOfChannel(); i++)
+        ImplyEq()(enabled, channelIn[i], 0);
     
 
     /* enabled be a boolean */
@@ -228,7 +234,9 @@ template DoReqWithdraw(){
 
     signal output channelOut[LenOfChannel()] <== [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     signal output resData[LenOfResponse()] <== [0, 0];
-    channelIn === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    
+    for(var i = 0; i < LenOfChannel(); i++)
+        ImplyEq()(enabled, channelIn[i], 0);
     
     /* enabled be a boolean */
     enabled * (enabled - 1) === 0;
@@ -287,7 +295,9 @@ template DoReqCancel(){
 
     signal output channelOut[LenOfChannel()] <== [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     signal output resData[LenOfResponse()] <== [0, 0];
-    channelIn === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    
+    for(var i = 0; i < LenOfChannel(); i++)
+        ImplyEq()(enabled, channelIn[i], 0);
 
     /* enabled be a boolean */
     enabled * (enabled - 1) === 0;
@@ -349,7 +359,9 @@ template DoReqSecondLimitOrder(){
     signal output channelOut[LenOfChannel()] <== [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     signal output resData[LenOfResponse()] <== [0, 0];
 
-    channelIn === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    
+    for(var i = 0; i < LenOfChannel(); i++)
+        ImplyEq()(enabled, channelIn[i], 0);
 
     /* enabled be a boolean */
     enabled * (enabled - 1) === 0;
@@ -420,7 +432,9 @@ template DoReqSecondLimitStart(){
 
     signal output channelOut[LenOfChannel()];
     signal output resData[LenOfResponse()];
-    channelIn === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    
+    for(var i = 0; i < LenOfChannel(); i++)
+        ImplyEq()(enabled, channelIn[i], 0);
 
     /* enabled be a boolean */
     enabled * (enabled - 1) === 0;
@@ -445,7 +459,7 @@ template DoReqSecondLimitStart(){
     channelOut[LenOfOL() + 1] <== r_oriOrderLeaf[0][LenOfRequest() + 2];
 
     /* response */    
-    resData <== [r_oriOrderLeaf[0][LenOfRequest()], 0];
+    resData <== [txId - r_oriOrderLeaf[0][OLIdxTxId()], 0];
 }
 template DoReqSecondLimitExchange(){
     signal input enabled;
@@ -671,7 +685,9 @@ template DoReqSecondMarketOrder(){
 
     signal output channelOut[LenOfChannel()];
     signal output resData[LenOfResponse()] <== [0, 0];
-    channelIn === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    
+    for(var i = 0; i < LenOfChannel(); i++)
+        ImplyEq()(enabled, channelIn[i], 0);
     
 
     /* enabled be a boolean */
