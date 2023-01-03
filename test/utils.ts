@@ -4,7 +4,7 @@ import { ERC20FreeMint } from '../typechain-types/contracts/ERC20FreeMint';
 import { ZkOBS } from '../typechain-types/contracts/ZkOBS';
 import { BigNumber } from 'ethers';
 import { poseidon } from '@big-whale-labs/poseidon';
-import root from './example/zkobs-p1/0_register-acc1-p5-commitment.json';
+import initStates from '/Users/aaronliang/Documents/TKspring/zk-obs/test/example/zkobs-p1/initStates.json';
 const circomlibjs = require('circomlibjs');
 const { createCode, generateABI } = circomlibjs.poseidonContract;
 
@@ -42,7 +42,7 @@ export async function deploy() {
   await poseidom2Contract.deployed();
   console.log('Deployed poseidom:', poseidom2Contract.address);
 
-  const genesisStateRoot = root.oriStateRoot;
+  const genesisStateRoot = initStates.stateRoot;
   const ZkOBS = await ethers.getContractFactory('ZkOBS');
 
   const zkOBS: ZkOBS = await ZkOBS.connect(operator).deploy(
