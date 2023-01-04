@@ -1045,10 +1045,10 @@ export class SequencerConsumer {
 
   private async doNoop() {
     const orderLeafId = '0';
-    const account = await this.getAccount('0');
-    if (!account) {
-      throw new Error('doNoop: account not found');
-    }
+    // const account = await this.getAccount('0');
+    // if (!account) {
+    //   throw new Error('doNoop: account not found');
+    // }
     await this.accountAndTokenBeforeUpdate('0', TsTokenAddress.Unknown);
     await this.accountAndTokenAfterUpdate('0', TsTokenAddress.Unknown);
     await this.accountAndTokenBeforeUpdate('0', TsTokenAddress.Unknown);
