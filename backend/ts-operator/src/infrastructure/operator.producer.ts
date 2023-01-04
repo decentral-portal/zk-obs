@@ -69,7 +69,18 @@ export class OperatorProducer {
         handler(log);
       });
     });
-    this.contract.on(filters, handler);
+    this.contract.on(filters, (...args) => {
+      handler({
+        args: {
+          sender: args[0],
+          accountId: args[1],
+          tsPubX: args[2],
+          tsPubY: args[3],
+          l2Addr: args[4],
+        },
+        blockNumber: args
+      });
+    });
   }
 
   async handleRegisterEvent(sender: string, accountId: number, tsPubX: BigNumber, tsPubY: BigNumber, l2Addr: string, tx: TransactionResponse) {
@@ -118,14 +129,27 @@ export class OperatorProducer {
       console.log({
         depositLog: log,
       });
-      this.handleDepositEvent(log.args.sender, log.args.accountId, log.args.tokenId, log.args.amount, log.transactionHash);
+      this.handleDepositEvent(log.args.sender, log.args.accountId, log.args.tokenId, log.args.amount, log);
     };
     this.contract.queryFilter(filters, lastSyncBlocknumberForDepositEvent, 'latest').then((logs) => {
       logs.forEach((log) => {
         handler(log);
       });
     });
-    this.contract.on(filters, handler);
+    this.contract.on(filters, (...args) => {
+      console.log({
+        args,
+      });
+      handler({
+        args: {
+          sender: args[0],
+          accountId: args[1],
+          tokenId: args[2],
+          amount: args[3],
+        },
+        blockNumber: args
+      });
+    });
   }
 
   async handleDepositEvent(sender: string, accountId: BigNumber, tokenId: BigNumber, amount: BigNumber, tx: TransactionResponse) {
