@@ -17,6 +17,7 @@ import { WorkerService } from '@common/cluster/worker.service';
 import { DatabasePubSubModule } from '@common/db-pubsub/db-pubsub.module';
 import { AccountInformation } from '@common/ts-typeorm/account/accountInformation.entity';
 import { BlockInformation } from '@common/ts-typeorm/account/blockInformation.entity';
+import { AccountModule } from '@common/ts-typeorm/account/account.module';
 
 const localNetwork = {
   name: 'LOCAL',
@@ -54,6 +55,7 @@ const localNetwork = {
     }),
     WorkerModule,
     DatabasePubSubModule,
+    AccountModule,
   ],
   controllers: [],
   providers: [OperatorConsumer, OperatorProducer,],

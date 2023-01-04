@@ -1206,7 +1206,7 @@ export class SequencerConsumer {
     const accountLeafId = req.accountId;
     const from = await this.getAccount(transferL2AddrFrom.toString());
     if (!from) {
-      throw new Error(`Deposit account not found L2Addr=${from}`);
+      throw new Error(`doWithdraw account not found L2Addr=${from}`);
     }
     const newNonce = BigInt(from.nonce) + 1n;
 

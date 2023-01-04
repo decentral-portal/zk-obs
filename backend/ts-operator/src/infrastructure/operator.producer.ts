@@ -28,6 +28,7 @@ import { Queue } from 'bullmq';
 import { TsTxType } from '@ts-sdk/domain/lib/ts-types/ts-types';
 import { TsTokenAddress } from '../../../ts-sdk/src/domain/lib/ts-types/ts-types';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
+import { TsAccountTreeService } from '@common/ts-typeorm/account/tsAccountTree.service';
 @Injectable({
   scope: Scope.DEFAULT,
 })
@@ -47,7 +48,7 @@ export class OperatorProducer {
     @InjectRepository(AccountInformation)
     private accountRepository: Repository<AccountInformation>,
     private readonly messageBrokerService: MessageBroker,
-
+    private readonly tsAccountTreeService: TsAccountTreeService,
     private readonly connection: Connection,
     private readonly workerService: WorkerService,
   ) {
@@ -235,11 +236,16 @@ export class OperatorProducer {
       amount: amount.toString(),
       arg0: BigInt(accountId.toString()).toString(),
     };
-    const account = await this.accountRepository.findOne({
-      where: { accountId: accountId.toString() },
-    });
-    if(!account || !account.L1Address) {
+    const account = await this.tsAccountTreeService.getLeaf(accountId.toString());
+    // const account = await this.accountRepository.findOne({
+    //   where: { accountId: accountId.toString() },
+    // });
+    if(!account) {
       this.holdTx.push(req);
+      console.log({
+        msg: 'pending depopsit req',
+        req,
+      });
     } else {
       await this.txRepository.insert(req);
     }
