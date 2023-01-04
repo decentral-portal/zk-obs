@@ -19,6 +19,8 @@
 // solhint-disable-next-line
 pragma solidity ^0.4.18;
 
+// import "hardhat/console.sol";
+
 contract WETH9 {
     string public name = "Wrapped Ether";
     string public symbol = "WETH";
@@ -42,7 +44,9 @@ contract WETH9 {
     }
 
     function withdraw(uint256 wad) public {
+        // console.log("in withdraw:");
         require(balanceOf[msg.sender] >= wad);
+        // console.log("1");
         balanceOf[msg.sender] -= wad;
         msg.sender.transfer(wad);
         Withdrawal(msg.sender, wad);
