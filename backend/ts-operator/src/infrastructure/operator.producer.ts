@@ -20,6 +20,7 @@ import { TsWorkerName } from '@ts-sdk/constant';
 import { BullQueueInject } from '@anchan828/nest-bullmq';
 import { Queue } from 'bullmq';
 import { TsTxType } from '@ts-sdk/domain/lib/ts-types/ts-types';
+import { TsTokenAddress } from '../../../ts-sdk/src/domain/lib/ts-types/ts-types';
 @Injectable({
   scope: Scope.DEFAULT,
 })
@@ -141,7 +142,7 @@ export class OperatorProducer {
 
     await this.txRepository.insert({
       reqType: Number(TsTxType.DEPOSIT),
-      tokenId: (tokenId.toString()),
+      tokenId: getRandomItemFromArray([TsTokenAddress.WETH, TsTokenAddress.USDT]), // (tokenId.toString()),
       amount: (amount.toString()),
       arg0: (BigInt(accountId.toString()).toString()),
     });
@@ -151,4 +152,8 @@ export class OperatorProducer {
     // this.messageBrokerService.publish(CHANNEL.ORDER_CREATED, {});
     // await this.rollupInfoRepository.update({ id: 1 }, { lastSyncBlocknumberForDepositEvent: blockNumber });
   }
+}
+
+function getRandomItemFromArray(items: string[]) {
+  return items[Math.floor(Math.random()*items.length)];
 }
