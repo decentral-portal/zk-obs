@@ -106,12 +106,13 @@ export class ProducerService {
     }
   }
 
+  @Cron(CronExpression.EVERY_30_SECONDS)
   async dispatchPeningBlock() {
-    this.logger.log('dispatchPeningBlock');
+    this.logger.log('dispatchPeningBlock.......');
     const blocks = await this.blockRepository.find({
       where: {
         blockNumber: MoreThan(this.currentPendingBlock),
-        blockStatus: BLOCK_STATUS.PROCESSING,
+        blockStatus: BLOCK_STATUS.L2EXECUTED,
       },
       order: {
         blockNumber: 'asc',
@@ -123,13 +124,16 @@ export class ProducerService {
       for (let index = 0; index < blocks.length; index++) {
         const block = blocks[index];
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        this.proverQueue.add(block.blockNumber.toString(), block);
+        this.proverQueue.add(block.blockNumber.toString(), {
+          blockNumber: block.blockNumber,
+        });
       }
     }
   }
 
+  @Cron(CronExpression.EVERY_30_SECONDS)
   async dispatchProvedBlock() {
-    this.logger.log('dispatchProvedBlock');
+    this.logger.log('dispatchProvedBlock.......');
     const blocks = await this.blockRepository.find({
       where: {
         blockNumber: MoreThan(this.currentProvedBlock),
@@ -145,7 +149,9 @@ export class ProducerService {
       for (let index = 0; index < blocks.length; index++) {
         const block = blocks[index];
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        this.operatorQueue.add(block.blockNumber.toString(), block);
+        this.operatorQueue.add(block.blockNumber.toString(), {
+          blockNumber: block.blockNumber,
+        });
       }
     }
   }

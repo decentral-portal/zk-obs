@@ -282,14 +282,15 @@ export class SequencerConsumer {
   async endRollup(): Promise<{
     inputs: TsRollupCircuitInputType;
   }> {
+    this.logger.log(`endRollup: blockNumber=${this.newBlockNumber}`);
     return await this.connection.transaction(async (manager) => {
-      this.rollupStatus = RollupStatus.Idle;
       const currentBlockNumber = this.newBlockNumber;
       const currentBlcok = await manager.findOneByOrFail(BlockInformation, {
         blockNumber: Number(currentBlockNumber),
       });
 
       const perBatch = this.txNormalPerBatch;
+
       if (this.currentTxLogs.length !== perBatch) {
         console.log(`Rollup txNumbers=${this.currentTxLogs.length} not match txPerBatch=${perBatch}`);
         const emptyTxNum = perBatch - this.currentTxLogs.length;
@@ -297,7 +298,7 @@ export class SequencerConsumer {
           await this.doTransaction(TxNoop);
         }
       }
-  
+      this.rollupStatus = RollupStatus.Idle;
       const circuitInputs = txsToRollupCircuitInput(this.currentTxLogs) as any;
       // TODO: type check
   
@@ -394,7 +395,9 @@ export class SequencerConsumer {
         timestamp: '0',
         pendingRollupTxHash: '',
       };
-
+      console.log({
+        blockState: currentBlcok.state,
+      });
       await manager.save(currentBlcok);
       return {
         inputs: circuitInputs,

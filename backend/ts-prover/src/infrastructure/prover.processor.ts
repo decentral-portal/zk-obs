@@ -55,7 +55,7 @@ export class ProverConsumer {
 
     const { proofPath, publicPath } = await prove(inputName, inputPath, this.circuitName);
     const proof = JSON.parse(fs.readFileSync(proofPath, 'utf8'));
-    const publicInput = JSON.parse(fs.readFileSync(publicPath, 'utf8'));
+    // const publicInput = JSON.parse(fs.readFileSync(publicPath, 'utf8'));
     // await verify(publicPath, proofPath, vKetPath, item.circuitName);
     // await genSolidityCalldata(item.name, proofPath, publicPath, item.circuitName);
     await this.blockRepository.update({
@@ -63,7 +63,6 @@ export class ProverConsumer {
     },{
       blockStatus: BLOCK_STATUS.L2CONFIRMED,
       proof,
-      // publicInput,
     });
     return true;
   }
