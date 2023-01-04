@@ -581,6 +581,12 @@ export class INIT_1669198902099 implements MigrationInterface {
             default: '\'{}\'',
           },
           {
+            type: 'json',
+            name: 'state',
+            isNullable: false,
+            default: '\'{}\'',
+          },
+          {
             type: 'enum',
             name: 'txStatus',
             enumName: 'TX_STATUS',
