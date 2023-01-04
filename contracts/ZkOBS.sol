@@ -26,10 +26,10 @@ contract ZkOBS is Ownable {
 
     struct StoredBlock {
         uint32 blockNumber;
-        bytes32 stateRoot;
         uint64 l1RequestNum;
         bytes32 pendingRollupTxHash;
         bytes32 commitment;
+        bytes32 stateRoot;
         uint256 timestamp;
     }
 
@@ -37,9 +37,9 @@ contract ZkOBS is Ownable {
         uint32 blockNumber;
         bytes32 newStateRoot;
         bytes32 newTsRoot;
+        uint256 timestamp;
         bytes publicData;
         uint32[] publicDataOffsets;
-        uint256 timestamp;
     }
 
     struct ExecuteBlock {
@@ -95,11 +95,11 @@ contract ZkOBS is Ownable {
         address wETHAddr_,
         address verifierAddr_,
         bytes32 genesisStateRoot,
-        address poseidon2Addr_
+        address poseidon2Addr
     ) {
         wETHAddr = wETHAddr_;
         verifierAddr = verifierAddr_;
-        poseidon2 = PoseidonUnit2(poseidon2Addr_);
+        poseidon2 = PoseidonUnit2(poseidon2Addr);
         StoredBlock memory storedBlock = StoredBlock({
             blockNumber: 0,
             stateRoot: genesisStateRoot,
@@ -115,14 +115,14 @@ contract ZkOBS is Ownable {
     }
 
     function addToken(address tokenAddr) external onlyOwner {
+        require(tokenIdOf[tokenAddr] == 0, "Token already registered");
         tokenIdOf[tokenAddr] = tokenNum;
         ++tokenNum;
     }
 
     function registerETH(uint256 tsPubX, uint256 tsPubY) external payable {
-        if (accountIdOf[msg.sender] != 0) {
-            revert("Account already registered");
-        }
+        require(accountIdOf[msg.sender] == 0, "Account already registered");
+
         uint16 l2TokenAddr = tokenIdOf[wETHAddr];
         uint128 depositAmount = SafeCast.toUint128(msg.value);
         IWETH(wETHAddr).deposit{ value: msg.value }();
@@ -137,9 +137,7 @@ contract ZkOBS is Ownable {
         address tokenAddr,
         uint128 amount
     ) external {
-        if (accountIdOf[msg.sender] != 0) {
-            revert("Account already registered");
-        }
+        require(accountIdOf[msg.sender] == 0, "Account already registered");
         uint16 tokenId = tokenIdOf[tokenAddr];
         IERC20 token = IERC20(tokenAddr);
         uint256 balanceBefore = token.balanceOf(address(this));
@@ -157,9 +155,7 @@ contract ZkOBS is Ownable {
     }
 
     function depositETH() external payable {
-        if (accountIdOf[msg.sender] == 0) {
-            revert("Account not registered");
-        }
+        require(accountIdOf[msg.sender] != 0, "Account not registered");
         uint16 l2TokenAddr = tokenIdOf[wETHAddr];
         uint128 depositAmount = SafeCast.toUint128(msg.value);
         IWETH(wETHAddr).deposit{ value: msg.value }();
@@ -168,9 +164,7 @@ contract ZkOBS is Ownable {
     }
 
     function depositERC20(address tokenAddr, uint128 amount) external {
-        if (accountIdOf[msg.sender] == 0) {
-            revert("Account not registered");
-        }
+        require(accountIdOf[msg.sender] != 0, "Account not registered");
         uint16 tokenId = tokenIdOf[tokenAddr];
         IERC20 token = IERC20(tokenAddr);
         uint256 balanceBefore = token.balanceOf(address(this));
@@ -183,9 +177,7 @@ contract ZkOBS is Ownable {
     }
 
     function withdrawETH(uint128 amount) external payable {
-        if (accountIdOf[msg.sender] == 0) {
-            revert("Account not registered");
-        }
+        require(accountIdOf[msg.sender] != 0, "Account not registered");
         uint16 tokenId = tokenIdOf[wETHAddr];
         _withdraw(msg.sender, tokenId, amount);
         IWETH(wETHAddr).withdraw(uint256(amount));
@@ -194,9 +186,7 @@ contract ZkOBS is Ownable {
     }
 
     function withdrawERC20(address tokenAddr, uint128 amount) external {
-        if (accountIdOf[msg.sender] == 0) {
-            revert("Account not registered");
-        }
+        require(accountIdOf[msg.sender] != 0, "Account not registered");
         uint16 tokenId = tokenIdOf[tokenAddr];
         _withdraw(msg.sender, tokenId, amount);
         IERC20(tokenAddr).transfer(msg.sender, amount);
@@ -340,10 +330,10 @@ contract ZkOBS is Ownable {
         return
             StoredBlock(
                 newBlock.blockNumber,
-                newBlock.newStateRoot,
                 committedL1RequestNum_,
                 pendingRollupTxHash,
                 commitment,
+                newBlock.newStateRoot,
                 newBlock.timestamp
             );
     }
