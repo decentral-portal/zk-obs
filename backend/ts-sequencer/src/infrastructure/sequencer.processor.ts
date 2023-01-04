@@ -597,6 +597,7 @@ export class SequencerConsumer {
 
   async doTransaction(req: TransactionInfo): Promise<TsRollupCircuitInputItemType> {
     try {
+      console.time(`doTransaction txid=${req.txId}, reqType=${req.reqType}`);
       console.log({
         req,
         accountId: req.accountId,
@@ -650,6 +651,7 @@ export class SequencerConsumer {
       if (remains < 3) {
         await this.endRollup();
       }
+      console.time(`doTransaction txid=${req.txId}, reqType=${req.reqType}`);
       return inputs;
     } catch(error: any) {
       console.error('-----------------------');
