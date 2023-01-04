@@ -21,6 +21,10 @@ export abstract class TsMerkleTree<T> {
   abstract getLeaf(leaf_id: bigint, otherPayload: any): Promise<T|null>;
   abstract getMerklerProof(leaf_id: bigint): Promise<bigint[]>;
   getProofIds(leaf_id: bigint) {
+    console.log({
+      leaf_id,
+      tpye: typeof leaf_id,
+    });
     const prf: bigint[] = [];
     const height = this.treeHeigt;
     const leafStart = leaf_id + (1n <<  BigInt(height));
