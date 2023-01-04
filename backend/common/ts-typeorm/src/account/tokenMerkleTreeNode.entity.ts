@@ -37,7 +37,7 @@ export class TokenMerkleTreeNode {
     precision: 86,
     scale: 0,
     nullable: true,
-    unique: true,
+    unique: false,
   })
   leafId!: string|null;
   // relations

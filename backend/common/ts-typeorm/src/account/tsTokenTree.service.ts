@@ -123,7 +123,7 @@ export class TsTokenTreeService extends TsMerkleTree<TokenLeafNode> {
           leafId: leaf_id.toString(),
           hash: hashDecString,
         }, [
-          'id', 'accountId', 'leafId'
+          'id', 'accountId'
         ]);
         await manager.upsert(TokenLeafNode, {
           leafId: leaf_id.toString(),

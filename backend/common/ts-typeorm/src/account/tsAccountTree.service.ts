@@ -168,17 +168,18 @@ export class TsAccountTreeService extends TsMerkleTree<AccountLeafNode>{
     // setup transaction
     await this.connection.transaction(async (manager) => {
       // insert this null hash on this node
-      await manager.insert(AccountMerkleTreeNode, {
+      // TODO: fix Bug
+      await manager.upsert(AccountMerkleTreeNode, {
         leafId: leafId,
         id: id.toString(),
         hash: hashDecString,
-      });
-      await manager.insert(AccountLeafNode, {
+      }, ['id']);
+      await manager.upsert(AccountLeafNode, {
         leafId: leafId.toString(),
         tsAddr: (value.tsAddr as string),
         nonce: '0',
         tokenRoot: (this.getDefaultTokenTreeRoot())
-      });
+      }, ['leafId']);
     });
   }
 

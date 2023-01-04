@@ -40,7 +40,7 @@ export abstract class TsMerkleTree<T> {
    */
   setLevelDefaultHash() {
     this.levelsDefaultHash = new Map<number, string>();
-    this.levelsDefaultHash.set(this.lastLevel, this.getLeafDefaultVavlue());
+    this.levelsDefaultHash.set(this.lastLevel, BigInt(this.getLeafDefaultVavlue()).toString());
     for(let level = this.lastLevel-1; level >= 0 ; level--) {
       const prevLevelHash = this.levelsDefaultHash.get(level+1);
       if (prevLevelHash != undefined) {

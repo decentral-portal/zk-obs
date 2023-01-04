@@ -452,13 +452,11 @@ export class SequencerConsumer {
     } else {
       const accountMkp = await this.tsAccountTreeService.getMerklerProof(accountLeafId);
       const accountLeaf = await this.tsAccountTreeService.getLeaf(accountLeafId);
-      const accountRoot = await this.tsAccountTreeService.getRoot();
       const tokenInfo = await this.tsTokenTreeService.getLeaf((tokenAddr), accountLeafId.toString());
       const tokenRoot = await this.tsTokenTreeService.getRoot(accountLeafId.toString());
       const tokenMkPr = await this.tsTokenTreeService.getMerklerProofByAccountId((tokenAddr), accountLeafId.toString());
 
       this.currentAccountPayload.r_oriAccountLeaf.push(accountLeaf.encode());
-      this.currentAccountPayload.r_accountRootFlow.push([accountRoot]);
       this.currentAccountPayload.r_accountMkPrf.push(accountMkp);
       this.currentAccountPayload.r_tokenRootFlow.push([tokenRoot.hash]);
       this.currentAccountPayload.r_oriTokenLeaf.push(tokenInfo.encode());

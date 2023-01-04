@@ -96,7 +96,7 @@ export class OperatorProducer {
         tokenId: '0',
         amount: '0',
         arg0: (BigInt(accountId.toString()).toString()),
-        arg1: (l2Addr),
+        arg1: BigInt(l2Addr).toString(),
       }),
       // this.rollupInfoRepository.update({ id: 1 }, { lastSyncBlocknumberForRegisterEvent: blockNumber }),
     ]);
