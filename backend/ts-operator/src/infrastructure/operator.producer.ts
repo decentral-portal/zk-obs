@@ -95,7 +95,7 @@ export class OperatorProducer {
         accountId: '0',
         tokenId: '0',
         amount: '0',
-        arg0: (accountId.toString()),
+        arg0: (BigInt(accountId.toString()).toString()),
         arg1: (l2Addr),
       }),
       // this.rollupInfoRepository.update({ id: 1 }, { lastSyncBlocknumberForRegisterEvent: blockNumber }),
@@ -143,7 +143,7 @@ export class OperatorProducer {
       reqType: Number(TsTxType.DEPOSIT),
       tokenId: (tokenId.toString()),
       amount: (amount.toString()),
-      arg0: (accountId.toString()),
+      arg0: (BigInt(accountId.toString()).toString()),
     });
     this.coreQueue.add('TransactionInfo', {
       test: true
