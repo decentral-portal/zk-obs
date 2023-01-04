@@ -1,8 +1,9 @@
-import { TsTokenAddress } from '@common/ts-typeorm/account/dto/ts-type';
+// import { TsTokenAddress } from '@common/ts-typeorm/account/dto/ts-type';
 import { BadRequestException } from '@nestjs/common';
 import { GetL2BalanceRequestDto } from '../dtos/getL2BalanceRequest.dto';
 import { GetL2BalanceResponseDto } from '@ts-rollup-api/infrastructure/dtos/getL2BalanceResponse.dto';
 import { L2BalanceRepository } from '@ts-rollup-api/infrastructure/ports/L2Balance.repository';
+import { TsTokenAddress } from '@ts-sdk/domain/lib/ts-types/ts-types';
 
 export class L2RealBalanceServiceFake implements L2BalanceRepository {
   realBalanceList =  [{
@@ -12,12 +13,12 @@ export class L2RealBalanceServiceFake implements L2BalanceRepository {
     lockedAmt: 0,
   },{
     accountId: 100n,
-    L2TokenAddr: TsTokenAddress.USDC,
+    L2TokenAddr: TsTokenAddress.USDT,
     availableAmt: 10,
     lockedAmt: 60,
   }, {
     accountId: 100n,
-    L2TokenAddr: TsTokenAddress.DAI,
+    L2TokenAddr: TsTokenAddress.WETH,
     availableAmt: 0,
     lockedAmt: 10,
   }];
@@ -28,10 +29,10 @@ export class L2RealBalanceServiceFake implements L2BalanceRepository {
     // get L2TokenAddrList from req
     const L2TokenAddrList: TsTokenAddress[] = (req.L2TokenAddrList === undefined||req.L2TokenAddrList.length === 0) ? [
       TsTokenAddress.WETH,
-      TsTokenAddress.WBTC,
+      // TsTokenAddress.WBTC,
       TsTokenAddress.USDT,
-      TsTokenAddress.USDC,
-      TsTokenAddress.DAI,
+      // TsTokenAddress.USDC,
+      // TsTokenAddress.DAI,
     ]: req.L2TokenAddrList;
     const result = this.realBalanceList.filter((item) => {
       return item.accountId.toString() === req.accountId && L2TokenAddrList.includes(item.L2TokenAddr);

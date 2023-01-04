@@ -1,5 +1,6 @@
-import { toTsTokenAddressFromStr } from '@common/ts-typeorm/account/dto/ts-type';
+// import { toTsTokenAddressFromStr } from '@common/ts-typeorm/account/dto/ts-type';
 import { BadRequestException, Controller, Get, Logger, Param, Query } from '@nestjs/common';
+import { toTsTokenAddressFromStr } from '@ts-rollup-api/domain/entities/L2AccountInfo';
 import { L2BalanceRepository } from '../ports/L2Balance.repository';
 
 @Controller('v1/ts/l2-real-balance')

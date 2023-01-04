@@ -1,7 +1,9 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { PinoLoggerService } from '@common/logger/adapters/real/pinoLogger.service';
-import { toTsTokenAddressFromStr, TsTokenAddress } from '@common/ts-typeorm/account/dto/ts-type';
+// import { toTsTokenAddressFromStr, TsTokenAddress } from ;
 import { L2BalanceRepository } from '@ts-rollup-api/infrastructure/ports/L2Balance.repository';
+import { toTsTokenAddressFromStr } from '@ts-rollup-api/domain/entities/L2AccountInfo';
+import { TsTokenAddress } from '@ts-sdk/domain/lib/ts-types/ts-types';
 
 @Injectable()
 export class CheckWithdrawOrderGuard implements CanActivate {
@@ -23,7 +25,7 @@ export class CheckWithdrawOrderGuard implements CanActivate {
       return false;
     }
     const targetWithdrawToken = toTsTokenAddressFromStr(L2TokenAddr);
-    if (targetWithdrawToken == TsTokenAddress.UNKNOWN) {
+    if (targetWithdrawToken == TsTokenAddress.Unknown) {
       return false;
     }
     try {

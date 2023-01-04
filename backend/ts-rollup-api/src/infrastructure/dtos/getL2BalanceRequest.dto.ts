@@ -1,5 +1,6 @@
-import { TsTokenAddress } from '@common/ts-typeorm/account/dto/ts-type';
+// import { TsTokenAddress } from '@common/ts-typeorm/account/dto/ts-type';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { TsTokenAddress } from '@ts-sdk/domain/lib/ts-types/ts-types';
 
 export class GetL2BalanceRequestDto {
   @ApiProperty()

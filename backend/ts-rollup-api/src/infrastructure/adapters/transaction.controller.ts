@@ -44,7 +44,7 @@ export class TsTransactionController {
     @ApiCreatedResponse({type: PlaceOrderResponseDto})
   async placeOrder(@Body()dto : PlaceOrderRequest) {
     // check reqType TsTxType.MARKET_ORDER buyAmt should be '0'
-    if (dto.reqType === SecondTxType.SecondMarketOrder  && dto.buyAmt !== '0') {
+    if (dto.reqType === '8'  && dto.buyAmt !== '0') {
       throw new BadRequestException('buyAmt should be 0 for market order');
     }
     // generate MarketPair query Pair
@@ -63,7 +63,7 @@ export class TsTransactionController {
     const remainBaseQty = baseQty;
     const mainTokenId = marketPairInfo.mainTokenId;
     const baseTokenId = marketPairInfo.baseTokenId;
-    const price = (dto.reqType === SecondTxType.SecondMarketOrder)?
+    const price = (dto.reqType === '8')?
       '0': (Number(mainQty)/Number(baseQty)).toString();
     const formatPrice = this.toFixed8(price);
     const nonce = dto.nonce.toString();
@@ -76,7 +76,7 @@ export class TsTransactionController {
       arg2: BigInt(dto.buyTokenId),
       arg3: 0n,
     };
-    if (dto.reqType === SecondTxType.SecondMarketOrder) {
+    if (dto.reqType === '8') {
       txInfo['arg3'] = BigInt(dto.buyAmt);
     }
     console.log(txInfo);
@@ -105,30 +105,30 @@ export class TsTransactionController {
     const orderId = await this.connection.transaction(async (manager) => { 
       const txInfoEntity = new TransactionInfo();
       txInfoEntity.reqType = txInfo.reqType;
-      txInfoEntity.accountId = txInfo.accountId;
-      txInfoEntity.nonce = txInfo.nonce;
-      txInfoEntity.amount = txInfo.amount;
-      txInfoEntity.tokenId = txInfo.tokenId;
-      txInfoEntity.arg2 = txInfo.arg2;
-      txInfoEntity.arg3 = txInfo.arg3;
+      txInfoEntity.accountId = txInfo.accountId.toString();
+      txInfoEntity.nonce = txInfo.nonce.toString();
+      txInfoEntity.amount = txInfo.amount.toString();
+      txInfoEntity.tokenId = txInfo.tokenId.toString();
+      txInfoEntity.arg2 = txInfo.arg2.toString();
+      txInfoEntity.arg3 = txInfo.arg3.toString();
       const txResult = await manager.getRepository(TransactionInfo).save(txInfoEntity);
       const result = await manager.getRepository(ObsOrderEntity).insert({
         txId: txResult.txId,
         reqType: Number(dto.reqType),
-        accountId: BigInt(dto.sender),
+        accountId: dto.sender,
         side,
-        mainTokenId: BigInt(mainTokenId),
-        baseTokenId: BigInt(baseTokenId),
-        mainQty: BigInt(mainQty),
-        baseQty: BigInt(baseQty),
-        remainMainQty: BigInt(remainMainQty),
-        remainBaseQty: BigInt(remainBaseQty),
+        mainTokenId: mainTokenId,
+        baseTokenId: baseTokenId,
+        mainQty: mainQty,
+        baseQty: baseQty,
+        remainMainQty: remainMainQty,
+        remainBaseQty: remainBaseQty,
         price: formatPrice,
       });
       await manager.getRepository(AccountLeafNode).update({
         leafId: dto.sender
       }, {
-        nonce: BigInt(accoutLeaf.nonce) + 1n
+        nonce: (BigInt(accoutLeaf.nonce) + 1n).toString()
       });
       const orderId = result.generatedMaps[0].id;
       return orderId;
