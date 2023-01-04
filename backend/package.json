@@ -4,6 +4,7 @@
   "author": "TKSpring",
   "license": "",
   "scripts": {
+    "reset:db": "npm run schema:drop && npm run typeorm:run-migrations && npm run seed:run",
     "postinstall": "patch-package",
     "pm2": "pm2 delete all && pm2 start",
     "build": "nest build ts-core",
