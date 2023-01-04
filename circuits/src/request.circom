@@ -70,7 +70,9 @@ template DoReqUnknow(){
 
     signal output channelOut[LenOfChannel()] <== [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     signal output resData[LenOfResponse()] <== [0, 0];
-    channelIn === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    
+    for(var i = 0; i < LenOfChannel(); i++)
+        ImplyEq()(enabled, channelIn[i], 0);
     
 
     /* enabled be a boolean */
@@ -112,7 +114,9 @@ template DoReqRegister(){
 
     signal output channelOut[LenOfChannel()] <== [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     signal output resData[LenOfResponse()] <== [0, 0];
-    channelIn === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    
+    for(var i = 0; i < LenOfChannel(); i++)
+        ImplyEq()(enabled, channelIn[i], 0);
     
 
     /* enabled be a boolean */
@@ -170,7 +174,9 @@ template DoReqDeposit(){
 
     signal output channelOut[LenOfChannel()] <== [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     signal output resData[LenOfResponse()] <== [0, 0];
-    channelIn === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    
+    for(var i = 0; i < LenOfChannel(); i++)
+        ImplyEq()(enabled, channelIn[i], 0);
     
 
     /* enabled be a boolean */
@@ -228,7 +234,9 @@ template DoReqWithdraw(){
 
     signal output channelOut[LenOfChannel()] <== [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     signal output resData[LenOfResponse()] <== [0, 0];
-    channelIn === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    
+    for(var i = 0; i < LenOfChannel(); i++)
+        ImplyEq()(enabled, channelIn[i], 0);
     
     /* enabled be a boolean */
     enabled * (enabled - 1) === 0;
@@ -287,7 +295,9 @@ template DoReqCancel(){
 
     signal output channelOut[LenOfChannel()] <== [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     signal output resData[LenOfResponse()] <== [0, 0];
-    channelIn === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    
+    for(var i = 0; i < LenOfChannel(); i++)
+        ImplyEq()(enabled, channelIn[i], 0);
 
     /* enabled be a boolean */
     enabled * (enabled - 1) === 0;
@@ -295,7 +305,7 @@ template DoReqCancel(){
     /* conn to the units*/
     ImplyEq()(enabled, r_orderRootFlow[0][0], orderRootFlow[0]);
     ImplyEq()(enabled, r_orderRootFlow[0][1], orderRootFlow[1]);
-    ImplyEq()(enabled, r_orderLeafId[0], reqData[ReqIdxArg(1)]);
+    ImplyEq()(enabled, r_orderLeafId[0], reqData[ReqIdxArg(4)]);
 
     ImplyEq()(enabled, r_accountRootFlow[0][0], accountRootFlow[0]);
     ImplyEq()(enabled, r_accountRootFlow[0][1], accountRootFlow[1]);
@@ -314,8 +324,8 @@ template DoReqCancel(){
     ImplyEq()(enabled, r_newAccountLeaf[0][ALIdxTsAddr()], r_oriAccountLeaf[0][ALIdxTsAddr()]);
     ImplyEq()(enabled, r_newAccountLeaf[0][ALIdxNonce()], r_oriAccountLeaf[0][ALIdxNonce()]);
     
-    ImplyEq()(enabled, r_newTokenLeaf[0][TLIdxAvlAmt()], r_oriTokenLeaf[0][TLIdxAvlAmt()] + reqData[ReqIdxAmount()]); 
-    ImplyEq()(enabled, r_newTokenLeaf[0][TLIdxLockedAmt()], r_oriTokenLeaf[0][TLIdxLockedAmt()] - reqData[ReqIdxAmount()]);
+    ImplyEq()(enabled, r_newTokenLeaf[0][TLIdxAvlAmt()], r_oriTokenLeaf[0][TLIdxAvlAmt()] + r_oriOrderLeaf[0][OLIdxAmount()]); 
+    ImplyEq()(enabled, r_newTokenLeaf[0][TLIdxLockedAmt()], r_oriTokenLeaf[0][TLIdxLockedAmt()] - r_oriOrderLeaf[0][OLIdxAmount()]);
 }
 template DoReqSecondLimitOrder(){
     signal input enabled;
@@ -349,7 +359,9 @@ template DoReqSecondLimitOrder(){
     signal output channelOut[LenOfChannel()] <== [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     signal output resData[LenOfResponse()] <== [0, 0];
 
-    channelIn === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    
+    for(var i = 0; i < LenOfChannel(); i++)
+        ImplyEq()(enabled, channelIn[i], 0);
 
     /* enabled be a boolean */
     enabled * (enabled - 1) === 0;
@@ -369,8 +381,11 @@ template DoReqSecondLimitOrder(){
     /* legality */
     ImplyEq()(enabled, r_oriAccountLeaf[0][ALIdxTsAddr()], TsPubKey2TsAddr()(tsPubKey));
     ImplyEq()(enabled, r_oriOrderLeaf[0][OLIdxReqType()], ReqTypeNumUnknow());
-    ImplyEq()(enabled, r_oriAccountLeaf[0][ALIdxNonce()], reqData[ReqIdxNonce()] + 1);
-    ImplyEq()(enabled, LessThan(BitsAmount())([reqData[ReqIdxAmount()] + (1 << (BitsAmount() - 1)), r_oriTokenLeaf[0][TLIdxAvlAmt()] + (1 << (BitsAmount() - 1))]), 1); 
+    ImplyEq()(enabled, r_oriAccountLeaf[0][ALIdxNonce()], reqData[ReqIdxNonce()]);
+    ImplyEq()(enabled, LessThan(BitsAmount())(
+        [reqData[ReqIdxAmount()] + (1 << (BitsAmount() - 1)), 
+        r_oriTokenLeaf[0][TLIdxAvlAmt()] + (1 << (BitsAmount() - 1))]
+    ), 1); 
     
     /* correctness */
     for(var i = 0; i < LenOfRequest(); i++)
@@ -417,7 +432,9 @@ template DoReqSecondLimitStart(){
 
     signal output channelOut[LenOfChannel()];
     signal output resData[LenOfResponse()];
-    channelIn === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    
+    for(var i = 0; i < LenOfChannel(); i++)
+        ImplyEq()(enabled, channelIn[i], 0);
 
     /* enabled be a boolean */
     enabled * (enabled - 1) === 0;
@@ -425,7 +442,7 @@ template DoReqSecondLimitStart(){
     /* conn to the units*/
     ImplyEq()(enabled, r_orderRootFlow[0][0], orderRootFlow[0]);
     ImplyEq()(enabled, r_orderRootFlow[0][1], orderRootFlow[1]);
-    ImplyEq()(enabled, r_orderLeafId[0], reqData[ReqIdxArg(1)]);
+    ImplyEq()(enabled, r_orderLeafId[0], reqData[ReqIdxArg(4)]);
 
     ImplyEq()(enabled, accountRootFlow[0], accountRootFlow[1]);
 
@@ -442,7 +459,7 @@ template DoReqSecondLimitStart(){
     channelOut[LenOfOL() + 1] <== r_oriOrderLeaf[0][LenOfRequest() + 2];
 
     /* response */    
-    resData <== [r_oriOrderLeaf[0][LenOfRequest()], 0];
+    resData <== [txId - r_oriOrderLeaf[0][OLIdxTxId()], 0];
 }
 template DoReqSecondLimitExchange(){
     signal input enabled;
@@ -513,7 +530,7 @@ template DoReqSecondLimitExchange(){
     /* conn to the units*/
     ImplyEq()(enabled, r_orderRootFlow[0][0], orderRootFlow[0]);
     ImplyEq()(enabled, r_orderRootFlow[0][1], orderRootFlow[1]);
-    ImplyEq()(enabled, r_orderLeafId[0], reqData[ReqIdxArg(1)]);
+    ImplyEq()(enabled, r_orderLeafId[0], reqData[ReqIdxArg(4)]);
 
     ImplyEq()(enabled, r_accountRootFlow[0][0], accountRootFlow[0]);
     ImplyEq()(enabled, r_accountRootFlow[0][1], accountRootFlow[1]);
@@ -522,23 +539,22 @@ template DoReqSecondLimitExchange(){
     ImplyEq()(enabled, r_tokenRootFlow[0][0], r_oriAccountLeaf[0][ALIdxTokenRoot()]);
     ImplyEq()(enabled, r_tokenRootFlow[0][1], r_tokenRootFlow[1][0]);
     ImplyEq()(enabled, r_tokenRootFlow[1][1], r_newAccountLeaf[0][ALIdxTokenRoot()]);
-    ImplyEq()(enabled, r_tokenLeafId[0], r_oriOrderLeaf[0][OLIdxArg(3)]);
+    ImplyEq()(enabled, r_tokenLeafId[0], r_oriOrderLeaf[0][OLIdxArg(2)]);
     ImplyEq()(enabled, r_tokenLeafId[1], r_oriOrderLeaf[0][OLIdxL2TokenAddr()]);
 
     /* legality */
     ImplyEq()(enabled, channelIn[ReqIdxReqType()], ReqTypeNumSecondLimitOrder());
-    ImplyEq()(enabled, channelIn[ReqIdxL2TokenAddr()], r_oriOrderLeaf[0][ReqIdxArg(3)]);
-    ImplyEq()(enabled, channelIn[ReqIdxArg(3)], r_oriOrderLeaf[0][ReqIdxL2TokenAddr()]);
+    ImplyEq()(enabled, channelIn[ReqIdxL2TokenAddr()], r_oriOrderLeaf[0][ReqIdxArg(2)]);
+    ImplyEq()(enabled, channelIn[ReqIdxArg(2)], r_oriOrderLeaf[0][ReqIdxL2TokenAddr()]);
     ImplyEq()(enabled, 1, isMatched);
 
     /* correctness */
-        //to-do: remove order if cumSellAmt == sellAmt;
     signal isEqual <== IsEqual()([makerSellAmt, r_oriOrderLeaf[0][OLIdxAccumulatedSellAmt()] + matchedSellAmt]);
     for(var i = 0; i < LenOfRequest(); i++)
-        ImplyEq()(enabled, r_newOrderLeaf[0][i], isEqual * r_oriOrderLeaf[0][i]);
-    ImplyEq()(enabled, r_newOrderLeaf[0][OLIdxTxId()], isEqual * r_oriOrderLeaf[0][OLIdxTxId()]);
-    ImplyEq()(enabled, r_newOrderLeaf[0][OLIdxAccumulatedSellAmt()], isEqual * r_oriOrderLeaf[0][OLIdxAccumulatedSellAmt()] + matchedSellAmt);
-    ImplyEq()(enabled, r_newOrderLeaf[0][OLIdxAccumulatedBuyAmt() ], isEqual * r_oriOrderLeaf[0][OLIdxAccumulatedBuyAmt() ] + matchedBuyAmt );
+        ImplyEq()(enabled, r_newOrderLeaf[0][i], (1 - isEqual) * r_oriOrderLeaf[0][i]);
+    ImplyEq()(enabled, r_newOrderLeaf[0][OLIdxTxId()], (1 - isEqual) * r_oriOrderLeaf[0][OLIdxTxId()]);
+    ImplyEq()(enabled, r_newOrderLeaf[0][OLIdxAccumulatedSellAmt()], (1 - isEqual) * (r_oriOrderLeaf[0][OLIdxAccumulatedSellAmt()] + matchedSellAmt));
+    ImplyEq()(enabled, r_newOrderLeaf[0][OLIdxAccumulatedBuyAmt() ], (1 - isEqual) * (r_oriOrderLeaf[0][OLIdxAccumulatedBuyAmt() ] + matchedBuyAmt ));
     
     ImplyEq()(enabled, r_newAccountLeaf[0][ALIdxTsAddr()], r_oriAccountLeaf[0][ALIdxTsAddr()]);
     ImplyEq()(enabled, r_newAccountLeaf[0][ALIdxNonce()], r_oriAccountLeaf[0][ALIdxNonce()]);
@@ -602,17 +618,18 @@ template DoReqSecondLimitEnd(){
     /* conn to the units*/
     ImplyEq()(enabled, r_orderRootFlow[0][0], orderRootFlow[0]);
     ImplyEq()(enabled, r_orderRootFlow[0][1], orderRootFlow[1]);
-    ImplyEq()(enabled, r_orderLeafId[0], reqData[ReqIdxArg(1)]);
+    ImplyEq()(enabled, r_orderLeafId[0], reqData[ReqIdxArg(4)]);
 
     ImplyEq()(enabled, r_accountRootFlow[0][0], accountRootFlow[0]);
     ImplyEq()(enabled, r_accountRootFlow[0][1], accountRootFlow[1]);
-    ImplyEq()(enabled, r_accountLeafId[0], r_oriOrderLeaf[0][OLIdxL2AddrSigner()]);
+    ImplyEq()(enabled, r_accountLeafId[0], channelIn[OLIdxL2AddrSigner()]);
 
     ImplyEq()(enabled, r_tokenRootFlow[0][0], r_oriAccountLeaf[0][ALIdxTokenRoot()]);
     ImplyEq()(enabled, r_tokenRootFlow[0][1], r_tokenRootFlow[1][0]);
     ImplyEq()(enabled, r_tokenRootFlow[1][1], r_newAccountLeaf[0][ALIdxTokenRoot()]);
-    ImplyEq()(enabled, r_tokenLeafId[0], r_oriOrderLeaf[0][OLIdxL2TokenAddr()]);
-    ImplyEq()(enabled, r_tokenLeafId[1], r_oriOrderLeaf[0][OLIdxArg(3)]);
+    log("here,", channelIn[OLIdxArg(3)], channelIn[OLIdxL2TokenAddr()]);
+    ImplyEq()(enabled, r_tokenLeafId[0], channelIn[OLIdxArg(2)]);
+    ImplyEq()(enabled, r_tokenLeafId[1], channelIn[OLIdxL2TokenAddr()]);
 
     /* legality */
     ImplyEq()(enabled, channelIn[ReqIdxReqType()], ReqTypeNumSecondLimitOrder());
@@ -620,8 +637,10 @@ template DoReqSecondLimitEnd(){
         ImplyEq()(enabled, r_oriOrderLeaf[0][i], 0);
     
     /* correctness */
+    ImplyEq()(enabled, channelIn[ReqIdxReqType()], ReqTypeNumSecondLimitOrder());
+    signal isEqual <== IsEqual()([channelIn[OLIdxAmount()], channelIn[OLIdxAccumulatedSellAmt()]]);
     for(var i = 0; i < LenOfOL(); i++)
-        ImplyEq()(enabled, r_newOrderLeaf[0][i], channelIn[i]);
+        ImplyEq()(enabled, r_newOrderLeaf[0][i], channelIn[i] * (1 - isEqual));
 
     ImplyEq()(enabled, r_newAccountLeaf[0][ALIdxTsAddr()], r_oriAccountLeaf[0][ALIdxTsAddr()]);
     ImplyEq()(enabled, r_newAccountLeaf[0][ALIdxNonce()], r_oriAccountLeaf[0][ALIdxNonce()]);
@@ -667,7 +686,9 @@ template DoReqSecondMarketOrder(){
 
     signal output channelOut[LenOfChannel()];
     signal output resData[LenOfResponse()] <== [0, 0];
-    channelIn === [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    
+    for(var i = 0; i < LenOfChannel(); i++)
+        ImplyEq()(enabled, channelIn[i], 0);
     
 
     /* enabled be a boolean */
@@ -739,7 +760,7 @@ template DoReqSecondMarketExchange(){
     /* conn to the units*/
     ImplyEq()(enabled, r_orderRootFlow[0][0], orderRootFlow[0]);
     ImplyEq()(enabled, r_orderRootFlow[0][1], orderRootFlow[1]);
-    ImplyEq()(enabled, r_orderLeafId[0], reqData[ReqIdxArg(1)]);
+    ImplyEq()(enabled, r_orderLeafId[0], reqData[ReqIdxArg(4)]);
 
     ImplyEq()(enabled, r_accountRootFlow[0][0], accountRootFlow[0]);
     ImplyEq()(enabled, r_accountRootFlow[0][1], accountRootFlow[1]);
@@ -760,10 +781,10 @@ template DoReqSecondMarketExchange(){
         //to-do: remove order if cumSellAmt == sellAmt;
     signal isEqual <== IsEqual()([makerSellAmt, r_oriOrderLeaf[0][OLIdxAccumulatedSellAmt()] + matchedSellAmt]);
     for(var i = 0; i < LenOfRequest(); i++)
-        ImplyEq()(enabled, r_newOrderLeaf[0][i], isEqual * r_oriOrderLeaf[0][i]);
-    ImplyEq()(enabled, r_newOrderLeaf[0][OLIdxTxId()], isEqual * r_oriOrderLeaf[0][OLIdxTxId()]);
-    ImplyEq()(enabled, r_newOrderLeaf[0][OLIdxAccumulatedSellAmt()], isEqual * r_oriOrderLeaf[0][OLIdxAccumulatedSellAmt()] + matchedSellAmt);
-    ImplyEq()(enabled, r_newOrderLeaf[0][OLIdxAccumulatedBuyAmt() ], isEqual * r_oriOrderLeaf[0][OLIdxAccumulatedBuyAmt() ] + matchedBuyAmt );
+        ImplyEq()(enabled, r_newOrderLeaf[0][i], (1 - isEqual) * r_oriOrderLeaf[0][i]);
+    ImplyEq()(enabled, r_newOrderLeaf[0][OLIdxTxId()], (1 - isEqual) * r_oriOrderLeaf[0][OLIdxTxId()]);
+    ImplyEq()(enabled, r_newOrderLeaf[0][OLIdxAccumulatedSellAmt()], (1 - isEqual) * (r_oriOrderLeaf[0][OLIdxAccumulatedSellAmt()] + matchedSellAmt));
+    ImplyEq()(enabled, r_newOrderLeaf[0][OLIdxAccumulatedBuyAmt() ], (1 - isEqual) * (r_oriOrderLeaf[0][OLIdxAccumulatedBuyAmt() ] + matchedBuyAmt ));
     
     ImplyEq()(enabled, r_newAccountLeaf[0][ALIdxTsAddr()], r_oriAccountLeaf[0][ALIdxTsAddr()]);
     ImplyEq()(enabled, r_newAccountLeaf[0][ALIdxNonce()], r_oriAccountLeaf[0][ALIdxNonce()]);

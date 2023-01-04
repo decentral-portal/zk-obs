@@ -17,7 +17,7 @@ template AllocReqData(){
         Verify the signals in reqData be legally allocated or not.
         the input signals of template "LessThan", ... in circomlib need to be verified in advance for legality of alloc.
     */
-    signal input reqData[LenOfRequest()];
+    signal input reqData[LenOfRequest()]; 
     var bits[LenOfRequest()] = [BitsReqType(), BitsL2Addr(), BitsTokenAddr(), BitsAmount(), BitsNonce(), BitsL2Addr(), BitsTsAddr(), BitsPrice(), BitsTokenAddr(), 32];
     for(var i = 0; i < LenOfRequest(); i++)
         _ <== Num2Bits(bits[i])(i);
@@ -47,7 +47,7 @@ template Chunkify(){
         Temp[2] * (1 << (8 * 11)) + 
         reqData[ReqIdxArg(3)] * (1 << (8 * 9)) +
         Temp[3] * (1 << (8 * 4));
-    signal B_4 <== resData[1] * (1 << (8 * 13));
+    signal B_4 <== Temp[3] * (1 << (8 * 13));
 
     signal B <== Mux(6)([B_0, B_1, B_2, B_3, B_4, 0], Mux(ReqTypeCount())([5, 0, 0, 0, 1, 5, 4, 5, 1, 4, 5, 5], reqData[ReqIdxReqType()]));
 
@@ -72,6 +72,9 @@ template Chunkify(){
         for(var j = 0; j < BitsChunk(); j++)
             t[j] = bit_arr[BitsChunk() * (i + 1) - 1 - j];
         Temp2[i] <== Bits2Num(BitsChunk())(t);
+        log(r_chunks[i]);
+        log(Temp2[i]);
+        log("===========");
         r_chunks[i] === Temp2[i];
     }
 }
@@ -108,7 +111,7 @@ template DoRequest(){
     signal output channelOut[LenOfChannel()];
     signal resData[LenOfResponse()];
 
-    signal isPuesdoReq <== Mux(ReqTypeCount())([1, 1, 1, 0, 0, 1, 1, 1, 0, 1, 1, 1],reqData[ReqIdxReqType()]);//to-do: extract as a func
+    signal isPseudoReq <== Mux(ReqTypeCount())([1, 1, 1, 0, 0, 1, 1, 1, 0, 1, 1, 1],reqData[ReqIdxReqType()]);//to-do: extract as a func
 
     signal slt <== LessThan(4)([reqData[ReqIdxReqType()], ReqTypeCount()]);
 
@@ -125,12 +128,12 @@ template DoRequest(){
 
     /* verify sig */
     EdDSAPoseidonVerifier()(
-        1 - isPuesdoReq,
+        1 - isPseudoReq,
         tsPubKey[0], tsPubKey[1], sigS, sigR[0], sigR[1],
         digest
     );
-    reqData[ReqIdxL2AddrSigner()] === (0 - reqData[ReqIdxL2AddrSigner()]) * isPuesdoReq + reqData[ReqIdxL2AddrSigner()];
-
+    reqData[ReqIdxL2AddrSigner()] === (0 - reqData[ReqIdxL2AddrSigner()]) * isPseudoReq + reqData[ReqIdxL2AddrSigner()];
+    
     /* 
         dispatch & verify:
             1.  conn        : alloc circuit unit to verify mk prf
@@ -205,6 +208,7 @@ template CalcCommitment(){
     for(var i = 0; i < 253; i++)
         b2n_commitment.in[i] <== sha256.out[255 - i];
     commitment <== b2n_commitment.out;
+    log("commitment", commitment);
 }
 template Normal(){
     /* the main circuits */
@@ -246,9 +250,10 @@ template Normal(){
     signal input r_chunks[NumOfReqs()][MaxChunksPerReq()];// chunks calc from req. dynamic arr is not allowed in circom
     signal input o_chunks[NumOfChunks()];// chunks used to calc commitment
 
-    signal oriStateRoot <== Poseidon(3)([orderRootFlow[0], accountRootFlow[0], oriTxNum]);
-    signal newStateRoot <== Poseidon(3)([orderRootFlow[NumOfReqs()], accountRootFlow[NumOfReqs()], oriTxNum + NumOfReqs()]);
-    signal newTsRoot <== Poseidon(2)([oriTxNum + NumOfReqs(), orderRootFlow[NumOfReqs()]]);
+    signal oriTsRoot <== Poseidon(2)([orderRootFlow[0], oriTxNum]);
+    signal newTsRoot <== Poseidon(2)([orderRootFlow[NumOfReqs()], oriTxNum + NumOfReqs()]);
+    signal oriStateRoot <== Poseidon(2)([oriTsRoot, accountRootFlow[0]]);
+    signal newStateRoot <== Poseidon(2)([newTsRoot, accountRootFlow[NumOfReqs()]]);
     
     signal chunkCount[NumOfReqs()];
     signal chunkCounter[NumOfReqs() + 1];
