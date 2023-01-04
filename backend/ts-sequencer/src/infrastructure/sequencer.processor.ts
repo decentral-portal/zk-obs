@@ -585,18 +585,18 @@ export class SequencerConsumer {
     }
   }
 
-  private addObsOrder(order: UpdateObsOrderTreeDto) {
+  private async addObsOrder(order: UpdateObsOrderTreeDto) {
     // if (BigInt(order.orderLeafId) > 0n) {
     //   throw new Error('addObsOrder: orderLeafId should be 0');
     // }
     // order.orderLeafId = this.obsOrderTreeService.currentOrderId.toString();
-    this.obsOrderRepository.update({
+    await this.obsOrderRepository.update({
       txId: Number(order.txId),
     }, {
       orderLeafId: Number(order.orderLeafId),
     });
-    this.obsOrderTreeService.updateLeaf(order.orderLeafId, order);
-    this.obsOrderTreeService.addCurrentOrderId();
+    await this.obsOrderTreeService.updateLeaf(order.orderLeafId, order);
+    await this.obsOrderTreeService.addCurrentOrderId();
   }
   private async removeObsOrder(leafId: string) {
     const order = await this.getObsOrder(leafId);
@@ -606,7 +606,7 @@ export class SequencerConsumer {
     if (order.reqType === TsTxType.UNKNOWN) {
       throw new Error('removeObsOrder: order not found (0)');
     }
-    this.obsOrderTreeService.updateLeaf(order.orderLeafId, {
+    await this.obsOrderTreeService.updateLeaf(order.orderLeafId, {
       orderLeafId: order.orderLeafId,
       txId: '0',
       reqType: '0',
@@ -620,9 +620,9 @@ export class SequencerConsumer {
       accumulatedBuyAmt: '0',
     });
   }
-  private updateObsOrder(order: UpdateObsOrderTreeDto) {
+  private async updateObsOrder(order: UpdateObsOrderTreeDto) {
     assert(BigInt(order.orderLeafId) > 0n, 'updateObsOrder: orderLeafId should be exist');
-    this.obsOrderTreeService.updateLeaf(order.orderLeafId, order);
+    await this.obsOrderTreeService.updateLeaf(order.orderLeafId, order);
   }
 
   private getTxChunks(
