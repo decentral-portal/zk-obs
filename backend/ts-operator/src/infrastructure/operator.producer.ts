@@ -63,8 +63,8 @@ export class OperatorProducer {
       this.logger.log(`OperatorProducer.listenRegisterEvent log:${JSON.stringify(log)}`);
       this.handleRegisterEvent(log.args.sender, log.args.accountId, log.args.tsPubX, log.args.tsPubY, log.args.l2Addr, log);
     };
-    // const { lastSyncBlocknumberForRegisterEvent } = await this.rollupInfoRepository.findOneOrFail({ where: { id: 1 } });
-    this.contract.queryFilter(filters, 0, 'latest').then((logs) => {
+    const { lastSyncBlocknumberForRegisterEvent } = await this.rollupInfoRepository.findOneOrFail({ where: { id: 1 } });
+    this.contract.queryFilter(filters, lastSyncBlocknumberForRegisterEvent, 'latest').then((logs) => {
       logs.forEach((log) => {
         handler(log);
       });
@@ -99,7 +99,7 @@ export class OperatorProducer {
         arg0: (BigInt(accountId.toString()).toString()),
         arg1: BigInt(l2Addr).toString(),
       }),
-      // this.rollupInfoRepository.update({ id: 1 }, { lastSyncBlocknumberForRegisterEvent: blockNumber }),
+      this.rollupInfoRepository.update({ id: 1 }, { lastSyncBlocknumberForRegisterEvent: blockNumber }),
     ]);
     this.coreQueue.add('TransactionInfo', {
       test: true
@@ -112,7 +112,7 @@ export class OperatorProducer {
     await firstValueFrom(this.workerService.onReadyObserver);
     this.logger.log(`OperatorProducer.listenDepositEvent contract=${this.contract.address}`);
     const filters = this.contract.filters.Deposit();
-    // const { lastSyncBlocknumberForDepositEvent } = await this.rollupInfoRepository.findOneOrFail({ where: { id: 1 } });
+    const { lastSyncBlocknumberForDepositEvent } = await this.rollupInfoRepository.findOneOrFail({ where: { id: 1 } });
     const handler = (log: any) => {
       this.logger.log(`OperatorProducer.listenDepositEvent log:${JSON.stringify(log)}`);
       console.log({
@@ -120,7 +120,7 @@ export class OperatorProducer {
       });
       this.handleDepositEvent(log.args.sender, log.args.accountId, log.args.tokenId, log.args.amount, log.transactionHash);
     };
-    this.contract.queryFilter(filters, 0, 'latest').then((logs) => {
+    this.contract.queryFilter(filters, lastSyncBlocknumberForDepositEvent, 'latest').then((logs) => {
       logs.forEach((log) => {
         handler(log);
       });
@@ -150,7 +150,7 @@ export class OperatorProducer {
       test: true
     });
     // this.messageBrokerService.publish(CHANNEL.ORDER_CREATED, {});
-    // await this.rollupInfoRepository.update({ id: 1 }, { lastSyncBlocknumberForDepositEvent: blockNumber });
+    await this.rollupInfoRepository.update({ id: 1 }, { lastSyncBlocknumberForDepositEvent: blockNumber });
   }
 }
 
