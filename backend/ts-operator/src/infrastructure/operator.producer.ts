@@ -92,11 +92,11 @@ export class OperatorProducer {
       this.accountRepository.upsert(txRegister, ['L1Address']),
       this.txRepository.insert({
         reqType: Number(TsTxType.REGISTER),
-        accountId: 0n,
-        tokenId: 0n,
-        amount: 0n,
-        arg0: BigInt(accountId.toString()),
-        arg1: BigInt(l2Addr),
+        accountId: '0',
+        tokenId: '0',
+        amount: '0',
+        arg0: (accountId.toString()),
+        arg1: (l2Addr),
       }),
       // this.rollupInfoRepository.update({ id: 1 }, { lastSyncBlocknumberForRegisterEvent: blockNumber }),
     ]);
@@ -141,9 +141,9 @@ export class OperatorProducer {
 
     await this.txRepository.insert({
       reqType: Number(TsTxType.DEPOSIT),
-      tokenId: BigInt(tokenId.toString()),
-      amount: BigInt(amount.toString()),
-      arg0: BigInt(accountId.toString()),
+      tokenId: (tokenId.toString()),
+      amount: (amount.toString()),
+      arg0: (accountId.toString()),
     });
     this.coreQueue.add('TransactionInfo', {
       test: true

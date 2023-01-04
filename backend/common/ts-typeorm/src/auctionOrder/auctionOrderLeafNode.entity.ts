@@ -20,7 +20,7 @@ export class AuctionOrderLeafNode {
     nullable: false,
     default: 0,
   })
-  txId!: bigint;
+  txId!: string;
   @Column({
     type: 'integer',
     name: 'reqType',
@@ -35,7 +35,7 @@ export class AuctionOrderLeafNode {
     nullable: false,
     default: 0,
   })
-  L2AddrFrom!: bigint;
+  L2AddrFrom!: string;
   @Column({
     type: 'decimal',
     name: 'L2AddrTo',
@@ -44,7 +44,7 @@ export class AuctionOrderLeafNode {
     nullable: false,
     default: 0,
   })
-  L2AddrTo!: bigint;
+  L2AddrTo!: string;
   @Column({
     type: 'decimal',
     name: 'L2TokenAddr',
@@ -53,7 +53,7 @@ export class AuctionOrderLeafNode {
     nullable: false,
     default: 0,
   })
-  L2TokenAddr!: bigint;
+  L2TokenAddr!: string;
   @Column({
     type: 'decimal',
     name: 'amount',
@@ -62,7 +62,7 @@ export class AuctionOrderLeafNode {
     nullable: false,
     default: 0,
   })
-  amount!: bigint;
+  amount!: string;
   @Column({
     type: 'decimal',
     name: 'nonce',
@@ -71,7 +71,7 @@ export class AuctionOrderLeafNode {
     nullable: false,
     default: 0,
   })
-  nonce!: bigint;
+  nonce!: string;
   @Column({
     type: 'decimal',
     name: 'maturityDate',
@@ -80,7 +80,7 @@ export class AuctionOrderLeafNode {
     nullable: false,
     default: 0,
   })
-  maturityDate!: bigint;
+  maturityDate!: string;
   @Column({
     type: 'decimal',
     name: 'expiredTime',
@@ -89,7 +89,7 @@ export class AuctionOrderLeafNode {
     nullable: false,
     default: 0,
   })
-  expiredTime!: bigint;
+  expiredTime!: string;
   @Column({
     type: 'decimal',
     name: 'interest',
@@ -98,7 +98,7 @@ export class AuctionOrderLeafNode {
     nullable: false,
     default: 0,
   })
-  interest!: bigint;
+  interest!: string;
   @Column({
     type: 'decimal',
     name: 'L2TokenAddrBorrowing',
@@ -107,7 +107,7 @@ export class AuctionOrderLeafNode {
     nullable: false,
     default: 0,
   })
-  L2TokenAddrBorrowing!: bigint;
+  L2TokenAddrBorrowing!: string;
   @Column({
     type: 'decimal',
     name: 'borrowingAmt',
@@ -116,7 +116,7 @@ export class AuctionOrderLeafNode {
     nullable: false,
     default: 0,
   })
-  borrowingAmt!: bigint;
+  borrowingAmt!: string;
   // relations
   // @ManyToOne(
   //   () => AccountInformation,

@@ -33,7 +33,7 @@ export class MerkleTreeController {
   async updateAccountTree(@Body() updateAccountTreeDto: UpdateAccountTreeDto) {
     console.time('controller updateAccountTree');
     await this.tsAccountTreeService.updateLeaf(
-      BigInt(updateAccountTreeDto.leafId),
+      (updateAccountTreeDto.leafId),
       updateAccountTreeDto
     );
     console.timeEnd('controller updateAccountTree');
@@ -43,7 +43,7 @@ export class MerkleTreeController {
     console.time('controller updateTokenTree');
     // const tokeneLeafId = await this.tsTokenTreeService.getCurrentLeafIdCount(BigInt(updateTokenTreeDto.accountId));
     await this.tsTokenTreeService.updateLeaf(
-      BigInt(updateTokenTreeDto.leafId),
+      (updateTokenTreeDto.leafId),
       updateTokenTreeDto,
     );
     console.timeEnd('controller updateTokenTree');
@@ -52,7 +52,7 @@ export class MerkleTreeController {
   async updateObsOrderTree(@Body() updateObsOrderTreeDto: UpdateObsOrderTreeDto) {
     console.time('controller updateObsOrderTree');
     await this.obsOrderTreeService.updateLeaf(
-      BigInt(updateObsOrderTreeDto.orderLeafId),
+      (updateObsOrderTreeDto.orderLeafId),
       updateObsOrderTreeDto
     );
     console.timeEnd('controller updateObsOrderTree');
@@ -61,8 +61,8 @@ export class MerkleTreeController {
   async updateObsStateTree(@Body() updateObsStateTreeDto: UpdateObsStateTreeDto) {
     console.time('controller updateObsStateTree');
     await this.obsStateTreeService.updateStateTree(
-      BigInt(updateObsStateTreeDto.accountId),
-      BigInt(updateObsStateTreeDto.tokenId),
+      (updateObsStateTreeDto.accountId),
+      (updateObsStateTreeDto.tokenId),
       BigInt(updateObsStateTreeDto.lockedAmt),
       BigInt(updateObsStateTreeDto.availableAmt),
     );

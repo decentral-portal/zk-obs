@@ -17,14 +17,11 @@ export abstract class TsMerkleTree<T> {
   }
   abstract getDefaultRoot(): string;
   abstract getLeafDefaultVavlue(): string;
-  abstract updateLeaf(leafId: bigint, value: any, otherPayload: any): void;
-  abstract getLeaf(leaf_id: bigint, otherPayload: any): Promise<T|null>;
-  abstract getMerklerProof(leaf_id: bigint): Promise<bigint[]>;
-  getProofIds(leaf_id: bigint) {
-    console.log({
-      leaf_id,
-      tpye: typeof leaf_id,
-    });
+  abstract updateLeaf(leafId: string, value: any, otherPayload: any): void;
+  abstract getLeaf(leaf_id: string, otherPayload: any): Promise<T|null>;
+  abstract getMerklerProof(leaf_id: string): Promise<bigint[]>;
+  getProofIds(_leaf_id: string) {
+    const leaf_id = BigInt(_leaf_id);
     const prf: bigint[] = [];
     const height = this.treeHeigt;
     const leafStart = leaf_id + (1n <<  BigInt(height));
@@ -51,8 +48,8 @@ export abstract class TsMerkleTree<T> {
       }
     }
   }
-  getLeafIdInTree(leafId: bigint) {
-    return leafId + (1n << BigInt(this.treeHeigt));
+  getLeafIdInTree(_leafId: string) {
+    return BigInt(_leafId) + (1n << BigInt(this.treeHeigt));
   }
   getLastLevel() {
     return this.lastLevel;

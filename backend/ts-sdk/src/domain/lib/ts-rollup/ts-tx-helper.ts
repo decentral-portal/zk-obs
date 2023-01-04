@@ -209,7 +209,7 @@ export function encodeRChunkBuffer(
             BigNumber.from(txTransferReq.reqType),
             BigNumber.from(txTransferReq.accountId),
             BigNumber.from(txTransferReq.tokenId),
-            BigNumber.from(amountToTxAmountV3_40bit(txTransferReq.amount)),
+            BigNumber.from(amountToTxAmountV3_40bit(BigInt(txTransferReq.amount))),
           ],
         )
         .replaceAll('0x', '');
@@ -226,7 +226,7 @@ export function encodeRChunkBuffer(
             BigNumber.from(txTransferReq.reqType),
             BigNumber.from(txTransferReq.arg0),
             BigNumber.from(txTransferReq.tokenId),
-            BigNumber.from(amountToTxAmountV3_40bit(txTransferReq.amount)),
+            BigNumber.from(amountToTxAmountV3_40bit(BigInt(txTransferReq.amount))),
           ],
         )
         .replaceAll('0x', '');

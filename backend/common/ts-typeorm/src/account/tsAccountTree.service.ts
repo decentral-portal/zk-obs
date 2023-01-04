@@ -45,7 +45,7 @@ export class TsAccountTreeService extends TsMerkleTree<AccountLeafNode>{
     return getDefaultAccountLeaf(this.getDefaultTokenTreeRoot());
   }
   // async _updateLeaf()
-  async updateLeaf(leafId: bigint, value: UpdateAccountTreeDto) {
+  async updateLeaf(leafId: string, value: UpdateAccountTreeDto) {
     console.time('updateLeaf for account tree');
     // setup transaction
     await this.connection.transaction(async (manager) => {
@@ -54,7 +54,7 @@ export class TsAccountTreeService extends TsMerkleTree<AccountLeafNode>{
     // }
     console.timeEnd('updateLeaf for account tree');
   }
-  async _updateLeaf(manager: EntityManager, leafId: bigint, value: UpdateAccountTreeDto) {
+  async _updateLeaf(manager: EntityManager, leafId: string, value: UpdateAccountTreeDto) {
     const prf = this.getProofIds(leafId);
     const id = this.getLeafIdInTree(leafId);
     const originValue = await this.getLeaf(leafId);
@@ -66,16 +66,16 @@ export class TsAccountTreeService extends TsMerkleTree<AccountLeafNode>{
     await manager.upsert(AccountMerkleTreeNode, {
       id: id.toString(),
       leafId: leafId,
-      hash: BigInt(toTreeLeaf([
+      hash: (toTreeLeaf([
         BigInt(newValue.tsAddr),
         BigInt(newValue.nonce),
         BigInt(newValue.tokenRoot)
       ]))
     }, ['id']);
     await manager.upsert(AccountLeafNode, {
-      tsAddr: BigInt(newValue.tsAddr),
-      nonce: BigInt(newValue.nonce),
-      tokenRoot: BigInt(newValue.tokenRoot),
+      tsAddr: (newValue.tsAddr),
+      nonce: (newValue.nonce),
+      tokenRoot: (newValue.tokenRoot),
       leafId: leafId.toString(),
     }, ['leafId']);
     // update tree
@@ -94,20 +94,20 @@ export class TsAccountTreeService extends TsMerkleTree<AccountLeafNode>{
       if (iValue == null) {
         jobs.push(manager.upsert(AccountMerkleTreeNode, {
           id: i.toString(),
-          hash: BigInt(iHashValue)
+          hash: (iHashValue)
         }, ['id']));
       }
       if (jValue == null && j < prf.length) {
         jobs.push(manager.upsert(AccountMerkleTreeNode, {
           id: prf[j].toString(),
-          hash: BigInt(jHashValue)
+          hash: (jHashValue)
         }, ['id']));
       }
       const updateRoot = i >> 1n;
       if (updateRoot >= 1n) {
         jobs.push(manager.upsert(AccountMerkleTreeNode, {
           id: updateRoot.toString(),
-          hash: BigInt(hash)
+          hash: (hash)
         }, ['id']));
       }
       await Promise.all(jobs);
@@ -115,10 +115,10 @@ export class TsAccountTreeService extends TsMerkleTree<AccountLeafNode>{
     }
   }
 
-  async updateTokenLeaf(leafId: bigint, value: UpdateTokenTreeDto) {
+  async updateTokenLeaf(leafId: string, value: UpdateTokenTreeDto) {
     return await this.connection.transaction(async (manager) => {
       const tokenRoot = await this.tokenTreeService._updateLeaf(manager, leafId, value);
-      await this._updateLeaf(manager, BigInt(value.accountId), {
+      await this._updateLeaf(manager, (value.accountId), {
         leafId: value.accountId,
         tokenRoot: tokenRoot.hash,
       });
@@ -126,13 +126,13 @@ export class TsAccountTreeService extends TsMerkleTree<AccountLeafNode>{
   }
 
 
-  async getLeaf(leaf_id: bigint): Promise<AccountLeafNode> {
+  async getLeaf(leaf_id: string): Promise<AccountLeafNode> {
     const result = await this.accountLeafNodeRepository.findOneBy({leafId: leaf_id.toString()});
     if (result == null) {
       const emptyAccount = this.accountLeafNodeRepository.create();
-      emptyAccount.tsAddr = 0n;
-      emptyAccount.nonce = 0n;
-      emptyAccount.tokenRoot = BigInt(this.getDefaultTokenTreeRoot());
+      emptyAccount.tsAddr = '0';
+      emptyAccount.nonce = '0';
+      emptyAccount.tokenRoot = BigInt(this.getDefaultTokenTreeRoot()).toString();
       emptyAccount.leafId = leaf_id.toString();
       return emptyAccount;
     }
@@ -146,7 +146,7 @@ export class TsAccountTreeService extends TsMerkleTree<AccountLeafNode>{
       const hash = await this.getDefaultHashByLevel(1);
       await this.accountMerkleTreeRepository.insert({
         id: 1n.toString(),
-        hash: BigInt(hash)
+        hash: (hash)
       });
       return {
         id: 1n.toString(),
@@ -157,7 +157,7 @@ export class TsAccountTreeService extends TsMerkleTree<AccountLeafNode>{
   }
 
   async addLeaf(value: UpdateAccountTreeDto) {
-    const leafId = BigInt(value.leafId);
+    const leafId = (value.leafId);
     if(!value.tsAddr) {
       throw new Error('tsAddr should not be null');
     }
@@ -171,18 +171,19 @@ export class TsAccountTreeService extends TsMerkleTree<AccountLeafNode>{
       await manager.insert(AccountMerkleTreeNode, {
         leafId: leafId,
         id: id.toString(),
-        hash: BigInt(hash)
+        hash: (hash)
       });
       await manager.insert(AccountLeafNode, {
         leafId: leafId.toString(),
-        tsAddr: BigInt(value.tsAddr as string),
-        nonce: 0n,
-        tokenRoot: BigInt(this.getDefaultTokenTreeRoot())
+        tsAddr: (value.tsAddr as string),
+        nonce: '0',
+        tokenRoot: (this.getDefaultTokenTreeRoot())
       });
     });
   }
 
-  async getMerklerProof(leafId: bigint): Promise<bigint[]> {
+  async getMerklerProof(leafId: string): Promise<bigint[]> {
+    console.log('getMerklerProof', leafId);
     const ids = this.getProofIds(leafId);
     const r = await this.accountMerkleTreeRepository.find({
       where: {
@@ -192,6 +193,6 @@ export class TsAccountTreeService extends TsMerkleTree<AccountLeafNode>{
         id: 'ASC'
       }
     });
-    return r.map(item => item.hash);
+    return r.map(item => BigInt(item.hash));
   }
 }

@@ -20,7 +20,7 @@ export class ObsOrderLeafMerkleTreeNode {
     nullable: false,
     default: 0n,
   })
-  hash!: bigint;
+  hash!: string;
   @Column({
     type: 'decimal',
     name: 'leafId',
@@ -28,7 +28,7 @@ export class ObsOrderLeafMerkleTreeNode {
     scale: 0,
     nullable: true
   })
-  leafId!: bigint | null;
+  leafId!: string | null;
   @OneToOne(
     () => ObsOrderLeafEntity,
     (obsOrderLeaf: ObsOrderLeafEntity) => obsOrderLeaf.merkleTreeNode,

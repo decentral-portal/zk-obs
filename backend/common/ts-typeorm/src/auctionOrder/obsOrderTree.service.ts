@@ -26,7 +26,7 @@ export class ObsOrderTreeService extends TsMerkleTree<ObsOrderLeafEntity> {
     console.timeEnd('init order tree');
     this.setLevelDefaultHash();
   }
-  async updateLeaf(leafId: bigint, value: UpdateObsOrderTreeDto) {
+  async updateLeaf(leafId: string, value: UpdateObsOrderTreeDto) {
     console.time('updateLeaf for obsOrder tree');
     const prf = this.getProofIds(leafId);
     const id = this.getLeafIdInTree(leafId);
@@ -35,7 +35,7 @@ export class ObsOrderTreeService extends TsMerkleTree<ObsOrderLeafEntity> {
       await manager.upsert(ObsOrderLeafMerkleTreeNode, {
         id: id.toString(),
         leafId: leafId,
-        hash: BigInt(toTreeLeaf([
+        hash: (toTreeLeaf([
           BigInt(value.txId),
           BigInt(value.reqType),
           BigInt(value.sender),
@@ -50,17 +50,17 @@ export class ObsOrderTreeService extends TsMerkleTree<ObsOrderLeafEntity> {
         ]))
       }, ['id']);
       await manager.upsert(ObsOrderLeafEntity, {
-        orderLeafId:BigInt(value.orderLeafId),
+        orderLeafId:(value.orderLeafId),
         txId: Number(value.txId),
         reqType: Number(value.reqType),
-        sender: BigInt(value.sender),
-        sellTokenId: BigInt(value.sellTokenId),
-        sellAmt: BigInt(value.sellAmt),
-        nonce: BigInt(value.nonce),
-        buyTokenId: BigInt(value.buyTokenId),
-        buyAmt: BigInt(value.buyAmt),
-        accumulatedSellAmt: BigInt(value.accumulatedSellAmt),
-        accumulatedBuyAmt: BigInt(value.accumulatedBuyAmt),
+        sender: (value.sender),
+        sellTokenId: (value.sellTokenId),
+        sellAmt: (value.sellAmt),
+        nonce: (value.nonce),
+        buyTokenId: (value.buyTokenId),
+        buyAmt: (value.buyAmt),
+        accumulatedSellAmt: (value.accumulatedSellAmt),
+        accumulatedBuyAmt: (value.accumulatedBuyAmt),
         orderId: Number(value.orderId)
       }, ['orderLeafId']);
       // update tree
@@ -79,20 +79,20 @@ export class ObsOrderTreeService extends TsMerkleTree<ObsOrderLeafEntity> {
         if (iValue == null) {
           jobs.push(manager.upsert(ObsOrderLeafMerkleTreeNode, {
             id: i.toString(),
-            hash: BigInt(iHashValue)
+            hash: (iHashValue)
           }, ['id']));
         } 
         if (jValue == null && j < prf.length) {
           jobs.push(manager.upsert(ObsOrderLeafMerkleTreeNode, {
             id: prf[j].toString(),
-            hash: BigInt(jHashValue)
+            hash: (jHashValue)
           }, ['id']));
         }
         const updateRoot = i >> 1n;
         if ( updateRoot >= 1n) {
           jobs.push(manager.upsert(ObsOrderLeafMerkleTreeNode, {
             id: updateRoot.toString(),
-            hash: BigInt(hash)
+            hash: (hash)
           }, ['id']));
         }
         await Promise.all(jobs);
@@ -101,7 +101,7 @@ export class ObsOrderTreeService extends TsMerkleTree<ObsOrderLeafEntity> {
     });
     console.timeEnd('updateLeaf for obsOrder tree');
   }
-  async getLeaf(leaf_id: bigint): Promise<ObsOrderLeafEntity | null> {
+  async getLeaf(leaf_id: string): Promise<ObsOrderLeafEntity | null> {
     const result = this.obsOrderLeafRepository.findOneBy({
       orderLeafId: leaf_id
     });
@@ -116,7 +116,7 @@ export class ObsOrderTreeService extends TsMerkleTree<ObsOrderLeafEntity> {
         await manager.insert(ObsOrderLeafMerkleTreeNode, {
           leafId: leaf_id,
           id: id.toString(),
-          hash: BigInt(hash),
+          hash: (hash),
         });
         await manager.insert(ObsOrderLeafEntity, {
           orderLeafId: leaf_id,
@@ -138,7 +138,7 @@ export class ObsOrderTreeService extends TsMerkleTree<ObsOrderLeafEntity> {
       const hash = await this.getDefaultHashByLevel(1);
       await this.obsOrderMerkleTreeRepository.insert({
         id: 1n.toString(),
-        hash: BigInt(hash),
+        hash: (hash),
       });
       return {
         id: 1n.toString(),
@@ -159,7 +159,7 @@ export class ObsOrderTreeService extends TsMerkleTree<ObsOrderLeafEntity> {
   }
 
 
-  async getMerklerProof(leafId: bigint): Promise<bigint[]> {
+  async getMerklerProof(leafId: string): Promise<bigint[]> {
     const ids = this.getProofIds(leafId);
     const r = await this.obsOrderMerkleTreeRepository.find({
       where: {
@@ -169,6 +169,6 @@ export class ObsOrderTreeService extends TsMerkleTree<ObsOrderLeafEntity> {
         id: 'ASC'
       }
     });
-    return r.map(item => item.hash);
+    return r.map(item => BigInt(item.hash));
   }
 }

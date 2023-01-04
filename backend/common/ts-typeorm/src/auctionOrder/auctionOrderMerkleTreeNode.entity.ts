@@ -18,7 +18,7 @@ export class AuctionOrderMerkleTreeNode {
     scale: 0,
     nullable: false,
   })
-  hash!: bigint;
+  hash!: string;
   @Column({
     type: 'decimal',
     name: 'leafId',

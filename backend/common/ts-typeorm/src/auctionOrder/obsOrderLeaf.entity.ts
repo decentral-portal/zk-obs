@@ -12,7 +12,7 @@ export class ObsOrderLeafEntity {
     nullable: false,
     default: 0n,
   })
-  orderLeafId!: bigint;
+  orderLeafId!: string;
   @Column({
     type: 'int8',
     name: 'txId',
@@ -34,7 +34,7 @@ export class ObsOrderLeafEntity {
     nullable: false,
     default: 0n,
   })
-  sender!: bigint;
+  sender!: string;
   @Column({
     type: 'decimal',
     name: 'sellTokenId',
@@ -43,7 +43,7 @@ export class ObsOrderLeafEntity {
     nullable: false,
     default: 0n,
   })
-  sellTokenId!: bigint;
+  sellTokenId!: string;
   @Column({
     type: 'decimal',
     name: 'sellAmt',
@@ -52,7 +52,7 @@ export class ObsOrderLeafEntity {
     nullable: false,
     default: 0n,
   })
-  sellAmt!: bigint;
+  sellAmt!: string;
   @Column({
     type: 'decimal',
     name: 'nonce',
@@ -61,7 +61,7 @@ export class ObsOrderLeafEntity {
     nullable: false,
     default: 0n,
   })
-  nonce!: bigint;
+  nonce!: string;
   @Column({
     type: 'decimal',
     name: 'buyTokenId',
@@ -70,7 +70,7 @@ export class ObsOrderLeafEntity {
     nullable: false,
     default: 0n,
   })
-  buyTokenId!: bigint;
+  buyTokenId!: string;
   @Column({
     type: 'decimal',
     name: 'buyAmt',
@@ -79,7 +79,7 @@ export class ObsOrderLeafEntity {
     nullable: false,
     default: 0n,
   })
-  buyAmt!: bigint;
+  buyAmt!: string;
   @Column({
     type: 'decimal',
     name: 'accumulatedSellAmt',
@@ -88,7 +88,7 @@ export class ObsOrderLeafEntity {
     nullable: false,
     default: 0n,
   })
-  accumulatedSellAmt!: bigint;
+  accumulatedSellAmt!: string;
   @Column({
     type: 'decimal',
     name: 'accumulatedBuyAmt',
@@ -97,7 +97,7 @@ export class ObsOrderLeafEntity {
     nullable: false,
     default: 0n,
   })
-  accumulatedBuyAmt!: bigint;
+  accumulatedBuyAmt!: string;
   @Column({
     type: 'int8',
     name: 'orderId',

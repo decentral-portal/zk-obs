@@ -30,7 +30,7 @@ export class TokenMerkleTreeNode {
     scale: 0,
     nullable: false
   })
-  hash!: bigint;
+  hash!: string;
   @Column({
     type: 'decimal',
     name: 'leafId',

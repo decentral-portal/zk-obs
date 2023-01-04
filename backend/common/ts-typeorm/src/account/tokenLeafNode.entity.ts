@@ -30,7 +30,7 @@ export class TokenLeafNode {
     scale: 0,
     default: 0n
   })
-  availableAmt!: bigint;
+  availableAmt!: string;
   @Column({
     type: 'decimal',
     name: 'lockedAmt',
@@ -38,7 +38,7 @@ export class TokenLeafNode {
     scale: 0,
     default: 0n
   })
-  lockedAmt!: bigint;
+  lockedAmt!: string;
   @OneToOne(
     () => TokenMerkleTreeNode,
     (tokenMerkleTreeNode: TokenMerkleTreeNode) => tokenMerkleTreeNode.leaf,
@@ -52,7 +52,7 @@ export class TokenLeafNode {
 
   encode(): TokenLeafEncodeType {
     return [
-      this.availableAmt, this.lockedAmt
+      BigInt(this.availableAmt), BigInt(this.lockedAmt)
     ];
   }
 

@@ -21,7 +21,7 @@ export class AccountLeafNode {
     nullable: false,
     default: 0n,
   })
-  tsAddr!: bigint;
+  tsAddr!: string;
   @Column({
     type: 'decimal',
     name: 'nonce',
@@ -30,7 +30,7 @@ export class AccountLeafNode {
     nullable: false,
     default: 0n
   })
-  nonce!: bigint;
+  nonce!: string;
   @Column({
     type: 'decimal',
     name: 'tokenRoot',
@@ -39,7 +39,7 @@ export class AccountLeafNode {
     nullable: false,
     default: 0n
   })
-  tokenRoot!: bigint;
+  tokenRoot!: string;
   // relations
   @OneToOne(
     () => AccountMerkleTreeNode,
@@ -55,7 +55,7 @@ export class AccountLeafNode {
 
   encode(): AccountLeafEncodeType {
     return [
-      this.tsAddr, this.nonce, this.tokenRoot
+      BigInt(this.tsAddr), BigInt(this.nonce), BigInt(this.tokenRoot)
     ];
   }
 

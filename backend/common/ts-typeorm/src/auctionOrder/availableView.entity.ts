@@ -43,7 +43,7 @@ export class AvailableViewEntity {
     scale: 0,
     default: 0n
   })
-  availableAmt!: bigint;
+  availableAmt!: string;
   @Column({
     name: 'lockedAmt',
     type: 'decimal',
@@ -51,5 +51,5 @@ export class AvailableViewEntity {
     scale: 0,
     default: 0n
   })
-  lockedAmt!: bigint;
+  lockedAmt!: string;
 }

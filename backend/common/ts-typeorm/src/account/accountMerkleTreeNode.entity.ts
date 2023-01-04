@@ -20,7 +20,7 @@ export class AccountMerkleTreeNode {
     scale: 0,
     nullable: false,
   })
-  hash!: bigint;
+  hash!: string;
   @Column({
     type: 'decimal',
     name: 'leafId',
@@ -28,7 +28,7 @@ export class AccountMerkleTreeNode {
     scale: 0,
     nullable: true,
   })
-  leafId!: bigint|null;
+  leafId!: string|null;
   // @OneToOne(
   //   () => AccountInformation, // mapType
   //   (accountInformation: AccountInformation) => accountInformation.accountMerkleTreeNode , // map attribute

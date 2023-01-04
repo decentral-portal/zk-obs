@@ -9,7 +9,7 @@ export class ObsMerkleTreeService {
     private readonly obsAccountTreeService: TsAccountTreeService,
   ) {}
   // update State Merkle tree
-  async updateStateTree(accountId: bigint, tokenId: bigint, lockedAmt: bigint, availableAmt: bigint) 
+  async updateStateTree(accountId: string, tokenId: string, lockedAmt: bigint, availableAmt: bigint) 
   {
     // first update token tree
     await this.obsTokenTreeService.updateLeaf(tokenId, {

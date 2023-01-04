@@ -45,7 +45,7 @@ export class RollupInformation {
     nullable: false,
     default: '0',
   })
-  currentOrderId!: bigint;
+  currentOrderId!: string;
 
   @CreateDateColumn({
     type: 'timestamp without time zone',

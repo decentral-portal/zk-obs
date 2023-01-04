@@ -63,7 +63,7 @@ export class MatchObsOrderEntity {
     scale: 0,
     default: 0n,
   })
-  matchedMQ!: bigint;
+  matchedMQ!: string;
   @Column({
     type: 'decimal',
     name: 'matchedBQ',
@@ -71,7 +71,7 @@ export class MatchObsOrderEntity {
     scale: 0,
     default: 0n
   })
-  matchedBQ!: bigint;
+  matchedBQ!: string;
   @Column({
     type: 'timestamp without time zone',
     name: 'timestamp',

@@ -46,7 +46,7 @@ export class ObsOrderEntity {
     nullable: false,
     default: 0n,
   })
-  accountId!: bigint;
+  accountId!: string;
   @Column({
     type: 'varchar',
     name: 'marketPair',
@@ -79,7 +79,7 @@ export class ObsOrderEntity {
     nullable: false,
     default: 0n,
   })
-  mainQty!: bigint;
+  mainQty!: string;
   @Column({
     type: 'decimal',
     name: 'baseQty',
@@ -88,7 +88,7 @@ export class ObsOrderEntity {
     nullable: false,
     default: 0n,
   })
-  baseQty!: bigint;
+  baseQty!: string;
   @Column({
     type: 'decimal',
     name: 'remainMainQty',
@@ -97,7 +97,7 @@ export class ObsOrderEntity {
     nullable: false,
     default: 0n,
   })
-  remainMainQty!: bigint;
+  remainMainQty!: string;
   @Column({
     type: 'decimal',
     name: 'remainBaseQty',
@@ -106,7 +106,7 @@ export class ObsOrderEntity {
     nullable: false,
     default: 0n,
   })
-  remainBaseQty!: bigint;
+  remainBaseQty!: string;
   @Column({
     type: 'decimal',
     name: 'accumulatedMainQty',
@@ -115,7 +115,7 @@ export class ObsOrderEntity {
     nullable: false,
     default: 0n,
   })
-  accumulatedMainQty!: bigint;
+  accumulatedMainQty!: string;
   @Column({
     type: 'decimal',
     name: 'accumulatedBaseQty',
@@ -124,7 +124,7 @@ export class ObsOrderEntity {
     nullable: false,
     default: 0n,
   })
-  accumulatedBaseQty!: bigint;
+  accumulatedBaseQty!: string;
   @Column({
     type: 'decimal',
     name: 'mainTokenId',
@@ -133,7 +133,7 @@ export class ObsOrderEntity {
     nullable: false,
     default: 0,
   })
-  mainTokenId!: bigint;
+  mainTokenId!: string;
   @Column({
     type: 'decimal',
     name: 'baseTokenId',
@@ -142,7 +142,7 @@ export class ObsOrderEntity {
     nullable: false,
     default: 0,
   })
-  baseTokenId!: bigint;
+  baseTokenId!: string;
   @Column({
     type: 'timestamp without time zone',
     name: 'timestamp',

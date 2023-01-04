@@ -45,7 +45,7 @@ export class TransactionInfo extends BaseTimeEntity {
     nullable: false,
     default: 0n,
   })
-  accountId!: bigint;
+  accountId!: string;
   @Column({
     type: 'decimal',
     name: 'tokenId',
@@ -54,7 +54,7 @@ export class TransactionInfo extends BaseTimeEntity {
     nullable: false,
     default: 0n,
   })
-  tokenId!: bigint;
+  tokenId!: string;
   @Column({
     type: 'decimal',
     name: 'accumulatedSellAmt',
@@ -63,7 +63,7 @@ export class TransactionInfo extends BaseTimeEntity {
     nullable: false,
     default: 0n,
   })
-  accumulatedSellAmt!: bigint;
+  accumulatedSellAmt!: string;
   @Column({
     type: 'decimal',
     name: 'accumulatedBuyAmt',
@@ -72,7 +72,7 @@ export class TransactionInfo extends BaseTimeEntity {
     nullable: false,
     default: 0n,
   })
-  accumulatedBuyAmt!: bigint;
+  accumulatedBuyAmt!: string;
   @Column({
     type: 'decimal',
     name: 'amount',
@@ -81,7 +81,7 @@ export class TransactionInfo extends BaseTimeEntity {
     nullable: false,
     default: 0n,
   })
-  amount!: bigint;
+  amount!: string;
   @Column({
     type: 'decimal',
     name: 'nonce',
@@ -90,7 +90,7 @@ export class TransactionInfo extends BaseTimeEntity {
     nullable: false,
     default: 0n,
   })
-  nonce!: bigint;
+  nonce!: string;
   @Column({
     type: 'json',
     name: 'eddsaSig',
@@ -117,7 +117,7 @@ export class TransactionInfo extends BaseTimeEntity {
     nullable: false,
     default: 0n,
   })
-  arg0!: bigint;
+  arg0!: string;
   @Column({
     type: 'decimal',
     name: 'arg1',
@@ -126,7 +126,7 @@ export class TransactionInfo extends BaseTimeEntity {
     nullable: false,
     default: 0n,
   })
-  arg1!: bigint;
+  arg1!: string;
   @Column({
     type: 'decimal',
     name: 'arg2',
@@ -135,7 +135,7 @@ export class TransactionInfo extends BaseTimeEntity {
     nullable: false,
     default: 0n,
   })
-  arg2!: bigint;
+  arg2!: string;
   @Column({
     type: 'decimal',
     name: 'arg3',
@@ -144,7 +144,7 @@ export class TransactionInfo extends BaseTimeEntity {
     nullable: false,
     default: 0n,
   })
-  arg3!: bigint;
+  arg3!: string;
   @Column({
     type: 'decimal',
     name: 'arg4',
@@ -153,7 +153,7 @@ export class TransactionInfo extends BaseTimeEntity {
     nullable: false,
     default: 0n,
   })
-  arg4!: bigint;
+  arg4!: string;
   @Column({
     type: 'varchar',
     name: 'tsPubKeyX',
@@ -178,7 +178,7 @@ export class TransactionInfo extends BaseTimeEntity {
     nullable: false,
     default: 0n,
   })
-  fee!: bigint;
+  fee!: string;
   @Column({
     type: 'decimal',
     name: 'feeToken',
@@ -187,7 +187,7 @@ export class TransactionInfo extends BaseTimeEntity {
     nullable: false,
     default: 0n,
   })
-  feeToken!: bigint;
+  feeToken!: string;
   @Column({
     type: 'json',
     name: 'metadata',
