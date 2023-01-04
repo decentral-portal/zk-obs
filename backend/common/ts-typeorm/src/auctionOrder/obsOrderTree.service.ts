@@ -24,6 +24,7 @@ export class ObsOrderTreeService extends TsMerkleTree<ObsOrderLeafEntity> {
     console.time('init order tree');
     super(configService.getOrThrow<number>('ORDER_TREE_HEIGHT'), tsHashFunc);
     console.timeEnd('init order tree');
+    this.setLevelDefaultHash();
   }
   async updateLeaf(leafId: bigint, value: UpdateObsOrderTreeDto) {
     console.time('updateLeaf for obsOrder tree');

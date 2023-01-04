@@ -29,6 +29,7 @@ export class TsAccountTreeService extends TsMerkleTree<AccountLeafNode>{
     super(configService.getOrThrow<number>('ACCOUNTS_TREE_HEIGHT'), tsHashFunc);
     console.timeEnd('create Account Tree');
     this.TOKENS_TREE_HEIGHT = configService.getOrThrow<number>('TOKENS_TREE_HEIGHT');
+    this.setLevelDefaultHash();
   }
   async getCurrentLeafIdCount(): Promise<number> {
     const leafIdCount = await this.accountLeafNodeRepository.count();

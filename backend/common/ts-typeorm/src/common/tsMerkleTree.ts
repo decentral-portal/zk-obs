@@ -13,7 +13,7 @@ export abstract class TsMerkleTree<T> {
     this.treeHeigt = Number(treeHeight);
     this.hashFunc = hashFunc;
     this.lastLevel = Number(this.treeHeigt);
-    this.setLevelDefaultHash();
+    // this.setLevelDefaultHash();
   }
   abstract getDefaultRoot(): string;
   abstract getLeafDefaultVavlue(): string;

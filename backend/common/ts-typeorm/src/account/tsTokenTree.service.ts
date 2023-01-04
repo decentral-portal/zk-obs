@@ -25,6 +25,7 @@ export class TsTokenTreeService extends TsMerkleTree<TokenLeafNode> {
     console.time('init token tree');
     super(configService.get<number>('TOKENS_TREE_HEIGHT', 2), tsHashFunc);
     console.timeEnd('init token tree');
+    this.setLevelDefaultHash();
   }
   async getCurrentLeafIdCount(accountId: bigint): Promise<number> {
     const leafIdCount = await this.tokenMerkleTreeRepository.count(
