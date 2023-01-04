@@ -13,7 +13,15 @@ library Operations {
         UNKNOWN,
         REGISTER,
         DEPOSIT,
-        WITHDRAW
+        WITHDRAW,
+        SECONDLIMITORDER,
+        SECONDLIMITSTART,
+        SECONDLIMITEXCHANGE,
+        SECONDLIMITEND,
+        SECONDMARKETORDER,
+        SECONDEXCHANGE,
+        SECONDMARKETEND,
+        CANCEL
     }
 
     // Byte length definition
@@ -31,6 +39,12 @@ library Operations {
 
     // Deposit pubdata
     struct Deposit {
+        uint32 accountId;
+        uint16 tokenId;
+        uint128 amount;
+    }
+
+    struct Withdraw {
         uint32 accountId;
         uint16 tokenId;
         uint128 amount;
@@ -89,5 +103,27 @@ library Operations {
         (offset, register.l2Addr) = Bytes.readBytes20(data, offset);
         deposit.accountId = register.accountId;
         require(offset == REGISTER_PUBDATA_BYTES, "Read register pubdata error");
+    }
+
+    uint256 internal constant DEPOSIT_PUBDATA_BYTES =
+        OP_TYPE_BYTES + L2_ADDR_BYTES + L2_TOKEN_ADDR_BYTES + STATE_AMOUNT_BYTES;
+
+    function readDepositPubdata(bytes memory data) internal pure returns (Deposit memory deposit) {
+        uint256 offset = OP_TYPE_BYTES;
+        (offset, deposit.accountId) = Bytes.readUInt32(data, offset);
+        (offset, deposit.tokenId) = Bytes.readUInt16(data, offset);
+        (offset, deposit.amount) = Bytes.readUInt128(data, offset);
+        require(offset == DEPOSIT_PUBDATA_BYTES, "Read deposit pubdata error");
+    }
+
+    uint256 internal constant WITHDRAW_PUBDATA_BYTES =
+        OP_TYPE_BYTES + L2_ADDR_BYTES + L2_TOKEN_ADDR_BYTES + STATE_AMOUNT_BYTES;
+
+    function readWithdrawPubdata(bytes memory data) internal pure returns (Withdraw memory withdraw) {
+        uint256 offset = OP_TYPE_BYTES;
+        (offset, withdraw.accountId) = Bytes.readUInt32(data, offset);
+        (offset, withdraw.tokenId) = Bytes.readUInt16(data, offset);
+        (offset, withdraw.amount) = Bytes.readUInt128(data, offset);
+        require(offset == WITHDRAW_PUBDATA_BYTES, "Read withdraw pubdata error");
     }
 }
