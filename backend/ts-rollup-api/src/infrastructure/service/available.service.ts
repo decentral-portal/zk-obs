@@ -1,3 +1,4 @@
+import { L1Address } from '@common/rbac/domain/value-objects/l1address';
 import { AccountInformation } from '@common/ts-typeorm/account/accountInformation.entity';
 import { TokenLeafNode } from '@common/ts-typeorm/account/tokenLeafNode.entity';
 import { AvailableViewEntity } from '@common/ts-typeorm/auctionOrder/availableView.entity';
@@ -35,7 +36,7 @@ export class AvailableService {
       if (accountInfo == null) {
         throw new NotFoundException(`L1Address ${dto.L1Address} not found`);
       }
-      accountId = accountInfo.L1Address;
+      accountId = accountInfo.accountId;
     }
     
     const result = (dto.L2TokenAddrs && dto.L2TokenAddrs.length !== 0)? 
@@ -50,6 +51,7 @@ export class AvailableService {
           accountId: accountId
         }
       });
+    // console.log(L1Address, accountId, dto.L2TokenAddrs)
     const txBasicResult = (dto.L2TokenAddrs && dto.L2TokenAddrs.length !== 0)? 
       await this.tokenLeafNodeRepository.find({
         select: ['leafId', 'availableAmt', 'lockedAmt'],
