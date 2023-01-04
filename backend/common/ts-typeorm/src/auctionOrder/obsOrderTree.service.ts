@@ -13,6 +13,7 @@ import { ObsOrderLeafMerkleTreeNode } from './obsOrderLeafMerkleTreeNode.entity'
 export class ObsOrderTreeService extends TsMerkleTree<ObsOrderLeafEntity> {
 
   private logger: Logger = new Logger(ObsOrderTreeService.name);
+  public currentOrderId = 1n;
   constructor(
     @InjectRepository(ObsOrderLeafEntity)
     private readonly obsOrderLeafRepository: Repository<ObsOrderLeafEntity>,
@@ -25,6 +26,31 @@ export class ObsOrderTreeService extends TsMerkleTree<ObsOrderLeafEntity> {
     super(configService.getOrThrow<number>('ORDER_TREE_HEIGHT'), tsHashFunc);
     console.timeEnd('init order tree');
     this.setLevelDefaultHash();
+    this.setCurrentOrderId();
+  }
+  async setCurrentOrderId() {
+    await this.updateLeaf('0', {
+      orderLeafId: '0',
+      txId: '0',
+      reqType: '0',
+      sender: '0',
+      sellTokenId: '0',
+      sellAmt: '0',
+      nonce: '0',
+      buyTokenId: '0',
+      buyAmt: '0',
+      accumulatedSellAmt: '0',
+      accumulatedBuyAmt: '0',
+    });
+    const last = await this.obsOrderLeafRepository.count({
+      order: {
+        orderLeafId: 'DESC'
+      },
+    });
+    this.currentOrderId = BigInt(last) + 1n;
+  }
+  async addCurrentOrderId() {
+    this.currentOrderId += 1n;
   }
   async updateLeaf(leafId: string, value: UpdateObsOrderTreeDto) {
     console.time('updateLeaf for obsOrder tree');
@@ -35,19 +61,20 @@ export class ObsOrderTreeService extends TsMerkleTree<ObsOrderLeafEntity> {
       await manager.upsert(ObsOrderLeafMerkleTreeNode, {
         id: id.toString(),
         leafId: leafId,
-        hash: (toTreeLeaf([
-          BigInt(value.txId),
+        hash: BigInt(toTreeLeaf([
           BigInt(value.reqType),
           BigInt(value.sender),
           BigInt(value.sellTokenId),
           BigInt(value.sellAmt),
           BigInt(value.nonce),
+          0n, 0n,
           BigInt(value.buyTokenId),
           BigInt(value.buyAmt),
+          0n,
+          BigInt(value.txId),
           BigInt(value.accumulatedSellAmt),
           BigInt(value.accumulatedBuyAmt),
-          BigInt(value.orderId)
-        ]))
+        ])).toString()
       }, ['id']);
       await manager.upsert(ObsOrderLeafEntity, {
         orderLeafId:(value.orderLeafId),
@@ -61,7 +88,7 @@ export class ObsOrderTreeService extends TsMerkleTree<ObsOrderLeafEntity> {
         buyAmt: (value.buyAmt),
         accumulatedSellAmt: (value.accumulatedSellAmt),
         accumulatedBuyAmt: (value.accumulatedBuyAmt),
-        orderId: Number(value.orderId)
+        // orderId: Number(value.orderId)
       }, ['orderLeafId']);
       // update tree
       for (let i = id, j = 0; i > 1n; i = i >> 1n) {

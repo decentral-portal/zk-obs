@@ -117,16 +117,20 @@ export class TsTokenTreeService extends TsMerkleTree<TokenLeafNode> {
       // start transaction
       await this.connection.transaction(async (manager) => {
         // insert this null hash on this node
-        await manager.insert(TokenMerkleTreeNode, {
+        await manager.upsert(TokenMerkleTreeNode, {
           accountId: accountId,
           id: id.toString(),
           leafId: leaf_id.toString(),
           hash: hashDecString,
-        });
-        await manager.insert(TokenLeafNode, {
+        }, [
+          'id', 'accountId', 'leafId'
+        ]);
+        await manager.upsert(TokenLeafNode, {
           leafId: leaf_id.toString(),
           accountId: accountId,
-        });
+          lockedAmt: '0',
+          availableAmt: '0',
+        }, ['leafId', 'accountId']);
       });
       return await this.tokenLeafRepository.findOneByOrFail({leafId: leaf_id.toString(), accountId: accountId});
     }

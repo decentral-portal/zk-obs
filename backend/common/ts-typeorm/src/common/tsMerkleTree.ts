@@ -44,7 +44,7 @@ export abstract class TsMerkleTree<T> {
     for(let level = this.lastLevel-1; level >= 0 ; level--) {
       const prevLevelHash = this.levelsDefaultHash.get(level+1);
       if (prevLevelHash != undefined) {
-        this.levelsDefaultHash.set(level, this.hashFunc([prevLevelHash, prevLevelHash]));
+        this.levelsDefaultHash.set(level, BigInt(this.hashFunc([prevLevelHash, prevLevelHash])).toString());
       }
     }
   }

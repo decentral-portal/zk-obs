@@ -1,6 +1,9 @@
+import { ObsOrderLeafEncodeType } from '@ts-sdk/domain/lib/ts-types/ts-types';
 import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
 import { ObsOrderEntity } from './obsOrder.entity';
 import { ObsOrderLeafMerkleTreeNode } from './obsOrderLeafMerkleTreeNode.entity';
+import { toTreeLeaf } from '../../../../ts-sdk/src/domain/lib/ts-rollup/ts-helper';
+import { UpdateObsOrderTreeDto } from './dto/updateObsOrderTree.dto';
 
 @Entity('ObsOrderLeaf', { schema: 'public' })
 export class ObsOrderLeafEntity {
@@ -98,22 +101,22 @@ export class ObsOrderLeafEntity {
     default: 0n,
   })
   accumulatedBuyAmt!: string;
-  @Column({
-    type: 'int8',
-    name: 'orderId',
-    nullable: false,
-    default: 0,
-  })
-  orderId!: number;
-  @OneToOne(() => ObsOrderEntity, (obsOrder) => obsOrder.obsOrderLeaf, {
-    onDelete: 'RESTRICT',
-    onUpdate: 'CASCADE',
-  })
-  @JoinColumn({
-    name: 'orderId',
-    referencedColumnName: 'id',
-  })
-  obsOrder!: ObsOrderEntity;
+  // @Column({
+  //   type: 'int8',
+  //   name: 'orderId',
+  //   nullable: false,
+  //   default: 0,
+  // })
+  // orderId!: number;
+  // @OneToOne(() => ObsOrderEntity, (obsOrder) => obsOrder.obsOrderLeaf, {
+  //   onDelete: 'RESTRICT',
+  //   onUpdate: 'CASCADE',
+  // })
+  // @JoinColumn({
+  //   name: 'orderId',
+  //   referencedColumnName: 'id',
+  // })
+  // obsOrder!: ObsOrderEntity;
   @OneToOne(() => ObsOrderLeafMerkleTreeNode, (obsOrderLeafMerkleTreeNode: ObsOrderLeafMerkleTreeNode) => obsOrderLeafMerkleTreeNode.leaf, {
     onDelete: 'RESTRICT',
     onUpdate: 'CASCADE',
@@ -123,4 +126,42 @@ export class ObsOrderLeafEntity {
     referencedColumnName: 'leafId',
   })
   merkleTreeNode!: ObsOrderLeafMerkleTreeNode;
+
+  encode(): ObsOrderLeafEncodeType {
+    return [
+      BigInt(this.reqType),
+      BigInt(this.sender),
+      BigInt(this.sellTokenId),
+      BigInt(this.sellAmt),
+      BigInt(this.nonce),
+      0n,
+      0n,
+      BigInt(this.buyTokenId),
+      BigInt(this.buyAmt),
+      0n,
+      BigInt(this.txId || 0),
+      BigInt(this.accumulatedSellAmt),
+      BigInt(this.accumulatedBuyAmt),
+    ];
+  }
+  encodeLeaf() {
+    return toTreeLeaf(this.encode());
+  }
+
+  convertToObsOrderDto(): UpdateObsOrderTreeDto {
+    return {
+      orderLeafId: this.orderLeafId,
+      txId: String(this.txId) || '0',
+      reqType: this.reqType.toString(),
+      sender: this.sender,
+      sellTokenId: this.sellTokenId,
+      nonce: this.nonce,
+      sellAmt: this.sellAmt,
+      buyTokenId: this.buyTokenId,
+      buyAmt: this.buyAmt,
+      accumulatedSellAmt: this.accumulatedSellAmt,
+      accumulatedBuyAmt: this.accumulatedBuyAmt,
+    // orderId!: string;
+    };
+  }
 }

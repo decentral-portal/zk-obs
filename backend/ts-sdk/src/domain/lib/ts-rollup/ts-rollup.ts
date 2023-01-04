@@ -32,7 +32,7 @@ export interface CircuitOrderTxPayload {
   r_oriOrderLeaf: Array<string[] | bigint[]>;
   r_newOrderLeaf: Array<string[] | bigint[]>;
   r_orderRootFlow: Array<string[]>;
-  r_orderMkPrf: Array<string[]>;
+  r_orderMkPrf: Array<string[] | bigint[]>;
 }
 
 export interface CircuitNullifierTxPayload {

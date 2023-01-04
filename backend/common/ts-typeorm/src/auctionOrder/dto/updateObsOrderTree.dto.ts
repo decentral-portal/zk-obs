@@ -45,8 +45,8 @@ export class UpdateObsOrderTreeDto {
     type: String
   })
   accumulatedBuyAmt!: string;
-  @ApiProperty({
-    type: String
-  })
-  orderId!: string;
+  // @ApiProperty({
+  //   type: String
+  // })
+  // orderId!: string;
 }

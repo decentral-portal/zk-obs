@@ -12,7 +12,7 @@ import { TsRollupConfigType, RollupStatus, CircuitAccountTxPayload, CircuitOrder
 import { encodeRollupWithdrawMessage } from '@ts-sdk/domain/lib/ts-rollup/ts-rollup-helper';
 import { txsToRollupCircuitInput, encodeRChunkBuffer, bigint_to_chunk_array } from '@ts-sdk/domain/lib/ts-rollup/ts-tx-helper';
 import { TsRollupCircuitInputType, TsRollupCircuitInputItemType } from '@ts-sdk/domain/lib/ts-types/ts-circuit-types';
-import { TxNoop, CHUNK_BITS_SIZE, MAX_CHUNKS_PER_REQ, TsTxType, TsSystemAccountAddress, TsTokenAddress } from '@ts-sdk/domain/lib/ts-types/ts-types';
+import { TxNoop, CHUNK_BITS_SIZE, MAX_CHUNKS_PER_REQ, TsTxType, TsSystemAccountAddress, TsTokenAddress, TsTxRequestDatasType } from '@ts-sdk/domain/lib/ts-types/ts-types';
 import assert from 'assert';
 import { dpPoseidonHash } from '@ts-sdk/domain/lib/poseidon-hash-dp';
 import { TsAccountTreeService } from '@common/ts-typeorm/account/tsAccountTree.service';
@@ -20,8 +20,9 @@ import { TsTokenTreeService } from '@common/ts-typeorm/account/tsTokenTree.servi
 import { ObsOrderTreeService } from '@common/ts-typeorm/auctionOrder/obsOrderTree.service';
 import { AccountLeafNode } from '@common/ts-typeorm/account/accountLeafNode.entity';
 import { ObsOrderLeafEntity } from '@common/ts-typeorm/auctionOrder/obsOrderLeaf.entity';
-import { getDefaultAccountLeafMessage, getDefaultTokenLeafMessage } from '@common/ts-typeorm/account/helper/mkAccount.helper';
+import { getDefaultAccountLeafMessage, getDefaultObsOrderLeafMessage, getDefaultTokenLeafMessage } from '@common/ts-typeorm/account/helper/mkAccount.helper';
 import { AccountInformation } from '@common/ts-typeorm/account/accountInformation.entity';
+import { UpdateObsOrderTreeDto } from '@common/ts-typeorm/auctionOrder/dto/updateObsOrderTree.dto';
 
 const DefaultRollupConfig: TsRollupConfigType = {
   order_tree_height: 8,
@@ -126,8 +127,6 @@ export class SequencerConsumer {
   }
   public rollupStatus: RollupStatus = RollupStatus.Idle;
 
-  private currentOrderId = 1; // 0 is default empty order
-
   /** Block information */
   public blockNumber = 0n;
   public oriTxId = 0n;
@@ -179,8 +178,7 @@ export class SequencerConsumer {
     return l2addr;
   }
 
-  private async updateAccountToken(accountId: bigint, tokenAddr: TsTokenAddress, tokenAmt: bigint, lockedAmt: bigint) {
-    const leaf_id = accountId.toString();
+  private async updateAccountToken(leaf_id: string, tokenAddr: TsTokenAddress, tokenAmt: bigint, lockedAmt: bigint) {
     const acc = this.getAccount(leaf_id);
     if (!acc) {
       throw new Error(`updateAccountToken: account id=${leaf_id} not found`);
@@ -189,11 +187,10 @@ export class SequencerConsumer {
       lockedAmt: lockedAmt.toString(),
       availableAmt: tokenAmt.toString(),
       leafId: tokenAddr,
-      accountId: accountId.toString(),
+      accountId: leaf_id,
     });
   }
-  private async updateAccountNonce(accountId: bigint, nonce: bigint) {
-    const leaf_id = accountId.toString();
+  private async updateAccountNonce(leaf_id: string, nonce: bigint) {
     const acc = await this.getAccount(leaf_id);
     if (!acc) {
       throw new Error(`updateAccountNonce: account id=${leaf_id} not found`);
@@ -486,54 +483,71 @@ export class SequencerConsumer {
     this.currentAccountPayload.r_tokenRootFlow[idx].push(tokenRoot.hash);
   }
 
-  private orderBeforeUpdate(orderLeafId: number) {
-    // const order = this.getObsOrder(orderLeafId);
-    // this.currentOrderPayload.r_orderLeafId.push([orderLeafId.toString()]);
+  private async orderBeforeUpdate(orderLeafId: string) {
+    const order = await this.getObsOrder(orderLeafId);
+    this.currentOrderPayload.r_orderLeafId.push([orderLeafId.toString()]);
 
-    // if (order) {
-    //   this.currentOrderPayload.r_oriOrderLeaf.push(order.encodeLeafMessage());
-    //   this.currentOrderPayload.r_orderRootFlow.push([BigInt(this.mkOrderTree.getRoot()).toString()]);
-    //   this.currentOrderPayload.r_orderMkPrf.push(this.mkOrderTree.getProof(orderLeafId));
-    // } else {
-    //   const defaultOrderLeaf = this.obsOrderTreeService.getLeafDefaultVavlue();
-    //   this.currentOrderPayload.r_oriOrderLeaf.push(this.getDefaultOrder().encodeLeafMessage());
-    //   this.currentOrderPayload.r_orderRootFlow.push([BigInt(this.mkOrderTree.getRoot()).toString()]);
-    //   this.currentOrderPayload.r_orderMkPrf.push(this.mkOrderTree.getProof(orderLeafId));
-    // }
+    const root = await this.obsOrderTreeService.getRoot();
+    const orderMkp = await this.obsOrderTreeService.getMerklerProof(orderLeafId);
+    if (order) {
+      this.currentOrderPayload.r_oriOrderLeaf.push(order.encode());
+      this.currentOrderPayload.r_orderRootFlow.push([root.hash]);
+      this.currentOrderPayload.r_orderMkPrf.push(orderMkp);
+    } else {
+      const defaultOrderLeafMessage = getDefaultObsOrderLeafMessage();
+      this.currentOrderPayload.r_oriOrderLeaf.push(defaultOrderLeafMessage);
+      this.currentOrderPayload.r_orderRootFlow.push([root.hash]);
+      this.currentOrderPayload.r_orderMkPrf.push(orderMkp);
+    }
   }
 
-  private orderAfterUpdate(orderLeafId: number) {
-    // const order = this.getObsOrder(orderLeafId);
-    // this.currentOrderPayload.r_orderRootFlow[this.currentOrderPayload.r_orderRootFlow.length - 1].push(BigInt(this.mkOrderTree.getRoot()).toString());
-    // if (order) {
-    //   this.currentOrderPayload.r_newOrderLeaf.push(order.encodeLeafMessage());
-    //   // this.currentOrderPayload.r_orderMkPrf.push(this.mkOrderTree.getProof(orderLeafId));
-    // } else {
-    //   this.currentOrderPayload.r_newOrderLeaf.push(this.getDefaultOrder().encodeLeafMessage());
-    // }
+  private async orderAfterUpdate(orderLeafId: string) {
+    const order = await this.getObsOrder(orderLeafId);
+    const root = await this.obsOrderTreeService.getRoot();
+
+    this.currentOrderPayload.r_orderRootFlow[this.currentOrderPayload.r_orderRootFlow.length - 1].push(root.hash);
+    if (order) {
+      this.currentOrderPayload.r_newOrderLeaf.push(order.encode());
+      // this.currentOrderPayload.r_orderMkPrf.push(this.mkOrderTree.getProof(orderLeafId));
+    } else {
+      const defaultOrderLeafMessage = getDefaultObsOrderLeafMessage();
+      this.currentOrderPayload.r_newOrderLeaf.push(defaultOrderLeafMessage);
+    }
   }
 
-  private addObsOrder(order: ObsOrderLeafEntity) {
-    // if (order.orderLeafId > 0n) {
+  private addObsOrder(order: UpdateObsOrderTreeDto) {
+    // if (BigInt(order.orderLeafId) > 0n) {
     //   throw new Error('addObsOrder: orderLeafId should be 0');
     // }
-    // order.setOrderLeafId(BigInt(this.currentOrderId));
-    // this.orderMap[this.currentOrderId] = order;
-    // this.mkOrderTree.updateLeafNode(this.currentOrderId, order.encodeLeafMessageForHash());
-    // this.currentOrderId++;
+    // order.orderLeafId = this.obsOrderTreeService.currentOrderId.toString();
+    this.obsOrderTreeService.updateLeaf(order.orderLeafId, order);
+    this.obsOrderTreeService.addCurrentOrderId();
   }
-  private removeObsOrder(leafId: number) {
-    // const order = this.getObsOrder(leafId);
-    // if (!order) {
-    //   throw new Error('removeObsOrder: order not found');
-    // }
-    // this.orderMap[leafId] = this.getDefaultOrder();
-    // this.mkOrderTree.updateLeafNode(leafId, this.orderMap[leafId].encodeLeafMessageForHash());
+  private async removeObsOrder(leafId: string) {
+    const order = await this.getObsOrder(leafId);
+    if (!order) {
+      throw new Error('removeObsOrder: order not found');
+    }
+    if (order.reqType === TsTxType.UNKNOWN) {
+      throw new Error('removeObsOrder: order not found (0)');
+    }
+    this.obsOrderTreeService.updateLeaf(order.orderLeafId, {
+      orderLeafId: order.orderLeafId,
+      txId: '0',
+      reqType: '0',
+      sender: '0',
+      sellTokenId: '0',
+      nonce: '0',
+      sellAmt: '0',
+      buyTokenId: '0',
+      buyAmt: '0',
+      accumulatedSellAmt: '0',
+      accumulatedBuyAmt: '0',
+    });
   }
-  private updateObsOrder(order: ObsOrderLeafEntity) {
-    // assert(order.orderLeafId > 0n, 'updateObsOrder: orderLeafId should be exist');
-    // this.orderMap[this.currentOrderId] = order;
-    // this.mkOrderTree.updateLeafNode(this.currentOrderId, order.encodeLeafMessageForHash());
+  private updateObsOrder(order: UpdateObsOrderTreeDto) {
+    assert(BigInt(order.orderLeafId) > 0n, 'updateObsOrder: orderLeafId should be exist');
+    this.obsOrderTreeService.updateLeaf(order.orderLeafId, order);
   }
 
   private getTxChunks(
@@ -554,6 +568,16 @@ export class SequencerConsumer {
     }
 
     return { r_chunks_bigint, o_chunks_bigint, isCriticalChunk };
+  }
+
+  async getTsPubKey(accountId: string) {
+    const tsPubKey = await this.accountInfoRepository.findOneOrFail({
+      select: ['tsPubKeyX', 'tsPubKeyY'],
+      where: {
+        accountId: accountId,
+      },
+    });
+    return [tsPubKey.tsPubKeyX, tsPubKey.tsPubKeyY];
   }
 
   async doTransaction(req: TransactionInfo): Promise<TsRollupCircuitInputItemType> {
@@ -578,18 +602,18 @@ export class SequencerConsumer {
         case TsTxType.WITHDRAW:
           inputs = await this.doWithdraw(req);
           break;
-        // case TsTxType.SecondLimitOrder:
-        //   inputs = await this.doSecondLimitOrder(req);
-        //   break;
-        // case TsTxType.SecondLimitStart:
-        //   inputs = await this.doSecondLimitStart(req);
-        //   break;
-        // case TsTxType.SecondLimitExchange:
-        //   inputs = await this.doSecondLimitExchange(req);
-        //   break;
-        // case TsTxType.SecondLimitEnd:
-        //   inputs = await this.doSecondLimitEnd(req);
-        //   break;
+        case TsTxType.SecondLimitOrder:
+          inputs = await this.doSecondLimitOrder(req);
+          break;
+        case TsTxType.SecondLimitStart:
+          inputs = await this.doSecondLimitStart(req);
+          break;
+        case TsTxType.SecondLimitExchange:
+          inputs = await this.doSecondLimitExchange(req);
+          break;
+        case TsTxType.SecondLimitEnd:
+          inputs = await this.doSecondLimitEnd(req);
+          break;
         case TsTxType.NOOP:
           inputs = await this.doNoop();
           break;
@@ -620,330 +644,336 @@ export class SequencerConsumer {
     }
   }
 
-  // private async doSecondLimitOrder(req: TransactionInfo): Promise<TsRollupCircuitInputItemType> {
-  //   const accountId = BigInt(req.accountId);
-  //   const reqData: CircuitReqDataType = [
-  //     BigInt(TsTxType.SecondLimitOrder),
-  //     BigInt(req.accountId),
-  //     BigInt(req.tokenAddr),
-  //     BigInt(req.amount),
-  //     BigInt(req.nonce),
-  //     0n,
-  //     0n,
-  //     BigInt(req.arg2),
-  //     BigInt(req.arg3),
-  //     0n,
-  //   ];
-  //   const from = await this.getAccount(req.accountId);
-  //   if (!from) {
-  //     throw new Error(`account not found L2Addr=${from}`);
-  //   }
-  //   const newNonce = BigInt(from.nonce) + 1n;
-  //   const tokenAddr = req.tokenAddr;
+  private async doSecondLimitOrder(req: TransactionInfo): Promise<TsRollupCircuitInputItemType> {
+    const accountLeafId = (req.accountId);
+    const reqData: TsTxRequestDatasType = [
+      BigInt(TsTxType.SecondLimitOrder),
+      BigInt(req.accountId),
+      BigInt(req.tokenAddr),
+      BigInt(req.amount),
+      BigInt(req.nonce),
+      0n,
+      0n,
+      BigInt(req.arg2),
+      BigInt(req.arg3),
+      0n,
+    ];
+    const from = await this.getAccount(accountLeafId);
+    if (!from) {
+      throw new Error(`account not found L2Addr=${from}`);
+    }
+    const newNonce = BigInt(from.nonce) + 1n;
+    const tokenAddr = req.tokenAddr;
 
-  //   this.accountAndTokenBeforeUpdate(req.accountId, tokenAddr);
-  //   this.updateAccountToken(accountId, tokenAddr, -BigInt(req.amount), BigInt(req.amount));
-  //   this.updateAccountNonce(accountId, newNonce);
-  //   this.accountAndTokenAfterUpdate(req.accountId, tokenAddr);
+    await this.accountAndTokenBeforeUpdate(accountLeafId, tokenAddr);
+    await this.updateAccountToken(accountLeafId, tokenAddr, -BigInt(req.amount), BigInt(req.amount));
+    await this.updateAccountNonce(accountLeafId, newNonce);
+    await this.accountAndTokenAfterUpdate(accountLeafId, tokenAddr);
 
-  //   this.accountAndTokenBeforeUpdate(req.accountId, tokenAddr);
-  //   this.accountAndTokenAfterUpdate(req.accountId, tokenAddr);
+    await this.accountAndTokenBeforeUpdate(accountLeafId, tokenAddr);
+    await this.accountAndTokenAfterUpdate(accountLeafId, tokenAddr);
 
-  //   const orderLeafId = this.currentOrderId;
-  //   const txId = this.latestTxId;
+    const orderLeafId = this.obsOrderTreeService.currentOrderId.toString();
+    const txId = this.latestTxId;
   
-  //   const order = new ObsOrderLeaf(
-  //     txId,
-  //     req.reqType as TsTxType,
-  //     req.accountId,
-  //     req.tokenId,
-  //     req.amount,
-  //     req.nonce,
-  //     req.arg2,
-  //     req.arg3,
-  //     0n,
-  //     0n,
-  //   );
-  //   console.log({
-  //     add: order,
-  //   });
-  //   this.orderBeforeUpdate(orderLeafId);
-  //   this.addObsOrder(order);
-  //   // await this.addAuctionOrder(req.reqType, txId, req as unknown as TsTxAuctionLendRequest | TsTxAuctionBorrowRequest);
-  //   this.orderAfterUpdate(orderLeafId);
+    const order: UpdateObsOrderTreeDto = {
+      orderLeafId,
+      txId: txId.toString(),
+      reqType: req.reqType.toString(),
+      sender: accountLeafId,
+      sellTokenId: req.tokenAddr,
+      sellAmt: req.amount,
+      nonce: req.nonce,
+      buyTokenId: req.arg2,
+      buyAmt: req.arg3,
+      accumulatedSellAmt: '0',
+      accumulatedBuyAmt: '0'
+    };
+    console.log({
+      doSecondLimitOrder: order,
+    });
+    await this.orderBeforeUpdate(orderLeafId);
+    this.addObsOrder(order);
+    // await this.addAuctionOrder(req.reqType, txId, req as unknown as TsTxAuctionLendRequest | TsTxAuctionBorrowRequest);
+    await this.orderAfterUpdate(orderLeafId);
 
-  //   const { r_chunks_bigint, o_chunks_bigint, isCriticalChunk } = this.getTxChunks(req);
+    const { r_chunks_bigint, o_chunks_bigint, isCriticalChunk } = this.getTxChunks(req);
+    const tsPubKey = await this.getTsPubKey(accountLeafId);
+    const tx = {
+      reqData,
+      tsPubKey, // Deposit tx not need signature
+      sigR: req.eddsaSig.R8,
+      sigS: req.eddsaSig.S,
 
-  //   const tx = {
-  //     reqData,
-  //     // tsPubKey: from.tsPubKey, // Deposit tx not need signature
-  //     sigR: req.eddsaSig.R8,
-  //     sigS: req.eddsaSig.S,
+      // chunkSize * MaxTokenUnitsPerReq
+      r_chunks: r_chunks_bigint,
+      // TODO: handle reach o_chunks max length
+      o_chunks: o_chunks_bigint,
+      isCriticalChunk,
+      ...this.currentAccountPayload,
+      ...this.currentOrderPayload,
+    };
 
-  //     // chunkSize * MaxTokenUnitsPerReq
-  //     r_chunks: r_chunks_bigint,
-  //     // TODO: handle reach o_chunks max length
-  //     o_chunks: o_chunks_bigint,
-  //     isCriticalChunk,
-  //     ...this.currentAccountPayload,
-  //     ...this.currentOrderPayload,
-  //   };
+    this.addTxLogs(tx);
+    return tx as unknown as TsRollupCircuitInputItemType;
+  }
 
-  //   this.addTxLogs(tx);
-  //   return tx as unknown as TsRollupCircuitInputItemType;
-  // }
+  private currentHoldTakerOrder: ObsOrderLeafEntity | null = null;
+  async doSecondLimitStart(req: TransactionInfo) {
+    const reqData: TsTxRequestDatasType = [BigInt(TsTxType.SecondLimitStart), 0n, 0n, 0n, 0n, 0n, 0n, 0n, 0n, BigInt(req.arg4)];
+    const orderLeafId = req.arg4;
+    const order = await this.getObsOrder(orderLeafId);
+    if (!order) {
+      throw new Error(`doCancelOrder: order not found orderLeafId=${orderLeafId}`);
+    }
+    if (order.sender === '0') {
+      throw new Error(`doCancelOrder: order not found orderLeafId=${orderLeafId} (order.sender=0)`);
+    }
+    this.currentHoldTakerOrder = order;
+    const from = await this.getAccount(order.sender);
+    if (!from) {
+      throw new Error(`account not found L2Addr=${from}`);
+    }
+    const sellTokenId = order.sellTokenId.toString() as TsTokenAddress;
 
-  // private currentHoldTakerOrder: ObsOrderLeaf | null = null;
-  // doSecondLimitStart(req: TransactionInfo) {
-  //   const reqData: CircuitReqDataType = [BigInt(TsTxType.SecondLimitStart), 0n, 0n, 0n, 0n, 0n, 0n, 0n, 0n, req.arg4];
-  //   const orderLeafId = Number(req.arg4);
-  //   const order = this.getObsOrder(orderLeafId);
-  //   if (!order) {
-  //     throw new Error(`doCancelOrder: order not found orderLeafId=${orderLeafId}`);
-  //   }
-  //   if (order.sender === 0n) {
-  //     throw new Error(`doCancelOrder: order not found orderLeafId=${orderLeafId} (order.sender=0)`);
-  //   }
-  //   this.currentHoldTakerOrder = order;
-  //   const from = this.getAccount(order.sender);
-  //   if (!from) {
-  //     throw new Error(`account not found L2Addr=${from}`);
-  //   }
-  //   const sellTokenId = order.sellTokenId.toString() as TsTokenAddress;
+    await this.accountAndTokenBeforeUpdate(order.sender, sellTokenId);
+    await this.accountAndTokenAfterUpdate(order.sender, sellTokenId);
+    await this.accountAndTokenBeforeUpdate(order.sender, sellTokenId);
+    await this.accountAndTokenAfterUpdate(order.sender, sellTokenId);
 
-  //   this.accountAndTokenBeforeUpdate(order.sender, sellTokenId);
-  //   this.accountAndTokenAfterUpdate(order.sender, sellTokenId);
-  //   this.accountAndTokenBeforeUpdate(order.sender, sellTokenId);
-  //   this.accountAndTokenAfterUpdate(order.sender, sellTokenId);
+    await this.orderBeforeUpdate(orderLeafId);
+    this.removeObsOrder(orderLeafId);
+    await this.orderAfterUpdate(orderLeafId);
 
-  //   this.orderBeforeUpdate(orderLeafId);
-  //   this.removeObsOrder(orderLeafId);
-  //   this.orderAfterUpdate(orderLeafId);
+    const txId = this.latestTxId;
+    const orderTxId = BigInt(order.txId?.toString() || '0');
+    const { r_chunks_bigint, o_chunks_bigint, isCriticalChunk } = this.getTxChunks(req, {
+      txOffset: txId - orderTxId,
+      makerBuyAmt: 0n,
+    });
 
-  //   const txId = this.latestTxId;
-  //   const { r_chunks_bigint, o_chunks_bigint, isCriticalChunk } = this.getTxChunks(req, {
-  //     txOffset: txId - order.txId,
-  //     makerBuyAmt: 0n,
-  //   });
+    const tsPubKey = await this.getTsPubKey(req.accountId);
+    const tx = {
+      reqData,
+      tsPubKey, // Deposit tx not need signature
+      sigR: ['0', '0'],
+      sigS: '0',
 
-  //   const tx = {
-  //     reqData,
-  //     tsPubKey: from.tsPubKey, // Deposit tx not need signature
-  //     sigR: ['0', '0'],
-  //     sigS: '0',
+      r_chunks: r_chunks_bigint,
+      o_chunks: o_chunks_bigint,
+      isCriticalChunk,
+      ...this.currentAccountPayload,
+      ...this.currentOrderPayload,
+    };
 
-  //     r_chunks: r_chunks_bigint,
-  //     o_chunks: o_chunks_bigint,
-  //     isCriticalChunk,
-  //     ...this.currentAccountPayload,
-  //     ...this.currentOrderPayload,
-  //   };
+    this.addTxLogs(tx);
+    return tx as unknown as TsRollupCircuitInputItemType;
+  }
+  async doSecondLimitExchange(req: TransactionInfo) {
+    const reqData: TsTxRequestDatasType = [BigInt(TsTxType.SecondLimitExchange), 0n, 0n, 0n, 0n, 0n, 0n, 0n, 0n, BigInt(req.arg4)];
+    const orderLeafId = req.arg4;
+    const makerOrder = await this.getObsOrder(req.arg4);
+    if (!makerOrder) {
+      throw new Error(`doCancelOrder: order not found orderLeafId=${orderLeafId}`);
+    }
+    if (makerOrder.sender === '0') {
+      throw new Error(`doCancelOrder: order not found orderLeafId=${orderLeafId} (order.sender=0)`);
+    }
+    const makerAcc = await this.getAccount(makerOrder.sender);
+    if (!makerAcc) {
+      throw new Error(`account not found L2Addr=${makerOrder.sender}`);
+    }
+    const sellTokenId = makerOrder.sellTokenId.toString() as TsTokenAddress;
+    const buyTokenId = makerOrder.buyTokenId.toString() as TsTokenAddress;
+    const accumulatedBuyAmt = BigInt(req.accumulatedBuyAmt);
+    const accumulatedSellAmt = BigInt(req.accumulatedSellAmt);
 
-  //   this.addTxLogs(tx);
-  //   return tx as unknown as TsRollupCircuitInputItemType;
-  // }
-  // doSecondLimitExchange(req: TransactionInfo) {
-  //   const reqData: CircuitReqDataType = [BigInt(TsTxType.SecondLimitExchange), 0n, 0n, 0n, 0n, 0n, 0n, 0n, 0n, req.arg4];
-  //   const orderLeafId = Number(req.arg4);
-  //   const makerOrder = this.getObsOrder(orderLeafId);
-  //   if (!makerOrder) {
-  //     throw new Error(`doCancelOrder: order not found orderLeafId=${orderLeafId}`);
-  //   }
-  //   if (makerOrder.sender === 0n) {
-  //     throw new Error(`doCancelOrder: order not found orderLeafId=${orderLeafId} (order.sender=0)`);
-  //   }
-  //   const makerAcc = this.getAccount(makerOrder.sender);
-  //   if (!makerAcc) {
-  //     throw new Error(`account not found L2Addr=${makerOrder.sender}`);
-  //   }
-  //   const sellTokenId = makerOrder.sellTokenId.toString() as TsTokenAddress;
-  //   const buyTokenId = makerOrder.buyTokenId.toString() as TsTokenAddress;
+    this.accountBeforeUpdate(makerOrder.sender);
 
-  //   console.log({
-  //     makerOrder,
-  //     makerOrderAmout: makerOrder.sellAmt,
-  //     makerOrderBuyAmout: makerOrder.buyAmt,
-  //     makerOrderAccumulated: req.accumulatedSellAmt,
-  //   });
-  //   this.accountBeforeUpdate(makerOrder.sender);
+    this.tokenBeforeUpdate(makerOrder.sender, buyTokenId);
+    await this.updateAccountToken(makerAcc.leafId, buyTokenId, accumulatedBuyAmt, 0n);
+    this.tokenAfterUpdate(makerOrder.sender, buyTokenId);
 
-  //   this.tokenBeforeUpdate(makerOrder.sender, buyTokenId);
-  //   this.updateAccountToken(makerAcc.L2Address, buyTokenId, req.accumulatedBuyAmt, 0n);
-  //   this.tokenAfterUpdate(makerOrder.sender, buyTokenId);
+    this.tokenBeforeUpdate(makerOrder.sender, sellTokenId);
+    await this.updateAccountToken(makerAcc.leafId, sellTokenId, 0n, -accumulatedSellAmt);
+    this.tokenAfterUpdate(makerOrder.sender, sellTokenId);
 
-  //   this.tokenBeforeUpdate(makerOrder.sender, sellTokenId);
-  //   this.updateAccountToken(makerAcc.L2Address, sellTokenId, 0n, -req.accumulatedSellAmt);
-  //   this.tokenAfterUpdate(makerOrder.sender, sellTokenId);
+    this.accountAfterUpdate(makerOrder.sender);
 
-  //   this.accountAfterUpdate(makerOrder.sender);
+    this.accountBeforeUpdate(makerOrder.sender);
+    this.accountAfterUpdate(makerOrder.sender);
 
-  //   this.accountBeforeUpdate(makerOrder.sender);
-  //   this.accountAfterUpdate(makerOrder.sender);
+    await this.orderBeforeUpdate(orderLeafId);
+    makerOrder.accumulatedSellAmt = (BigInt(makerOrder.accumulatedSellAmt) + accumulatedSellAmt).toString();
+    makerOrder.accumulatedBuyAmt = (BigInt(makerOrder.accumulatedBuyAmt) + accumulatedBuyAmt).toString();
+    const isAllSellAmtMatched = makerOrder.accumulatedSellAmt === makerOrder.sellAmt;
+    if (isAllSellAmtMatched) {
+      this.removeObsOrder(orderLeafId);
+    } else {
+      this.updateObsOrder(makerOrder.convertToObsOrderDto());
+    }
+    await this.orderAfterUpdate(orderLeafId);
 
-  //   this.orderBeforeUpdate(orderLeafId);
-  //   makerOrder.accumulatedSellAmt += req.accumulatedSellAmt;
-  //   makerOrder.accumulatedBuyAmt += req.accumulatedBuyAmt;
-  //   const isAllSellAmtMatched = makerOrder.accumulatedSellAmt === makerOrder.sellAmt;
-  //   if (isAllSellAmtMatched) {
-  //     this.removeObsOrder(orderLeafId);
-  //   } else {
-  //     this.updateObsOrder(makerOrder);
-  //   }
-  //   this.orderAfterUpdate(orderLeafId);
+    const txId = this.latestTxId;
+    const orderTxId = BigInt(makerOrder.txId?.toString() || '0');
+    const { r_chunks_bigint, o_chunks_bigint, isCriticalChunk } = this.getTxChunks(req, {
+      txOffset: txId - orderTxId,
+      makerBuyAmt: BigInt(makerOrder.buyAmt),
+    });
+    const tsPubKey = await this.getTsPubKey(makerAcc.leafId);
+    const tx = {
+      reqData,
+      tsPubKey, // Deposit tx not need signature
+      sigR: ['0', '0'],
+      sigS: '0',
 
-  //   const txId = this.latestTxId;
-  //   const { r_chunks_bigint, o_chunks_bigint, isCriticalChunk } = this.getTxChunks(req, {
-  //     txOffset: txId - makerOrder.txId,
-  //     makerBuyAmt: makerOrder.buyAmt,
-  //   });
+      r_chunks: r_chunks_bigint,
+      o_chunks: o_chunks_bigint,
+      isCriticalChunk,
+      ...this.currentAccountPayload,
+      ...this.currentOrderPayload,
+    };
 
-  //   const tx = {
-  //     reqData,
-  //     tsPubKey: makerAcc.tsPubKey, // Deposit tx not need signature
-  //     sigR: ['0', '0'],
-  //     sigS: '0',
+    this.addTxLogs(tx);
+    return tx as unknown as TsRollupCircuitInputItemType;
+  }
+  async doSecondLimitEnd(req: TransactionInfo) {
+    assert(!!this.currentHoldTakerOrder, 'doSecondLimitEnd: currentHoldTakerOrder is null');
+    const reqData: TsTxRequestDatasType = [BigInt(TsTxType.SecondLimitEnd), 0n, 0n, 0n, 0n, 0n, 0n, 0n, 0n, BigInt(req.arg4)];
+    const orderLeafId = req.arg4;
+    assert(orderLeafId === this.currentHoldTakerOrder.orderLeafId, 'doSecondLimitEnd: orderLeafId not match');
+    const takerOrder = this.currentHoldTakerOrder;
+    if (!takerOrder) {
+      throw new Error(`doSecondLimitEnd: order not found orderLeafId=${orderLeafId}`);
+    }
+    if (takerOrder.sender === '0') {
+      throw new Error(`doSecondLimitEnd: order not found orderLeafId=${orderLeafId} (order.sender=0)`);
+    }
+    const takerAcc = await this.getAccount(takerOrder.sender);
+    if (!takerAcc) {
+      throw new Error(`account not found L2Addr=${takerOrder.sender}`);
+    }
+    const sellTokenId = takerOrder.sellTokenId.toString() as TsTokenAddress;
+    const buyTokenId = takerOrder.buyTokenId.toString() as TsTokenAddress;
+    const accumulatedBuyAmt = BigInt(req.accumulatedBuyAmt);
+    const accumulatedSellAmt = BigInt(req.accumulatedSellAmt);
 
-  //     r_chunks: r_chunks_bigint,
-  //     o_chunks: o_chunks_bigint,
-  //     isCriticalChunk,
-  //     ...this.currentAccountPayload,
-  //     ...this.currentOrderPayload,
-  //   };
+    this.accountBeforeUpdate(takerOrder.sender);
 
-  //   this.addTxLogs(tx);
-  //   return tx as unknown as TsRollupCircuitInputItemType;
-  // }
-  // doSecondLimitEnd(req: TransactionInfo) {
-  //   assert(!!this.currentHoldTakerOrder, 'doSecondLimitEnd: currentHoldTakerOrder is null');
-  //   const reqData: CircuitReqDataType = [BigInt(TsTxType.SecondLimitEnd), 0n, 0n, 0n, 0n, 0n, 0n, 0n, 0n, req.arg4];
-  //   const orderLeafId = Number(req.arg4);
-  //   assert(orderLeafId === Number(this.currentHoldTakerOrder.orderLeafId), 'doSecondLimitEnd: orderLeafId not match');
-  //   const takerOrder = this.currentHoldTakerOrder;
-  //   if (!takerOrder) {
-  //     throw new Error(`doSecondLimitEnd: order not found orderLeafId=${orderLeafId}`);
-  //   }
-  //   if (takerOrder.sender === 0n) {
-  //     throw new Error(`doSecondLimitEnd: order not found orderLeafId=${orderLeafId} (order.sender=0)`);
-  //   }
-  //   const takerAcc = this.getAccount(takerOrder.sender);
-  //   if (!takerAcc) {
-  //     throw new Error(`account not found L2Addr=${takerOrder.sender}`);
-  //   }
-  //   const sellTokenId = takerOrder.sellTokenId.toString() as TsTokenAddress;
-  //   const buyTokenId = takerOrder.buyTokenId.toString() as TsTokenAddress;
-  //   this.accountBeforeUpdate(takerOrder.sender);
+    this.tokenBeforeUpdate(takerOrder.sender, buyTokenId);
+    await this.updateAccountToken(takerAcc.leafId, buyTokenId, accumulatedBuyAmt, 0n);
+    this.tokenAfterUpdate(takerOrder.sender, buyTokenId);
 
-  //   this.tokenBeforeUpdate(takerOrder.sender, buyTokenId);
-  //   this.updateAccountToken(takerAcc.L2Address, buyTokenId, req.accumulatedBuyAmt, 0n);
-  //   this.tokenAfterUpdate(takerOrder.sender, buyTokenId);
+    this.tokenBeforeUpdate(takerOrder.sender, sellTokenId);
+    await this.updateAccountToken(takerAcc.leafId, sellTokenId, 0n, -accumulatedSellAmt);
+    this.tokenAfterUpdate(takerOrder.sender, sellTokenId);
 
-  //   this.tokenBeforeUpdate(takerOrder.sender, sellTokenId);
-  //   this.updateAccountToken(takerAcc.L2Address, sellTokenId, 0n, -req.accumulatedSellAmt);
-  //   this.tokenAfterUpdate(takerOrder.sender, sellTokenId);
+    this.accountAfterUpdate(takerOrder.sender);
 
-  //   this.accountAfterUpdate(takerOrder.sender);
+    this.accountBeforeUpdate(takerOrder.sender);
+    this.accountAfterUpdate(takerOrder.sender);
 
-  //   this.accountBeforeUpdate(takerOrder.sender);
-  //   this.accountAfterUpdate(takerOrder.sender);
+    await this.orderBeforeUpdate(orderLeafId);
+    takerOrder.accumulatedSellAmt = (BigInt(takerOrder.accumulatedSellAmt) + accumulatedSellAmt).toString();
+    takerOrder.accumulatedBuyAmt = (BigInt(takerOrder.accumulatedBuyAmt) + accumulatedBuyAmt).toString();
+    const isAllSellAmtMatched = takerOrder.accumulatedSellAmt === takerOrder.sellAmt;
+    if (isAllSellAmtMatched) {
+      this.removeObsOrder(orderLeafId);
+    } else {
+      this.updateObsOrder(takerOrder.convertToObsOrderDto());
+    }
+    await this.orderAfterUpdate(orderLeafId);
 
-  //   this.orderBeforeUpdate(orderLeafId);
-  //   takerOrder.accumulatedSellAmt += req.accumulatedSellAmt;
-  //   takerOrder.accumulatedBuyAmt += req.accumulatedBuyAmt;
-  //   const isAllSellAmtMatched = takerOrder.accumulatedSellAmt === takerOrder.sellAmt;
-  //   if (isAllSellAmtMatched) {
-  //     this.removeObsOrder(orderLeafId);
-  //   } else {
-  //     this.updateObsOrder(takerOrder);
-  //   }
-  //   this.orderAfterUpdate(orderLeafId);
+    const txId = this.latestTxId;
+    const orderTxId = BigInt(takerOrder.txId?.toString() || '0');
+    const { r_chunks_bigint, o_chunks_bigint, isCriticalChunk } = this.getTxChunks(req, {
+      txOffset: txId - orderTxId,
+      makerBuyAmt: 0n,
+    });
 
-  //   const txId = this.latestTxId;
-  //   const { r_chunks_bigint, o_chunks_bigint, isCriticalChunk } = this.getTxChunks(req, {
-  //     txOffset: txId - takerOrder.txId,
-  //     makerBuyAmt: 0n,
-  //   });
+    this.currentHoldTakerOrder = null;
+    const tsPubKey = await this.getTsPubKey(takerAcc.leafId);
 
-  //   this.currentHoldTakerOrder = null;
-  //   const tx = {
-  //     reqData,
-  //     tsPubKey: takerAcc.tsPubKey, // Deposit tx not need signature
-  //     sigR: ['0', '0'],
-  //     sigS: '0',
+    const tx = {
+      reqData,
+      tsPubKey, // Deposit tx not need signature
+      sigR: ['0', '0'],
+      sigS: '0',
 
-  //     r_chunks: r_chunks_bigint,
-  //     o_chunks: o_chunks_bigint,
-  //     isCriticalChunk,
-  //     ...this.currentAccountPayload,
-  //     ...this.currentOrderPayload,
-  //   };
+      r_chunks: r_chunks_bigint,
+      o_chunks: o_chunks_bigint,
+      isCriticalChunk,
+      ...this.currentAccountPayload,
+      ...this.currentOrderPayload,
+    };
 
-  //   this.addTxLogs(tx);
-  //   return tx as unknown as TsRollupCircuitInputItemType;
-  // }
+    this.addTxLogs(tx);
+    return tx as unknown as TsRollupCircuitInputItemType;
+  }
 
-  // doCancelOrder(req: TransactionInfo) {
-  //   const orderLeafId = req.arg4;
-  //   const reqData: CircuitReqDataType = [BigInt(TsTxType.CancelOrder), 0n, 0n, 0n, 0n, req.arg0, orderLeafId, 0n, 0n, 0n];
-  //   const order = this.getObsOrder(Number(orderLeafId));
-  //   if (!order) {
-  //     throw new Error(`doCancelOrder: order not found orderLeafId=${orderLeafId}`);
-  //   }
-  //   if (order.sender === 0n) {
-  //     throw new Error(`doCancelOrder: order not found orderLeafId=${orderLeafId} (order.sender=0)`);
-  //   }
-  //   const account = this.getAccount(order.sender);
-  //   if (!account) {
-  //     throw new Error(`doCancelOrder: account not found L2Addr=${order.sender}`);
-  //   }
-  //   if (req.arg0 !== account.L2Address) {
-  //     throw new Error(`doCancelOrder: account not match L2Addr=${order.sender} req.arg0=${req.arg0}`);
-  //   }
-  //   const refundTokenAddr = order.sellTokenId.toString() as TsTokenAddress;
-  //   const refundAmount = order.sellAmt - order.accumulatedSellAmt;
+  async doCancelOrder(req: TransactionInfo) {
+    const orderLeafId = req.arg4;
+    const reqData: TsTxRequestDatasType = [BigInt(TsTxType.CancelOrder), 0n, 0n, 0n, 0n, BigInt(req.arg0), BigInt(orderLeafId), 0n, 0n, 0n];
+    const order = await this.getObsOrder(orderLeafId);
+    if (!order) {
+      throw new Error(`doCancelOrder: order not found orderLeafId=${orderLeafId}`);
+    }
+    if (order.sender === '0') {
+      throw new Error(`doCancelOrder: order not found orderLeafId=${orderLeafId} (order.sender=0)`);
+    }
+    const account = await this.getAccount(order.sender);
+    if (!account) {
+      throw new Error(`doCancelOrder: account not found L2Addr=${order.sender}`);
+    }
+    if (req.arg0 !== account.leafId) {
+      throw new Error(`doCancelOrder: account not match L2Addr=${order.sender} req.arg0=${req.arg0}`);
+    }
+    const refundTokenAddr = order.sellTokenId.toString() as TsTokenAddress;
+    const refundAmount = BigInt(order.sellAmt) - BigInt(order.accumulatedSellAmt);
 
-  //   this.accountAndTokenBeforeUpdate(account.L2Address, refundTokenAddr);
-  //   this.updateAccountToken(account.L2Address, refundTokenAddr, BigInt(refundAmount), -BigInt(refundAmount));
-  //   this.accountAndTokenAfterUpdate(account.L2Address, refundTokenAddr);
-  //   this.accountAndTokenBeforeUpdate(account.L2Address, refundTokenAddr);
-  //   this.accountAndTokenAfterUpdate(account.L2Address, refundTokenAddr);
+    await this.accountAndTokenBeforeUpdate(account.leafId, refundTokenAddr);
+    await this.updateAccountToken(account.leafId, refundTokenAddr, BigInt(refundAmount), -BigInt(refundAmount));
+    await this.accountAndTokenAfterUpdate(account.leafId, refundTokenAddr);
+    await this.accountAndTokenBeforeUpdate(account.leafId, refundTokenAddr);
+    await this.accountAndTokenAfterUpdate(account.leafId, refundTokenAddr);
 
-  //   this.orderBeforeUpdate(Number(order));
-  //   this.removeObsOrder(Number(order));
-  //   this.orderAfterUpdate(Number(order));
+    await this.orderBeforeUpdate(order.orderLeafId);
+    this.removeObsOrder(order.orderLeafId);
+    await this.orderAfterUpdate(order.orderLeafId);
 
-  //   const { r_chunks_bigint, o_chunks_bigint, isCriticalChunk } = this.getTxChunks(req);
+    const { r_chunks_bigint, o_chunks_bigint, isCriticalChunk } = this.getTxChunks(req);
+    const tsPubKey = await this.getTsPubKey(account.leafId);
+    const tx = {
+      reqData,
+      tsPubKey, // Deposit tx not need signature
+      sigR: req.eddsaSig.R8,
+      sigS: req.eddsaSig.S,
 
-  //   const tx = {
-  //     reqData,
-  //     tsPubKey: account.tsPubKey, // Deposit tx not need signature
-  //     sigR: req.eddsaSig.R8,
-  //     sigS: req.eddsaSig.S,
+      // chunkSize * MaxTokenUnitsPerReq
+      r_chunks: r_chunks_bigint,
+      // TODO: handle reach o_chunks max length
+      o_chunks: o_chunks_bigint,
+      isCriticalChunk,
+      ...this.currentAccountPayload,
+      ...this.currentOrderPayload,
+    };
 
-  //     // chunkSize * MaxTokenUnitsPerReq
-  //     r_chunks: r_chunks_bigint,
-  //     // TODO: handle reach o_chunks max length
-  //     o_chunks: o_chunks_bigint,
-  //     isCriticalChunk,
-  //     ...this.currentAccountPayload,
-  //     ...this.currentOrderPayload,
-  //   };
-
-  //   this.addTxLogs(tx);
-  //   return tx as unknown as TsRollupCircuitInputItemType;
-  // }
+    this.addTxLogs(tx);
+    return tx as unknown as TsRollupCircuitInputItemType;
+  }
 
   private async doNoop() {
-    const orderLeafId = 0;
+    const orderLeafId = '0';
     const account = await this.getAccount('0');
     if (!account) {
       throw new Error('doNoop: account not found');
     }
-    this.accountAndTokenBeforeUpdate('0', TsTokenAddress.Unknown);
-    this.accountAndTokenAfterUpdate('0', TsTokenAddress.Unknown);
-    this.accountAndTokenBeforeUpdate('0', TsTokenAddress.Unknown);
-    this.accountAndTokenAfterUpdate('0', TsTokenAddress.Unknown);
-    this.orderBeforeUpdate(orderLeafId);
-    this.orderAfterUpdate(orderLeafId);
+    await this.accountAndTokenBeforeUpdate('0', TsTokenAddress.Unknown);
+    await this.accountAndTokenAfterUpdate('0', TsTokenAddress.Unknown);
+    await this.accountAndTokenBeforeUpdate('0', TsTokenAddress.Unknown);
+    await this.accountAndTokenAfterUpdate('0', TsTokenAddress.Unknown);
+    await this.orderBeforeUpdate(orderLeafId);
+    await this.orderAfterUpdate(orderLeafId);
     const tx = {
       reqData: [0n, 0n, 0n, 0n, 0n, 0n, 0n, 0n, 0n, 0n],
       tsPubKey: ['0', '0'], // Deposit tx not need signature
@@ -975,26 +1005,26 @@ export class SequencerConsumer {
       0n,
       0n,
     ];
-    const orderLeafId = 0;
+    const orderLeafId = '0';
     const depositAccount = this.getAccount(req.arg0);
     if (!depositAccount) {
       throw new Error(`Deposit account not found L2Addr=${depositL2Addr}`);
     }
     const tokenId = req.tokenId.toString() as TsTokenAddress;
 
-    this.accountAndTokenBeforeUpdate(accountLeafId, tokenId);
-    this.orderBeforeUpdate(orderLeafId);
+    await this.accountAndTokenBeforeUpdate(accountLeafId, tokenId);
+    await this.orderBeforeUpdate(orderLeafId);
 
-    this.updateAccountToken(depositL2Addr, tokenId, BigInt(req.amount), 0n);
+    await this.updateAccountToken(accountLeafId, tokenId, BigInt(req.amount), 0n);
 
-    this.accountAndTokenAfterUpdate(accountLeafId, tokenId);
-    this.orderAfterUpdate(orderLeafId);
+    await this.accountAndTokenAfterUpdate(accountLeafId, tokenId);
+    await this.orderAfterUpdate(orderLeafId);
 
     // TODO: fill left reqs
-    this.accountAndTokenBeforeUpdate(accountLeafId, tokenId);
-    this.accountAndTokenAfterUpdate(accountLeafId, tokenId);
-    // this.orderBeforeUpdate(orderLeafId);
-    // this.orderAfterUpdate(orderLeafId);
+    await this.accountAndTokenBeforeUpdate(accountLeafId, tokenId);
+    await this.accountAndTokenAfterUpdate(accountLeafId, tokenId);
+    // await this.orderBeforeUpdate(orderLeafId);
+    // await this.orderAfterUpdate(orderLeafId);
     const { r_chunks_bigint, o_chunks_bigint, isCriticalChunk } = this.getTxChunks(req);
 
     const tx = {
@@ -1037,7 +1067,7 @@ export class SequencerConsumer {
     registerAccount.leafId = registerL2Addr.toString();
     registerAccount.tsAddr = hashedTsPubKey.toString();
     // const registerAccount = new TsRollupAccount(tokenInfos, this.config.token_tree_height, [BigInt(req.tsPubKeyX), BigInt(req.tsPubKeyY)]);
-    const orderLeafId = 0;
+    const orderLeafId = '0';
     const reqData = [
       BigInt(TsTxType.REGISTER),
       BigInt(TsSystemAccountAddress.MINT_ADDR),
@@ -1050,8 +1080,8 @@ export class SequencerConsumer {
       0n,
       0n,
     ];
-    this.accountAndTokenBeforeUpdate(accountLeafId, registerTokenId);
-    this.orderBeforeUpdate(orderLeafId);
+    await this.accountAndTokenBeforeUpdate(accountLeafId, registerTokenId);
+    await this.orderBeforeUpdate(orderLeafId);
 
     /** update state */
     this.addAccount(registerL2Addr, {
@@ -1059,14 +1089,14 @@ export class SequencerConsumer {
       tsAddr: hashedTsPubKey,
     });
 
-    this.accountAndTokenAfterUpdate(accountLeafId, registerTokenId);
-    this.orderAfterUpdate(orderLeafId);
+    await this.accountAndTokenAfterUpdate(accountLeafId, registerTokenId);
+    await this.orderAfterUpdate(orderLeafId);
 
     // TODO: fill left reqs
-    this.accountAndTokenBeforeUpdate(accountLeafId, registerTokenId);
-    this.accountAndTokenAfterUpdate(accountLeafId, registerTokenId);
-    // this.orderBeforeUpdate(orderLeafId);
-    // this.orderAfterUpdate(orderLeafId);
+    await this.accountAndTokenBeforeUpdate(accountLeafId, registerTokenId);
+    await this.accountAndTokenAfterUpdate(accountLeafId, registerTokenId);
+    // await this.orderBeforeUpdate(orderLeafId);
+    // await this.orderAfterUpdate(orderLeafId);
 
     const { r_chunks_bigint, o_chunks_bigint, isCriticalChunk } = this.getTxChunks(req);
 
@@ -1091,7 +1121,7 @@ export class SequencerConsumer {
 
   private async doWithdraw(req: TransactionInfo): Promise<TsRollupCircuitInputItemType> {
     const reqData = encodeRollupWithdrawMessage(req);
-    const orderLeafId = 0;
+    const orderLeafId = '0';
     const transferL2AddrFrom = BigInt(req.accountId);
     const accountLeafId = req.accountId;
     const from = await this.getAccount(transferL2AddrFrom.toString());
@@ -1100,21 +1130,21 @@ export class SequencerConsumer {
     }
     const newNonce = BigInt(from.nonce) + 1n;
 
-    this.accountAndTokenBeforeUpdate(accountLeafId, req.tokenAddr);
-    this.updateAccountToken(transferL2AddrFrom, req.tokenAddr, -BigInt(req.amount), 0n);
-    this.updateAccountNonce(transferL2AddrFrom, newNonce);
-    this.accountAndTokenAfterUpdate(accountLeafId, req.tokenAddr);
+    await this.accountAndTokenBeforeUpdate(accountLeafId, req.tokenAddr);
+    await this.updateAccountToken(from.leafId, req.tokenAddr, -BigInt(req.amount), 0n);
+    await this.updateAccountNonce(from.leafId, newNonce);
+    await this.accountAndTokenAfterUpdate(accountLeafId, req.tokenAddr);
 
-    this.accountAndTokenBeforeUpdate(accountLeafId, req.tokenAddr);
-    this.accountAndTokenAfterUpdate(accountLeafId, req.tokenAddr);
-    this.orderBeforeUpdate(orderLeafId);
-    this.orderAfterUpdate(orderLeafId);
+    await this.accountAndTokenBeforeUpdate(accountLeafId, req.tokenAddr);
+    await this.accountAndTokenAfterUpdate(accountLeafId, req.tokenAddr);
+    await this.orderBeforeUpdate(orderLeafId);
+    await this.orderAfterUpdate(orderLeafId);
 
     const { r_chunks_bigint, o_chunks_bigint, isCriticalChunk } = this.getTxChunks(req);
-
+    const tsPubKey = await this.getTsPubKey(accountLeafId);
     const tx = {
       reqData,
-      // tsPubKey: from.tsPubKey, // Deposit tx not need signature
+      tsPubKey, // Deposit tx not need signature
       sigR: req.eddsaSig.R8,
       sigS: req.eddsaSig.S,
 

@@ -165,15 +165,15 @@ export class ObsOrderEntity {
     unique: true,
   })
   orderLeafId!: number | null;
-  @OneToOne(
-    () => ObsOrderLeafEntity,
-    (obsOrder: ObsOrderLeafEntity ) => obsOrder.obsOrder,
-  )
-  @JoinColumn({
-    name: 'id',
-    referencedColumnName: 'orderId'
-  })
-  obsOrderLeaf!: ObsOrderLeafEntity;
+  // @OneToOne(
+  //   () => ObsOrderLeafEntity,
+  //   (obsOrder: ObsOrderLeafEntity ) => obsOrder.obsOrder,
+  // )
+  // @JoinColumn({
+  //   name: 'id',
+  //   referencedColumnName: 'orderId'
+  // })
+  // obsOrderLeaf!: ObsOrderLeafEntity;
   @OneToMany(
     () => MatchObsOrderEntity,
     (matchOrders: MatchObsOrderEntity) => matchOrders.marketPair
