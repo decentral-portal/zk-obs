@@ -52,20 +52,20 @@ export class TsTokenTreeService extends TsMerkleTree<TokenLeafNode> {
     });
     console.timeEnd('updateLeaf for token tree');
   }
-  async _updateLeaf(manager: EntityManager, leafId: string, value: UpdateTokenTreeDto) {
-    const prf = this.getProofIds(leafId);
-    const id = this.getLeafIdInTree(leafId);
+  async _updateLeaf(manager: EntityManager, tokenLeafId: string, value: UpdateTokenTreeDto) {
+    const prf = this.getProofIds(tokenLeafId);
+    const id = this.getLeafIdInTree(tokenLeafId);
     const leafHashDecString = BigInt(toTreeLeaf([BigInt(value.leafId), BigInt(value.lockedAmt), BigInt(value.availableAmt)])).toString();
     const accountId = value.accountId;
     // update leaf
     await manager.upsert(TokenMerkleTreeNode, {
       accountId: accountId,
       id: id.toString(),
-      leafId: leafId.toString(),
+      leafId: tokenLeafId.toString(),
       hash: leafHashDecString
     }, ['id', 'accountId']);
     await manager.upsert(TokenLeafNode, {
-      leafId: leafId.toString(),
+      leafId: tokenLeafId.toString(),
       accountId: accountId,
       lockedAmt: value.lockedAmt,
       availableAmt: value.availableAmt
@@ -82,6 +82,17 @@ export class TsTokenTreeService extends TsMerkleTree<TokenLeafNode> {
       const iHashValue: string = (iValue == null) ? this.getDefaultHashByLevel(iLevel) : iValue.hash.toString();
       const r = (id % 2n == 0n) ? [jHashValue, iHashValue] : [iHashValue, jHashValue];
       const hashDecString = BigInt(this.hashFunc(r)).toString();
+      console.log({
+        id, value,
+        tokenLeafId,
+        i,
+        jLevel,
+        iLevel,
+        jHashValue, 
+        iHashValue,
+        height: this.treeHeigt,
+        hashDecString
+      });
       const jobs = [];
       if (iValue == null) {
         jobs.push(manager.upsert(TokenMerkleTreeNode, {

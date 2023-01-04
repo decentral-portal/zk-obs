@@ -36,7 +36,7 @@ export class TsAccountTreeService extends TsMerkleTree<AccountLeafNode>{
     return leafIdCount;
   }
   getDefaultTokenTreeRoot() {
-    return this.tokenTreeService.getDefaultRoot();
+    return BigInt(this.tokenTreeService.getDefaultRoot()).toString();
   }
   getDefaultRoot(): string {
     return this.getDefaultHashByLevel(1);
@@ -66,11 +66,11 @@ export class TsAccountTreeService extends TsMerkleTree<AccountLeafNode>{
     await manager.upsert(AccountMerkleTreeNode, {
       id: id.toString(),
       leafId: leafId,
-      hash: (toTreeLeaf([
+      hash: BigInt(toTreeLeaf([
         BigInt(newValue.tsAddr),
         BigInt(newValue.nonce),
         BigInt(newValue.tokenRoot)
-      ]))
+      ])).toString()
     }, ['id']);
     await manager.upsert(AccountLeafNode, {
       tsAddr: (newValue.tsAddr),
@@ -115,11 +115,11 @@ export class TsAccountTreeService extends TsMerkleTree<AccountLeafNode>{
     }
   }
 
-  async updateTokenLeaf(leafId: string, value: UpdateTokenTreeDto) {
+  async updateTokenLeaf(leafId: string, tokenDto: UpdateTokenTreeDto) {
     return await this.connection.transaction(async (manager) => {
-      const tokenRoot = await this.tokenTreeService._updateLeaf(manager, leafId, value);
-      await this._updateLeaf(manager, (value.accountId), {
-        leafId: value.accountId,
+      const tokenRoot = await this.tokenTreeService._updateLeaf(manager, tokenDto.leafId, tokenDto);
+      await this._updateLeaf(manager, (tokenDto.accountId), {
+        leafId: leafId,
         tokenRoot: tokenRoot.hash,
       });
     });

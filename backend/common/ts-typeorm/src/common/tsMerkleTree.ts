@@ -63,6 +63,6 @@ export abstract class TsMerkleTree<T> {
       });
       throw new Error('getDefaultHashByLevel null');
     }
-    return result;
+    return BigInt(result).toString();
   }
 }
