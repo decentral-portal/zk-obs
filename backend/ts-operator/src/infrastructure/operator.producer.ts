@@ -21,15 +21,12 @@ import { WorkerService } from '@common/cluster/worker.service';
 import { firstValueFrom } from 'rxjs/internal/firstValueFrom';
 import { AccountInformation } from '@common/ts-typeorm/account/accountInformation.entity';
 import { MessageBroker } from '@common/db-pubsub/ports/messageBroker';
-import { CHANNEL } from '@common/db-pubsub/domains/value-objects/pubSub.constants';
 import { TsWorkerName } from '@ts-sdk/constant';
 import { BullQueueInject } from '@anchan828/nest-bullmq';
 import { Queue } from 'bullmq';
 import { TsTxType } from '@ts-sdk/domain/lib/ts-types/ts-types';
-import { TsTokenAddress } from '../../../ts-sdk/src/domain/lib/ts-types/ts-types';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { TsAccountTreeService } from '@common/ts-typeorm/account/tsAccountTree.service';
-import { accountId } from '@common/rbac/domain/value-objects/accountId';
 @Injectable({
   scope: Scope.DEFAULT,
 })
