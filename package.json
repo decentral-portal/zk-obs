@@ -13,7 +13,7 @@
     "storage:layout": "hardhat storage-layout",
     "size": "hardhat size-contracts",
     "prepend-spdx": "hardhat prepend-spdx-license",
-    "deploy": "deploy.sh",
+    "deploy": "npx hardhat run scripts/deploy.ts --network localhost",
     "deploy:custom": "npx hardhat run scripts/deploy_testnet.ts --network custom",
     "deploy:all": "hardhat run scripts/deploy.ts --network",
     "verify": "hardhat verify --network",
