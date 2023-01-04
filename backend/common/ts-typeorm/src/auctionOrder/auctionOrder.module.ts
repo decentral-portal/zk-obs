@@ -29,6 +29,6 @@ import { ObsOrderTreeService } from './obsOrderTree.service';
     AvailableViewEntity
   ])],
   providers: [ConfigService, ObsOrderTreeService, MarketPairInfoService],
-  exports: [MarketPairInfoService, ObsOrderTreeService]
+  exports: [MarketPairInfoService, ObsOrderTreeService, TypeOrmModule]
 })
 export class AuctionOrderMoudle {}

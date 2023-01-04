@@ -30,6 +30,6 @@ import { TsTokenTreeService } from './tsTokenTree.service';
   ],
   providers: [TsAccountTreeService, TsTokenTreeService, ObsMerkleTreeService],
   controllers: [],
-  exports: [TsAccountTreeService, TsTokenTreeService, ObsMerkleTreeService]
+  exports: [TsAccountTreeService, TsTokenTreeService, ObsMerkleTreeService, TypeOrmModule]
 })
 export class AccountModule{}

@@ -41,6 +41,7 @@ const services: Provider[] = [
       signOptions: { expiresIn: '15m' },
     }),
     TsTypeOrmModule,
+    // TypeOrmModule.forFeature([AvailableViewEntity, AccountInformation, TokenLeafNode, AccountLeafNode, BlockInformation, TransactionInfo]),
     WebSocketModule
   ],
   providers: [

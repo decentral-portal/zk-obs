@@ -20,7 +20,7 @@ export class TsAccountTreeService extends TsMerkleTree<AccountLeafNode>{
     @InjectRepository(AccountMerkleTreeNode)
     private accountMerkleTreeRepository: Repository<AccountMerkleTreeNode>,
     private connection: Connection,
-    private readonly configService: ConfigService,
+    private configService: ConfigService,
   ) {
     console.time('create Account Tree');
     super(configService.get<number>('ACCOUNTS_TREE_HEIGHT', 32), tsHashFunc);
@@ -31,7 +31,7 @@ export class TsAccountTreeService extends TsMerkleTree<AccountLeafNode>{
     return leafIdCount;
   }
   getDefaultTokenTreeRoot() {
-    return getDefaultTokenTreeRoot(this.configService.getOrThrow<number>('TOKENS_TREE_HEIGHT'));
+    return getDefaultTokenTreeRoot(Number(`${process.env.TOKENS_TREE_HEIGHT}`));
   }
   getDefaultRoot(): string {
     return getDefaultAccountTreeRoot(this.treeHeigt, this.getDefaultTokenTreeRoot());
