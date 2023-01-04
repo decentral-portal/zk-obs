@@ -12,30 +12,30 @@ import {
   getRollupData,
   stateToCommitment,
 } from './helper/helper';
-import inputs0 from '/Users/aaronliang/Documents/TKspring/zk-obs/test/example/zkobs-p1/0_register-acc1-eth-8-8-4-8-inputs.json';
-import root0 from '/Users/aaronliang/Documents/TKspring/zk-obs/test/example/zkobs-p1/0_register-acc1-eth-8-8-4-8-commitment.json';
-import calldata0 from '/Users/aaronliang/Documents/TKspring/zk-obs/test/example/zkobs-p1/0_register-acc1-eth-8-8-4-8-calldata-raw.json';
-import inputs1 from '/Users/aaronliang/Documents/TKspring/zk-obs/test/example/zkobs-p1/1_register-acc2-usdt-8-8-4-8-inputs.json';
-import root1 from '/Users/aaronliang/Documents/TKspring/zk-obs/test/example/zkobs-p1/1_register-acc2-usdt-8-8-4-8-commitment.json';
-import calldata1 from '/Users/aaronliang/Documents/TKspring/zk-obs/test/example/zkobs-p1/1_register-acc2-usdt-8-8-4-8-calldata-raw.json';
-import inputs2 from '/Users/aaronliang/Documents/TKspring/zk-obs/test/example/zkobs-p1/2_deposit-acc1-usdt-8-8-4-8-inputs.json';
-import root2 from '/Users/aaronliang/Documents/TKspring/zk-obs/test/example/zkobs-p1/2_deposit-acc1-usdt-8-8-4-8-commitment.json';
-import calldata2 from '/Users/aaronliang/Documents/TKspring/zk-obs/test/example/zkobs-p1/2_deposit-acc1-usdt-8-8-4-8-calldata-raw.json';
-import inputs3 from '/Users/aaronliang/Documents/TKspring/zk-obs/test/example/zkobs-p1/3_deposit-acc2-eth-8-8-4-8-inputs.json';
-import root3 from '/Users/aaronliang/Documents/TKspring/zk-obs/test/example/zkobs-p1/3_deposit-acc2-eth-8-8-4-8-commitment.json';
-import calldata3 from '/Users/aaronliang/Documents/TKspring/zk-obs/test/example/zkobs-p1/3_deposit-acc2-eth-8-8-4-8-calldata-raw.json';
-import inputs4 from '/Users/aaronliang/Documents/TKspring/zk-obs/test/example/zkobs-p1/4_withdraw-acc1-eth-8-8-4-8-inputs.json';
-import root4 from '/Users/aaronliang/Documents/TKspring/zk-obs/test/example/zkobs-p1/4_withdraw-acc1-eth-8-8-4-8-commitment.json';
-import calldata4 from '/Users/aaronliang/Documents/TKspring/zk-obs/test/example/zkobs-p1/4_withdraw-acc1-eth-8-8-4-8-calldata-raw.json';
-import inputs5 from '/Users/aaronliang/Documents/TKspring/zk-obs/test/example/zkobs-p1/5_order-acc1-eth2usdt-8-8-4-8-inputs.json';
-import root5 from '/Users/aaronliang/Documents/TKspring/zk-obs/test/example/zkobs-p1/5_order-acc1-eth2usdt-8-8-4-8-commitment.json';
-import calldata5 from '/Users/aaronliang/Documents/TKspring/zk-obs/test/example/zkobs-p1/5_order-acc1-eth2usdt-8-8-4-8-calldata-raw.json';
-import inputs6 from '/Users/aaronliang/Documents/TKspring/zk-obs/test/example/zkobs-p1/6_order-acc2-usdt2eth-8-8-4-8-inputs.json';
-import root6 from '/Users/aaronliang/Documents/TKspring/zk-obs/test/example/zkobs-p1/6_order-acc2-usdt2eth-8-8-4-8-commitment.json';
-import calldata6 from '/Users/aaronliang/Documents/TKspring/zk-obs/test/example/zkobs-p1/6_order-acc2-usdt2eth-8-8-4-8-calldata-raw.json';
-import inputs7 from '/Users/aaronliang/Documents/TKspring/zk-obs/test/example/zkobs-p1/7_order-acc2-usdt2eth-8-8-4-8-inputs.json';
-import root7 from '/Users/aaronliang/Documents/TKspring/zk-obs/test/example/zkobs-p1/7_order-acc2-usdt2eth-8-8-4-8-commitment.json';
-import calldata7 from '/Users/aaronliang/Documents/TKspring/zk-obs/test/example/zkobs-p1/7_order-acc2-usdt2eth-8-8-4-8-calldata-raw.json';
+import inputs0 from './example/zkobs-p1/0_register-acc1-eth-8-8-4-8-inputs.json';
+import root0 from './example/zkobs-p1/0_register-acc1-eth-8-8-4-8-commitment.json';
+import calldata0 from './example/zkobs-p1/0_register-acc1-eth-8-8-4-8-calldata-raw.json';
+import inputs1 from './example/zkobs-p1/1_register-acc2-usdt-8-8-4-8-inputs.json';
+import root1 from './example/zkobs-p1/1_register-acc2-usdt-8-8-4-8-commitment.json';
+import calldata1 from './example/zkobs-p1/1_register-acc2-usdt-8-8-4-8-calldata-raw.json';
+import inputs2 from './example/zkobs-p1/2_deposit-acc1-usdt-8-8-4-8-inputs.json';
+import root2 from './example/zkobs-p1/2_deposit-acc1-usdt-8-8-4-8-commitment.json';
+import calldata2 from './example/zkobs-p1/2_deposit-acc1-usdt-8-8-4-8-calldata-raw.json';
+import inputs3 from './example/zkobs-p1/3_deposit-acc2-eth-8-8-4-8-inputs.json';
+import root3 from './example/zkobs-p1/3_deposit-acc2-eth-8-8-4-8-commitment.json';
+import calldata3 from './example/zkobs-p1/3_deposit-acc2-eth-8-8-4-8-calldata-raw.json';
+import inputs4 from './example/zkobs-p1/4_withdraw-acc1-eth-8-8-4-8-inputs.json';
+import root4 from './example/zkobs-p1/4_withdraw-acc1-eth-8-8-4-8-commitment.json';
+import calldata4 from './example/zkobs-p1/4_withdraw-acc1-eth-8-8-4-8-calldata-raw.json';
+import inputs5 from './example/zkobs-p1/5_order-acc1-eth2usdt-8-8-4-8-inputs.json';
+import root5 from './example/zkobs-p1/5_order-acc1-eth2usdt-8-8-4-8-commitment.json';
+import calldata5 from './example/zkobs-p1/5_order-acc1-eth2usdt-8-8-4-8-calldata-raw.json';
+import inputs6 from './example/zkobs-p1/6_order-acc2-usdt2eth-8-8-4-8-inputs.json';
+import root6 from './example/zkobs-p1/6_order-acc2-usdt2eth-8-8-4-8-commitment.json';
+import calldata6 from './example/zkobs-p1/6_order-acc2-usdt2eth-8-8-4-8-calldata-raw.json';
+import inputs7 from './example/zkobs-p1/7_order-acc2-usdt2eth-8-8-4-8-inputs.json';
+import root7 from './example/zkobs-p1/7_order-acc2-usdt2eth-8-8-4-8-commitment.json';
+import calldata7 from './example/zkobs-p1/7_order-acc2-usdt2eth-8-8-4-8-calldata-raw.json';
 
 describe('Unit test of rollup', function () {
   enum OpType {

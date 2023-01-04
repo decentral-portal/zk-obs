@@ -4,7 +4,7 @@ import { ERC20FreeMint } from '../typechain-types/contracts/ERC20FreeMint';
 import { ZkOBS } from '../typechain-types/contracts/ZkOBS';
 import { BigNumber } from 'ethers';
 import { poseidon } from '@big-whale-labs/poseidon';
-import initStates from '/Users/aaronliang/Documents/TKspring/zk-obs/test/example/zkobs-p1/initStates.json';
+import initStates from './example/zkobs-p1/initStates.json';
 const circomlibjs = require('circomlibjs');
 const { createCode, generateABI } = circomlibjs.poseidonContract;
 

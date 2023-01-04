@@ -24,6 +24,7 @@ import { getDefaultAccountLeafMessage, getDefaultObsOrderLeafMessage, getDefault
 import { AccountInformation } from '@common/ts-typeorm/account/accountInformation.entity';
 import { UpdateObsOrderTreeDto } from '@common/ts-typeorm/auctionOrder/dto/updateObsOrderTree.dto';
 import { BLOCK_STATUS } from '@common/ts-typeorm/account/blockStatus.enum';
+import { ObsOrderEntity } from '@common/ts-typeorm/auctionOrder/obsOrder.entity';
 
 const DefaultRollupConfig: TsRollupConfigType = {
   order_tree_height: 8,
@@ -92,6 +93,8 @@ export class SequencerConsumer {
     private accountLeafNodeRepository: Repository<AccountLeafNode>,
     @InjectRepository(AccountInformation)
     private accountInfoRepository: Repository<AccountInformation>,
+    @InjectRepository(ObsOrderEntity)
+    private obsOrderRepository: Repository<ObsOrderEntity>,
     private readonly tsAccountTreeService: TsAccountTreeService,  
     private readonly tsTokenTreeService: TsTokenTreeService,
     private readonly obsOrderTreeService: ObsOrderTreeService,
@@ -535,6 +538,11 @@ export class SequencerConsumer {
     //   throw new Error('addObsOrder: orderLeafId should be 0');
     // }
     // order.orderLeafId = this.obsOrderTreeService.currentOrderId.toString();
+    this.obsOrderRepository.update({
+      txId: Number(order.txId),
+    }, {
+      orderLeafId: Number(order.orderLeafId),
+    });
     this.obsOrderTreeService.updateLeaf(order.orderLeafId, order);
     this.obsOrderTreeService.addCurrentOrderId();
   }
