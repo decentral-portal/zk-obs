@@ -89,7 +89,7 @@ export class TsAccountTreeService extends TsMerkleTree<AccountLeafNode>{
       const jHashValue: string = (jValue == null) ? this.getDefaultHashByLevel(jLevel) : jValue.hash.toString();
       const iHashValue: string = (iValue == null) ? this.getDefaultHashByLevel(iLevel) : iValue.hash.toString();
       const r = (id % 2n == 0n) ? [jHashValue, iHashValue] : [iHashValue, jHashValue];
-      const hash = this.hashFunc(r);
+      const hashDecString = BigInt(this.hashFunc(r)).toString();
       const jobs = [];
       if (iValue == null) {
         jobs.push(manager.upsert(AccountMerkleTreeNode, {
@@ -107,7 +107,7 @@ export class TsAccountTreeService extends TsMerkleTree<AccountLeafNode>{
       if (updateRoot >= 1n) {
         jobs.push(manager.upsert(AccountMerkleTreeNode, {
           id: updateRoot.toString(),
-          hash: (hash)
+          hash: hashDecString,
         }, ['id']));
       }
       await Promise.all(jobs);
@@ -143,14 +143,14 @@ export class TsAccountTreeService extends TsMerkleTree<AccountLeafNode>{
       id: 1n.toString(),
     });
     if (result == null) {
-      const hash = await this.getDefaultHashByLevel(1);
+      const hashDecString = BigInt(this.getDefaultHashByLevel(1)).toString();
       await this.accountMerkleTreeRepository.insert({
         id: 1n.toString(),
-        hash: (hash)
+        hash: hashDecString
       });
       return {
         id: 1n.toString(),
-        hash: hash
+        hash: hashDecString
       };
     }
     return result;  
@@ -164,14 +164,14 @@ export class TsAccountTreeService extends TsMerkleTree<AccountLeafNode>{
     const id = this.getLeafIdInTree(leafId);
     const level = Math.floor(Math.log2(Number(id)));
     // TODO: check register evemt has tokenInfo
-    const hash = this.getDefaultHashByLevel(level);
+    const hashDecString = BigInt(this.getDefaultHashByLevel(level)).toString();
     // setup transaction
     await this.connection.transaction(async (manager) => {
       // insert this null hash on this node
       await manager.insert(AccountMerkleTreeNode, {
         leafId: leafId,
         id: id.toString(),
-        hash: (hash)
+        hash: hashDecString,
       });
       await manager.insert(AccountLeafNode, {
         leafId: leafId.toString(),

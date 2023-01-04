@@ -74,7 +74,7 @@ export class ObsOrderTreeService extends TsMerkleTree<ObsOrderLeafEntity> {
         const jHashValue: string = (jValue == null)? this.getDefaultHashByLevel(jLevel): jValue.hash.toString();
         const iHashValue: string = (iValue == null)? this.getDefaultHashByLevel(iLevel): iValue.hash.toString();
         const r = (id % 2n == 0n) ?[ jHashValue, iHashValue] : [ iHashValue, jHashValue];
-        const hash = this.hashFunc(r);
+        const hashDecString = BigInt(this.hashFunc(r)).toString();
         const jobs = [];
         if (iValue == null) {
           jobs.push(manager.upsert(ObsOrderLeafMerkleTreeNode, {
@@ -92,7 +92,7 @@ export class ObsOrderTreeService extends TsMerkleTree<ObsOrderLeafEntity> {
         if ( updateRoot >= 1n) {
           jobs.push(manager.upsert(ObsOrderLeafMerkleTreeNode, {
             id: updateRoot.toString(),
-            hash: (hash)
+            hash: hashDecString
           }, ['id']));
         }
         await Promise.all(jobs);
@@ -109,14 +109,14 @@ export class ObsOrderTreeService extends TsMerkleTree<ObsOrderLeafEntity> {
       // check level
       const id = this.getLeafIdInTree(leaf_id);
       const level = Math.floor(Math.log2(Number(id)));
-      const hash = this.getDefaultHashByLevel(level);
+      const hashDecString = BigInt(this.getDefaultHashByLevel(level)).toString();
       // setup transaction
       await this.connection.transaction(async (manager) => {
         // insert this null hash on this node
         await manager.insert(ObsOrderLeafMerkleTreeNode, {
           leafId: leaf_id,
           id: id.toString(),
-          hash: (hash),
+          hash: hashDecString,
         });
         await manager.insert(ObsOrderLeafEntity, {
           orderLeafId: leaf_id,
@@ -135,14 +135,14 @@ export class ObsOrderTreeService extends TsMerkleTree<ObsOrderLeafEntity> {
       }       
     });
     if (result == null) {
-      const hash = await this.getDefaultHashByLevel(1);
+      const hashDecString = BigInt(this.getDefaultHashByLevel(1)).toString();
       await this.obsOrderMerkleTreeRepository.insert({
         id: 1n.toString(),
-        hash: (hash),
+        hash: hashDecString,
       });
       return {
         id: 1n.toString(),
-        hash: hash
+        hash: hashDecString
       };
     }
     return {

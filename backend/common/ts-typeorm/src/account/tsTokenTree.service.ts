@@ -55,14 +55,14 @@ export class TsTokenTreeService extends TsMerkleTree<TokenLeafNode> {
   async _updateLeaf(manager: EntityManager, leafId: string, value: UpdateTokenTreeDto) {
     const prf = this.getProofIds(leafId);
     const id = this.getLeafIdInTree(leafId);
-    const leafHash = toTreeLeaf([BigInt(value.leafId), BigInt(value.lockedAmt), BigInt(value.availableAmt)]);
+    const leafHashDecString = BigInt(toTreeLeaf([BigInt(value.leafId), BigInt(value.lockedAmt), BigInt(value.availableAmt)])).toString();
     const accountId = value.accountId;
     // update leaf
     await manager.upsert(TokenMerkleTreeNode, {
       accountId: accountId,
       id: id.toString(),
       leafId: leafId.toString(),
-      hash: leafHash
+      hash: leafHashDecString
     }, ['id', 'accountId']);
     await manager.upsert(TokenLeafNode, {
       leafId: leafId.toString(),
@@ -81,7 +81,7 @@ export class TsTokenTreeService extends TsMerkleTree<TokenLeafNode> {
       const jHashValue: string = (jValue == null) ? this.getDefaultHashByLevel(jLevel) : jValue.hash.toString();
       const iHashValue: string = (iValue == null) ? this.getDefaultHashByLevel(iLevel) : iValue.hash.toString();
       const r = (id % 2n == 0n) ? [jHashValue, iHashValue] : [iHashValue, jHashValue];
-      const hash = this.hashFunc(r);
+      const hashDecString = BigInt(this.hashFunc(r)).toString();
       const jobs = [];
       if (iValue == null) {
         jobs.push(manager.upsert(TokenMerkleTreeNode, {
@@ -96,7 +96,7 @@ export class TsTokenTreeService extends TsMerkleTree<TokenLeafNode> {
       const updateRoot = i >> 1n;
       if (updateRoot >= 1n) {
         jobs.push(this.tokenMerkleTreeRepository.upsert([{
-          id: updateRoot.toString(), accountId: accountId, hash: (hash)
+          id: updateRoot.toString(), accountId: accountId, hash: hashDecString
         }], ['id', 'accountId']));
       }
       await Promise.all(jobs);
@@ -113,7 +113,7 @@ export class TsTokenTreeService extends TsMerkleTree<TokenLeafNode> {
       // check level
       const id = this.getLeafIdInTree(leaf_id);
       const level = Math.floor(Math.log2(Number(id)));
-      const hash = this.getDefaultHashByLevel(level);
+      const hashDecString = BigInt(this.getDefaultHashByLevel(level)).toString();
       // start transaction
       await this.connection.transaction(async (manager) => {
         // insert this null hash on this node
@@ -121,7 +121,7 @@ export class TsTokenTreeService extends TsMerkleTree<TokenLeafNode> {
           accountId: accountId,
           id: id.toString(),
           leafId: leaf_id.toString(),
-          hash: hash
+          hash: hashDecString,
         });
         await manager.insert(TokenLeafNode, {
           leafId: leaf_id.toString(),
@@ -135,20 +135,20 @@ export class TsTokenTreeService extends TsMerkleTree<TokenLeafNode> {
   async getRoot(accountId: string): Promise<TokenTreeResponseDto> {
     const result =  await this.tokenMerkleTreeRepository.findOneBy({accountId: accountId, id: 1n.toString()});
     if (result == null) {
-      const hash = this.getDefaultHashByLevel(1);
+      const hashDecString = BigInt(this.getDefaultHashByLevel(1)).toString();
       await this.tokenMerkleTreeRepository.insert({
         accountId: accountId,
         id: 1n.toString(),
-        hash: hash
+        hash: hashDecString
       });
       return {
         accountId: accountId,
         id: 1,
         leafId: null,
-        hash: hash
+        hash: hashDecString
       };
     }
-    const resultHash = result.hash ? result.hash.toString() : '';
+    const resultHash = result.hash ? BigInt(result.hash).toString() : '';
     return {
       accountId: accountId,
       id: 1,
