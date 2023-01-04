@@ -9,7 +9,7 @@ import { Repository, Connection } from 'typeorm';
 import { TS_STATUS } from 'common/ts-typeorm/src/account/tsStatus.enum';
 import { recursiveToString } from '@ts-sdk/domain/lib/helper';
 import { TsRollupConfigType, RollupStatus, CircuitAccountTxPayload, CircuitOrderTxPayload, CircuitNullifierTxPayload } from '@ts-sdk/domain/lib/ts-rollup/ts-rollup';
-import { encodeRollupWithdrawMessage } from '@ts-sdk/domain/lib/ts-rollup/ts-rollup-helper';
+import { encodeRollupWithdrawMessage, stateToCommitment } from '@ts-sdk/domain/lib/ts-rollup/ts-rollup-helper';
 import { txsToRollupCircuitInput, encodeRChunkBuffer, bigint_to_chunk_array } from '@ts-sdk/domain/lib/ts-rollup/ts-tx-helper';
 import { TsRollupCircuitInputType, TsRollupCircuitInputItemType } from '@ts-sdk/domain/lib/ts-types/ts-circuit-types';
 import { TxNoop, CHUNK_BITS_SIZE, MAX_CHUNKS_PER_REQ, TsTxType, TsSystemAccountAddress, TsTokenAddress, TsTxRequestDatasType } from '@ts-sdk/domain/lib/ts-types/ts-types';
@@ -25,6 +25,8 @@ import { AccountInformation } from '@common/ts-typeorm/account/accountInformatio
 import { UpdateObsOrderTreeDto } from '@common/ts-typeorm/auctionOrder/dto/updateObsOrderTree.dto';
 import { BLOCK_STATUS } from '@common/ts-typeorm/account/blockStatus.enum';
 import { ObsOrderEntity } from '@common/ts-typeorm/auctionOrder/obsOrder.entity';
+import { arrayChunkToHexString } from '@ts-sdk/domain/lib/bigint-helper';
+import { utils } from 'ethers';
 
 const DefaultRollupConfig: TsRollupConfigType = {
   order_tree_height: 10,
@@ -184,13 +186,13 @@ export class SequencerConsumer {
   }
 
   private async updateAccountToken(leaf_id: string, tokenAddr: TsTokenAddress, tokenAmt: bigint, lockedAmt: bigint) {
-    const acc = this.getAccount(leaf_id);
-    if (!acc) {
-      throw new Error(`updateAccountToken: account id=${leaf_id} not found`);
-    }
+    const tokenInfo = await this.tsTokenTreeService.getLeaf(tokenAddr, leaf_id);
+
+    const newAvlAmt = BigInt(tokenInfo.availableAmt) + tokenAmt;
+    const newLktAmt = BigInt(tokenInfo.lockedAmt) + lockedAmt;
     await this.tsAccountTreeService.updateTokenLeaf(leaf_id, {
-      lockedAmt: lockedAmt.toString(),
-      availableAmt: tokenAmt.toString(),
+      availableAmt: newAvlAmt.toString(),
+      lockedAmt: newLktAmt.toString(),
       leafId: tokenAddr,
       accountId: leaf_id,
     });
@@ -299,9 +301,20 @@ export class SequencerConsumer {
       const circuitInputs = txsToRollupCircuitInput(this.currentTxLogs) as any;
       // TODO: type check
   
+      const publicDataOffsets = [];
+      const o_chunk_1level_length = circuitInputs['o_chunks'].length;
+      let currentOffset = 0;
+      for (let index = 0; index < o_chunk_1level_length; index++) {
+        publicDataOffsets.push(currentOffset);
+        const reqChunkLength = circuitInputs['o_chunks'][index].length;
+        currentOffset += reqChunkLength;
+      }
+
       circuitInputs['o_chunks'] = circuitInputs['o_chunks'].flat();
+
       const o_chunk_remains = this.config.numOfChunks - circuitInputs['o_chunks'].length;
       circuitInputs['isCriticalChunk'] = circuitInputs['isCriticalChunk'].flat();
+      const l1RequestNum = circuitInputs['o_chunks'].filter((t: any) => t === '1').length;
       assert(
         circuitInputs['isCriticalChunk'].length === circuitInputs['o_chunks'].length,
         `isCriticalChunk=${circuitInputs['isCriticalChunk'].length} length not match o_chunks=${circuitInputs['o_chunks'].length} `,
@@ -343,6 +356,45 @@ export class SequencerConsumer {
 
       currentBlcok.blockStatus = BLOCK_STATUS.L2EXECUTED;
       currentBlcok.rawData = JSON.stringify(circuitInputs);
+
+      const stateRoot = await this.stateRoot();
+      const orderTreeRoot = await this.obsOrderTreeService.getRoot();
+      const oriTxNum = this.oriTxId;
+      const tsRoot = '0x' + dpPoseidonHash([
+        BigInt(orderTreeRoot.hash), oriTxNum
+      ]).toString(16).padStart(64, '0');
+      const accountRoot = (await this.tsAccountTreeService.getRoot()).hash;
+      const orderRoot = (await this.obsOrderTreeService.getRoot()).hash;
+      const state_isCriticalChunk = arrayChunkToHexString(circuitInputs?.isCriticalChunk as any, 1);
+      const state_o_chunk = arrayChunkToHexString(circuitInputs?.o_chunks as any);
+      const pubdata = utils.solidityPack([
+        'bytes', 'bytes', 
+      ], [
+        state_isCriticalChunk, state_o_chunk
+      ]);
+      const {
+        commitmentMessage,
+        commitment,
+      } = stateToCommitment({
+        oriStateRoot: stateRoot,
+        newStateRoot: stateRoot,
+        newTsRoot: tsRoot,
+        pubdata,
+      });
+      currentBlcok.state = {
+        blockNumber: currentBlockNumber.toString(),
+        stateRoot,
+        l1RequestNum,
+        commitment,
+        tsRoot: tsRoot,
+        publicData: commitmentMessage,
+        publicDataOffsets: publicDataOffsets.map(v => v.toString()),
+        orderRoot,
+        accountRoot,
+        timestamp: '0',
+        pendingRollupTxHash: '',
+      };
+
       await manager.save(currentBlcok);
       return {
         inputs: circuitInputs,
