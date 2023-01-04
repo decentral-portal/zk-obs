@@ -163,7 +163,7 @@ export class ObsOrderTreeService extends TsMerkleTree<ObsOrderLeafEntity> {
     const ids = this.getProofIds(leafId);
     const r = await this.obsOrderMerkleTreeRepository.find({
       where: {
-        id: In(ids)
+        id: In(ids.map(id => id.toString()))
       },
       order: {
         id: 'ASC'

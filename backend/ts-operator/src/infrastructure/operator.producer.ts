@@ -83,7 +83,7 @@ export class OperatorProducer {
     }
     const txRegister = {
       L1Address: sender,
-      accountId: BigInt(accountId.toString()),
+      accountId: accountId.toString(),
       tsPubKeyX: tsPubX.toString(),
       tsPubKeyY: tsPubY.toString(),
     };

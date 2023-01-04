@@ -24,7 +24,7 @@ export class AccountInformation extends BaseTimeEntity {
     scale: 0,
     nullable: false,
   })
-  accountId!: bigint;
+  accountId!: string;
   @Column({
     type: 'varchar',
     name: 'email',

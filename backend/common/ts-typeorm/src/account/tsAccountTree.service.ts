@@ -36,9 +36,6 @@ export class TsAccountTreeService extends TsMerkleTree<AccountLeafNode>{
     return leafIdCount;
   }
   getDefaultTokenTreeRoot() {
-    console.log({
-      tokenTreeService: this.tokenTreeService,
-    });
     return this.tokenTreeService.getDefaultRoot();
   }
   getDefaultRoot(): string {
@@ -189,7 +186,7 @@ export class TsAccountTreeService extends TsMerkleTree<AccountLeafNode>{
     const ids = this.getProofIds(leafId);
     const r = await this.accountMerkleTreeRepository.find({
       where: {
-        id: In(ids)
+        id: In(ids.map(id => id.toString()))
       },
       order: {
         id: 'ASC'

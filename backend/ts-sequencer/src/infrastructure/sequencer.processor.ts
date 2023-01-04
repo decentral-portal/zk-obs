@@ -1022,7 +1022,7 @@ export class SequencerConsumer {
     const tokenInfos = req.tokenAddr !== TsTokenAddress.Unknown && Number(req.amount) > 0 ? t : {};
     const accountInfo = await this.accountInfoRepository.findOneOrFail({
       where: {
-        accountId: registerL2Addr,
+        accountId: registerL2Addr.toString(),
       }
     });
     const hashedTsPubKey = accountInfo.hashedTsPubKey;

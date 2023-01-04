@@ -164,7 +164,7 @@ export class TsTokenTreeService extends TsMerkleTree<TokenLeafNode> {
     const r = await this.tokenMerkleTreeRepository.find({
       where: {
         accountId: accountId,
-        id: In(ids)
+        id: In(ids.map(v => v.toString()))
       },
       order: {
         id: 'ASC'

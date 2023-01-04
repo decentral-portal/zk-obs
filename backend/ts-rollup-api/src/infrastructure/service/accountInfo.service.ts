@@ -37,14 +37,14 @@ export class AccountInfoService {
       throw new NotFoundException('account not found');
     }
     const nonceInfo = await this.accountLeafRepo.findOneBy({
-      leafId: result.accountId
+      leafId: result.accountId.toString()
     });
     if (nonceInfo == null) {
       throw new NotFoundException('nonce not found');
     }
     return {
       L1Address: result.L1Address,
-      accountId: result.accountId,
+      accountId: result.accountId.toString(),
       nonce: nonceInfo.nonce.toString(),
       name: '',
       socialId: null,
