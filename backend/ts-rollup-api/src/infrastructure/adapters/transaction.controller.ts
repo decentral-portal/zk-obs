@@ -27,6 +27,7 @@ import { GetTransactionResponseDto } from '../dtos/transactionInfo.dto';
 import { AccountLeafNode } from '@common/ts-typeorm/account/accountLeafNode.entity';
 import { AvailableService } from '../service/available.service';
 import { TokenInfo } from '../dtos/getAvailable.dto';
+import { TsTxType } from '../../../../ts-sdk/src/domain/lib/ts-types/ts-types';
 
 @Controller('v1/ts/transaction')
 @ApiTags('Transaction')
@@ -74,11 +75,11 @@ export class TsTransactionController {
       amount: BigInt(dto.sellAmt),
       tokenId: BigInt(dto.sellTokenId),
       arg2: BigInt(dto.buyTokenId),
-      arg3: 0n,
+      arg3: BigInt(dto.buyAmt),
     };
-    if (dto.reqType === '8') {
-      txInfo['arg3'] = BigInt(dto.buyAmt);
-    }
+    // if (dto.reqType === TsTxType.SecondLimitOrder) {
+    //   txInfo['arg3'] = BigInt(dto.buyAmt);
+    // }
     console.log(txInfo);
     const [accoutLeaf, currentAvailable] = await Promise.all([
       this.connection.getRepository(AccountLeafNode).findOne({ 
