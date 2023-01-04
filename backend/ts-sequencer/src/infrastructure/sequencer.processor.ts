@@ -1105,7 +1105,6 @@ export class SequencerConsumer {
     });
 
     await this.accountAndTokenAfterUpdate(accountLeafId, registerTokenId);
-    await this.orderAfterUpdate(orderLeafId);
 
     // TODO: fill left reqs
     await this.accountAndTokenBeforeUpdate(accountLeafId, registerTokenId);
