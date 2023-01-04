@@ -12,7 +12,7 @@ import { Queue } from 'bullmq';
 import { TsWorkerName } from '../../ts-sdk/src/constant';
 import { BLOCK_STATUS } from '@common/ts-typeorm/account/blockStatus.enum';
 // import { BullWorker, BullWorkerProcess } from '@anchan828/nest-bullmq';
-import { Cron } from '@nestjs/schedule';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable({
   scope: Scope.DEFAULT,
@@ -44,10 +44,9 @@ export class ProducerService {
   // @BullWorkerProcess({
   //   autorun: true,
   // })
-  @Cron('5 * * * * *')
+  @Cron(CronExpression.EVERY_5_SECONDS)
   async process() {
     // const name = job.name;
-    // console.log('==============process============', name);
     // if(name === 'TransactionInfo') {
     // }
     await this.dispatchPendingTransaction();

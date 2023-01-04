@@ -5,7 +5,7 @@ import { Job } from 'bullmq';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BlockInformation } from 'common/ts-typeorm/src/account/blockInformation.entity';
 import { TransactionInfo } from 'common/ts-typeorm/src/account/transactionInfo.entity';
-import { Repository } from 'typeorm';
+import { Repository, Connection } from 'typeorm';
 import { TS_STATUS } from 'common/ts-typeorm/src/account/tsStatus.enum';
 import { recursiveToString } from '@ts-sdk/domain/lib/helper';
 import { TsRollupConfigType, RollupStatus, CircuitAccountTxPayload, CircuitOrderTxPayload, CircuitNullifierTxPayload } from '@ts-sdk/domain/lib/ts-rollup/ts-rollup';
@@ -23,6 +23,7 @@ import { ObsOrderLeafEntity } from '@common/ts-typeorm/auctionOrder/obsOrderLeaf
 import { getDefaultAccountLeafMessage, getDefaultObsOrderLeafMessage, getDefaultTokenLeafMessage } from '@common/ts-typeorm/account/helper/mkAccount.helper';
 import { AccountInformation } from '@common/ts-typeorm/account/accountInformation.entity';
 import { UpdateObsOrderTreeDto } from '@common/ts-typeorm/auctionOrder/dto/updateObsOrderTree.dto';
+import { BLOCK_STATUS } from '@common/ts-typeorm/account/blockStatus.enum';
 
 const DefaultRollupConfig: TsRollupConfigType = {
   order_tree_height: 8,
@@ -94,6 +95,7 @@ export class SequencerConsumer {
     private readonly tsAccountTreeService: TsAccountTreeService,  
     private readonly tsTokenTreeService: TsTokenTreeService,
     private readonly obsOrderTreeService: ObsOrderTreeService,
+    private connection: Connection,
   ) {
     this.logger.log('SEQUENCER.process START');
     this.config = DefaultRollupConfig;
@@ -226,11 +228,11 @@ export class SequencerConsumer {
     this.currentOrderPayload = this.prepareTxOrderPayload();
 
     // TODO: blockLogs
-    this.blockLogs.set(blocknumber.toString(), {
+    return {
       logs,
       accountRootFlow,
       auctionOrderRootFlow,
-    });
+    };
   }
 
   private async addAccountRootFlow() {
@@ -256,79 +258,94 @@ export class SequencerConsumer {
       throw new Error('Rollup is running');
     }
     this.rollupStatus = RollupStatus.Running;
-
-    this.newBlockNumber = this.blockNumber + 1n;
+    const r = await this.blockRepository.insert({
+      blockHash: '',
+      L1TransactionHash: '',
+      verifiedAt: new Date(0),
+      blockStatus: BLOCK_STATUS.PROCESSING,
+      operatorAddress: '',
+    });
+    const newBlock = r.identifiers[0];
+    this.newBlockNumber = BigInt(newBlock.blockNumber || 0);
     this.addFirstRootFlow();
-    // TODO: rollback state if callback failed
-    // await callback(this, this.newBlockNumber);
-
     return {
       blockNumber: this.newBlockNumber,
     };
+
   }
 
   async endRollup(): Promise<{
     inputs: TsRollupCircuitInputType;
   }> {
-    const perBatch = this.txNormalPerBatch;
-    if (this.currentTxLogs.length !== perBatch) {
-      console.log(`Rollup txNumbers=${this.currentTxLogs.length} not match txPerBatch=${perBatch}`);
-      const emptyTxNum = perBatch - this.currentTxLogs.length;
-      for (let i = 0; i < emptyTxNum; i++) {
-        await this.doTransaction(TxNoop);
+    return await this.connection.transaction(async (manager) => {
+      this.rollupStatus = RollupStatus.Idle;
+      const currentBlockNumber = this.newBlockNumber;
+      const currentBlcok = await manager.findOneByOrFail(BlockInformation, {
+        blockNumber: Number(currentBlockNumber),
+      });
+
+      const perBatch = this.txNormalPerBatch;
+      if (this.currentTxLogs.length !== perBatch) {
+        console.log(`Rollup txNumbers=${this.currentTxLogs.length} not match txPerBatch=${perBatch}`);
+        const emptyTxNum = perBatch - this.currentTxLogs.length;
+        for (let i = 0; i < emptyTxNum; i++) {
+          await this.doTransaction(TxNoop);
+        }
       }
-    }
-    // const circuitInputs = exportTransferCircuitInput(this.currentTxLogs, this.txId, this.currentAccountRootFlow, this.currentAuctionOrderRootFlow);
+  
+      const circuitInputs = txsToRollupCircuitInput(this.currentTxLogs) as any;
+      // TODO: type check
+  
+      circuitInputs['o_chunks'] = circuitInputs['o_chunks'].flat();
+      const o_chunk_remains = this.config.numOfChunks - circuitInputs['o_chunks'].length;
+      circuitInputs['isCriticalChunk'] = circuitInputs['isCriticalChunk'].flat();
+      assert(
+        circuitInputs['isCriticalChunk'].length === circuitInputs['o_chunks'].length,
+        `isCriticalChunk=${circuitInputs['isCriticalChunk'].length} length not match o_chunks=${circuitInputs['o_chunks'].length} `,
+      );
+      for (let index = 0; index < o_chunk_remains; index++) {
+        circuitInputs['o_chunks'].push('0');
+        circuitInputs['isCriticalChunk'].push('0');
+      }
+      assert(
+        circuitInputs['o_chunks'].length === this.config.numOfChunks,
+        `o_chunks=${circuitInputs['o_chunks'].length} length not match numOfChunks=${this.config.numOfChunks} `,
+      );
+      assert(
+        circuitInputs['isCriticalChunk'].length === this.config.numOfChunks,
+        `isCriticalChunk=${circuitInputs['isCriticalChunk'].length} length not match numOfChunks=${this.config.numOfChunks} `,
+      );
+      // TODO: hotfix
+      circuitInputs['r_accountLeafId'] = circuitInputs['r_accountLeafId'][0];
+      circuitInputs['r_oriAccountLeaf'] = circuitInputs['r_oriAccountLeaf'][0];
+      circuitInputs['r_newAccountLeaf'] = circuitInputs['r_newAccountLeaf'][0];
+      circuitInputs['r_accountRootFlow'] = circuitInputs['r_accountRootFlow'][0];
+      circuitInputs['r_accountMkPrf'] = circuitInputs['r_accountMkPrf'][0];
+      circuitInputs['r_tokenLeafId'] = circuitInputs['r_tokenLeafId'][0];
+      circuitInputs['r_oriTokenLeaf'] = circuitInputs['r_oriTokenLeaf'][0];
+      circuitInputs['r_newTokenLeaf'] = circuitInputs['r_newTokenLeaf'][0];
+      circuitInputs['r_tokenRootFlow'] = circuitInputs['r_tokenRootFlow'][0];
+      circuitInputs['r_tokenMkPrf'] = circuitInputs['r_tokenMkPrf'][0];
+      circuitInputs['r_orderLeafId'] = circuitInputs['r_orderLeafId'][0];
+      circuitInputs['r_oriOrderLeaf'] = circuitInputs['r_oriOrderLeaf'][0];
+      circuitInputs['r_newOrderLeaf'] = circuitInputs['r_newOrderLeaf'][0];
+      circuitInputs['r_orderRootFlow'] = circuitInputs['r_orderRootFlow'][0];
+      circuitInputs['r_orderMkPrf'] = circuitInputs['r_orderMkPrf'][0];
+  
+      circuitInputs['oriTxNum'] = this.oriTxId.toString();
+      circuitInputs['accountRootFlow'] = this.currentAccountRootFlow.map((x) => recursiveToString(x));
+      circuitInputs['orderRootFlow'] = this.currentOrderRootFlow.map((x) => recursiveToString(x));
+      this.oriTxId = this.latestTxId;
+      this.flushBlock(currentBlockNumber);
 
-    const circuitInputs = txsToRollupCircuitInput(this.currentTxLogs) as any;
-    // TODO: type check
+      currentBlcok.blockStatus = BLOCK_STATUS.L2EXECUTED;
+      currentBlcok.rawData = JSON.stringify(circuitInputs);
+      await manager.save(currentBlcok);
+      return {
+        inputs: circuitInputs,
+      };
+    });
 
-    circuitInputs['o_chunks'] = circuitInputs['o_chunks'].flat();
-    const o_chunk_remains = this.config.numOfChunks - circuitInputs['o_chunks'].length;
-    circuitInputs['isCriticalChunk'] = circuitInputs['isCriticalChunk'].flat();
-    assert(
-      circuitInputs['isCriticalChunk'].length === circuitInputs['o_chunks'].length,
-      `isCriticalChunk=${circuitInputs['isCriticalChunk'].length} length not match o_chunks=${circuitInputs['o_chunks'].length} `,
-    );
-    for (let index = 0; index < o_chunk_remains; index++) {
-      circuitInputs['o_chunks'].push('0');
-      circuitInputs['isCriticalChunk'].push('0');
-    }
-    assert(
-      circuitInputs['o_chunks'].length === this.config.numOfChunks,
-      `o_chunks=${circuitInputs['o_chunks'].length} length not match numOfChunks=${this.config.numOfChunks} `,
-    );
-    assert(
-      circuitInputs['isCriticalChunk'].length === this.config.numOfChunks,
-      `isCriticalChunk=${circuitInputs['isCriticalChunk'].length} length not match numOfChunks=${this.config.numOfChunks} `,
-    );
-    // TODO: hotfix
-    circuitInputs['r_accountLeafId'] = circuitInputs['r_accountLeafId'][0];
-    circuitInputs['r_oriAccountLeaf'] = circuitInputs['r_oriAccountLeaf'][0];
-    circuitInputs['r_newAccountLeaf'] = circuitInputs['r_newAccountLeaf'][0];
-    circuitInputs['r_accountRootFlow'] = circuitInputs['r_accountRootFlow'][0];
-    circuitInputs['r_accountMkPrf'] = circuitInputs['r_accountMkPrf'][0];
-    circuitInputs['r_tokenLeafId'] = circuitInputs['r_tokenLeafId'][0];
-    circuitInputs['r_oriTokenLeaf'] = circuitInputs['r_oriTokenLeaf'][0];
-    circuitInputs['r_newTokenLeaf'] = circuitInputs['r_newTokenLeaf'][0];
-    circuitInputs['r_tokenRootFlow'] = circuitInputs['r_tokenRootFlow'][0];
-    circuitInputs['r_tokenMkPrf'] = circuitInputs['r_tokenMkPrf'][0];
-    circuitInputs['r_orderLeafId'] = circuitInputs['r_orderLeafId'][0];
-    circuitInputs['r_oriOrderLeaf'] = circuitInputs['r_oriOrderLeaf'][0];
-    circuitInputs['r_newOrderLeaf'] = circuitInputs['r_newOrderLeaf'][0];
-    circuitInputs['r_orderRootFlow'] = circuitInputs['r_orderRootFlow'][0];
-    circuitInputs['r_orderMkPrf'] = circuitInputs['r_orderMkPrf'][0];
-
-    circuitInputs['oriTxNum'] = this.oriTxId.toString();
-    circuitInputs['accountRootFlow'] = this.currentAccountRootFlow.map((x) => recursiveToString(x));
-    circuitInputs['orderRootFlow'] = this.currentOrderRootFlow.map((x) => recursiveToString(x));
-    this.oriTxId = this.latestTxId;
-    this.flushBlock(this.newBlockNumber);
-    this.rollupStatus = RollupStatus.Idle;
-
-    return {
-      inputs: circuitInputs,
-    };
   }
 
   private prepareTxAccountPayload() {
@@ -585,7 +602,7 @@ export class SequencerConsumer {
         accountId: req.accountId,
         tpye: typeof req.accountId,
       });
-      if (this.rollupStatus === RollupStatus.Running) {
+      if (this.rollupStatus !== RollupStatus.Running) {
         await this.startRollup();
       }
       let inputs: TsRollupCircuitInputItemType;
@@ -638,7 +655,8 @@ export class SequencerConsumer {
       console.error('-----------------------');
       console.error(error);
       console.error('-----------------------');
-      return {error: true} as unknown as TsRollupCircuitInputItemType;
+      // return {error: true} as unknown as TsRollupCircuitInputItemType;
+      throw error;
     }
   }
 
@@ -1079,7 +1097,6 @@ export class SequencerConsumer {
       0n,
     ];
     await this.accountAndTokenBeforeUpdate(accountLeafId, registerTokenId);
-    await this.orderBeforeUpdate(orderLeafId);
 
     /** update state */
     this.addAccount(registerL2Addr, {
@@ -1093,8 +1110,8 @@ export class SequencerConsumer {
     // TODO: fill left reqs
     await this.accountAndTokenBeforeUpdate(accountLeafId, registerTokenId);
     await this.accountAndTokenAfterUpdate(accountLeafId, registerTokenId);
-    // await this.orderBeforeUpdate(orderLeafId);
-    // await this.orderAfterUpdate(orderLeafId);
+    await this.orderBeforeUpdate(orderLeafId);
+    await this.orderAfterUpdate(orderLeafId);
 
     const { r_chunks_bigint, o_chunks_bigint, isCriticalChunk } = this.getTxChunks(req);
 

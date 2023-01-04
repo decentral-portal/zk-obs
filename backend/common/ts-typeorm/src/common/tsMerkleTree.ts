@@ -56,6 +56,13 @@ export abstract class TsMerkleTree<T> {
   }
   getDefaultHashByLevel(level: number):string {
     const result = this.levelsDefaultHash.get(level);
-    return result? result : '';
+    if(!result) {
+      console.log({
+        level,
+        heigt: this.treeHeigt,
+      });
+      throw new Error('getDefaultHashByLevel null');
+    }
+    return result;
   }
 }
