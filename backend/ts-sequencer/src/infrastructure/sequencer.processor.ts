@@ -659,7 +659,7 @@ export class SequencerConsumer {
       if (remains < 3) {
         await this.endRollup();
       }
-      console.time(`doTransaction txid=${req.txId}, reqType=${req.reqType}`);
+      console.timeEnd(`doTransaction txid=${req.txId}, reqType=${req.reqType}`);
       return inputs;
     } catch(error: any) {
       console.error('-----------------------');
