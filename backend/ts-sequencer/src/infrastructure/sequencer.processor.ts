@@ -172,13 +172,13 @@ export class SequencerConsumer {
     return acc;
   }
 
-  addAccount(l2addr: bigint, account: {
+  async addAccount(l2addr: bigint, account: {
     l2Addr: bigint;
     tsAddr: bigint;
-  }): bigint {
+  }): Promise<bigint> {
     // TODO: check account is exist
     // TODO: check register has tokenInfo
-    this.tsAccountTreeService.addLeaf({
+    await this.tsAccountTreeService.addLeaf({
       leafId: l2addr.toString(),
       tsAddr: account.tsAddr.toString(),
     });
@@ -209,12 +209,12 @@ export class SequencerConsumer {
   }
 
   /** Rollup trace */
-  private addFirstRootFlow() {
+  private async addFirstRootFlow() {
     if (this.currentAccountRootFlow.length !== 0 || this.currentOrderRootFlow.length !== 0) {
       throw new Error('addFirstRootFlow must run on new block');
     }
-    this.addAccountRootFlow();
-    this.addOrderRootFlow();
+    await this.addAccountRootFlow();
+    await this.addOrderRootFlow();
   }
 
   private flushBlock(blocknumber: bigint) {
@@ -704,8 +704,8 @@ export class SequencerConsumer {
           throw new Error(`Unknown request type reqType=${req.reqType}`);
       }
   
-      this.addAccountRootFlow();
-      this.addOrderRootFlow();
+      await this.addAccountRootFlow();
+      await this.addOrderRootFlow();
   
       const remains = this.txNormalPerBatch - this.currentTxLogs.length;
       if (remains < 3) {
@@ -771,7 +771,7 @@ export class SequencerConsumer {
       doSecondLimitOrder: order,
     });
     await this.orderBeforeUpdate(orderLeafId);
-    this.addObsOrder(order);
+    await this.addObsOrder(order);
     // await this.addAuctionOrder(req.reqType, txId, req as unknown as TsTxAuctionLendRequest | TsTxAuctionBorrowRequest);
     await this.orderAfterUpdate(orderLeafId);
 
@@ -820,7 +820,7 @@ export class SequencerConsumer {
     await this.accountAndTokenAfterUpdate(order.sender, sellTokenId);
 
     await this.orderBeforeUpdate(orderLeafId);
-    this.removeObsOrder(orderLeafId);
+    await this.removeObsOrder(orderLeafId);
     await this.orderAfterUpdate(orderLeafId);
 
     const txId = this.latestTxId;
@@ -866,29 +866,29 @@ export class SequencerConsumer {
     const accumulatedBuyAmt = BigInt(req.accumulatedBuyAmt);
     const accumulatedSellAmt = BigInt(req.accumulatedSellAmt);
 
-    this.accountBeforeUpdate(makerOrder.sender);
+    await this.accountBeforeUpdate(makerOrder.sender);
 
-    this.tokenBeforeUpdate(makerOrder.sender, buyTokenId);
+    await this.tokenBeforeUpdate(makerOrder.sender, buyTokenId);
     await this.updateAccountToken(makerAcc.leafId, buyTokenId, accumulatedBuyAmt, 0n);
-    this.tokenAfterUpdate(makerOrder.sender, buyTokenId);
+    await this.tokenAfterUpdate(makerOrder.sender, buyTokenId);
 
-    this.tokenBeforeUpdate(makerOrder.sender, sellTokenId);
+    await this.tokenBeforeUpdate(makerOrder.sender, sellTokenId);
     await this.updateAccountToken(makerAcc.leafId, sellTokenId, 0n, -accumulatedSellAmt);
-    this.tokenAfterUpdate(makerOrder.sender, sellTokenId);
+    await this.tokenAfterUpdate(makerOrder.sender, sellTokenId);
 
-    this.accountAfterUpdate(makerOrder.sender);
+    await this.accountAfterUpdate(makerOrder.sender);
 
-    this.accountBeforeUpdate(makerOrder.sender);
-    this.accountAfterUpdate(makerOrder.sender);
+    await this.accountBeforeUpdate(makerOrder.sender);
+    await this.accountAfterUpdate(makerOrder.sender);
 
     await this.orderBeforeUpdate(orderLeafId);
     makerOrder.accumulatedSellAmt = (BigInt(makerOrder.accumulatedSellAmt) + accumulatedSellAmt).toString();
     makerOrder.accumulatedBuyAmt = (BigInt(makerOrder.accumulatedBuyAmt) + accumulatedBuyAmt).toString();
     const isAllSellAmtMatched = makerOrder.accumulatedSellAmt === makerOrder.sellAmt;
     if (isAllSellAmtMatched) {
-      this.removeObsOrder(orderLeafId);
+      await this.removeObsOrder(orderLeafId);
     } else {
-      this.updateObsOrder(makerOrder.convertToObsOrderDto());
+      await this.updateObsOrder(makerOrder.convertToObsOrderDto());
     }
     await this.orderAfterUpdate(orderLeafId);
 
@@ -936,20 +936,20 @@ export class SequencerConsumer {
     const accumulatedBuyAmt = BigInt(req.accumulatedBuyAmt);
     const accumulatedSellAmt = BigInt(req.accumulatedSellAmt);
 
-    this.accountBeforeUpdate(takerOrder.sender);
+    await this.accountBeforeUpdate(takerOrder.sender);
 
-    this.tokenBeforeUpdate(takerOrder.sender, buyTokenId);
+    await this.tokenBeforeUpdate(takerOrder.sender, buyTokenId);
     await this.updateAccountToken(takerAcc.leafId, buyTokenId, accumulatedBuyAmt, 0n);
-    this.tokenAfterUpdate(takerOrder.sender, buyTokenId);
+    await this.tokenAfterUpdate(takerOrder.sender, buyTokenId);
 
-    this.tokenBeforeUpdate(takerOrder.sender, sellTokenId);
+    await this.tokenBeforeUpdate(takerOrder.sender, sellTokenId);
     await this.updateAccountToken(takerAcc.leafId, sellTokenId, 0n, -accumulatedSellAmt);
-    this.tokenAfterUpdate(takerOrder.sender, sellTokenId);
+    await this.tokenAfterUpdate(takerOrder.sender, sellTokenId);
 
-    this.accountAfterUpdate(takerOrder.sender);
+    await this.accountAfterUpdate(takerOrder.sender);
 
-    this.accountBeforeUpdate(takerOrder.sender);
-    this.accountAfterUpdate(takerOrder.sender);
+    await this.accountBeforeUpdate(takerOrder.sender);
+    await this.accountAfterUpdate(takerOrder.sender);
 
     await this.orderBeforeUpdate(orderLeafId);
     takerOrder.accumulatedSellAmt = (BigInt(takerOrder.accumulatedSellAmt) + accumulatedSellAmt).toString();
@@ -1016,7 +1016,7 @@ export class SequencerConsumer {
     await this.accountAndTokenAfterUpdate(account.leafId, refundTokenAddr);
 
     await this.orderBeforeUpdate(order.orderLeafId);
-    this.removeObsOrder(order.orderLeafId);
+    await this.removeObsOrder(order.orderLeafId);
     await this.orderAfterUpdate(order.orderLeafId);
 
     const { r_chunks_bigint, o_chunks_bigint, isCriticalChunk } = this.getTxChunks(req);
@@ -1128,13 +1128,14 @@ export class SequencerConsumer {
     const registerL2Addr = BigInt(req.arg0);
     const accountLeafId = registerL2Addr.toString();
     const registerTokenId = req.tokenAddr;
-    const t = {
-      [req.tokenAddr as TsTokenAddress]: {
-        amount: BigInt(req.amount),
-        lockAmt: 0n,
-      },
-    };
-    const tokenInfos = req.tokenAddr !== TsTokenAddress.Unknown && Number(req.amount) > 0 ? t : {};
+    // TODO: check if register has token
+    // const t = {
+    //   [req.tokenAddr as TsTokenAddress]: {
+    //     amount: BigInt(req.amount),
+    //     lockAmt: 0n,
+    //   },
+    // };
+    // const tokenInfos = req.tokenAddr !== TsTokenAddress.Unknown && Number(req.amount) > 0 ? t : {};
     const accountInfo = await this.accountInfoRepository.findOneOrFail({
       where: {
         accountId: registerL2Addr.toString(),
@@ -1161,7 +1162,7 @@ export class SequencerConsumer {
     await this.accountAndTokenBeforeUpdate(accountLeafId, registerTokenId);
 
     /** update state */
-    this.addAccount(registerL2Addr, {
+    await this.addAccount(registerL2Addr, {
       l2Addr: registerL2Addr,
       tsAddr: hashedTsPubKey,
     });
