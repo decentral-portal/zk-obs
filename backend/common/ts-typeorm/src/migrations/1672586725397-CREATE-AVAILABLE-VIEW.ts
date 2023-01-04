@@ -17,7 +17,7 @@ FROM (SELECT
   SUM(ti.amount) AS "sellAmt",
   "tokenId"
 FROM "TransactionInfo" ti 
-WHERE ti."txStatus" = 'PENDING'
+WHERE ti."txStatus" = 'PENDING' OR ti."txStatus" = 'PROCESSING'
 GROUP BY ti."accountId", ti."tokenId"
 ) AS "pendingOrder"
 JOIN "TokenLeafNode" "tokenleaf"
