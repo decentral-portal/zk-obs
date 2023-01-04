@@ -27,11 +27,11 @@ import { BLOCK_STATUS } from '@common/ts-typeorm/account/blockStatus.enum';
 import { ObsOrderEntity } from '@common/ts-typeorm/auctionOrder/obsOrder.entity';
 
 const DefaultRollupConfig: TsRollupConfigType = {
-  order_tree_height: 8,
+  order_tree_height: 10,
   l2_acc_addr_size: 8,
   token_tree_height: 4,
   nullifier_tree_height: 8,
-  numOfReqs: 20,
+  numOfReqs: 10,
   numOfChunks: 50,
 
   register_batch_size: 1,
