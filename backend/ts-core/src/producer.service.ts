@@ -8,20 +8,21 @@ import { BlockInformation } from 'common/ts-typeorm/src/account/blockInformation
 import { TransactionInfo } from 'common/ts-typeorm/src/account/transactionInfo.entity';
 import { TS_STATUS } from 'common/ts-typeorm/src/account/tsStatus.enum';
 import { MoreThan, Repository } from 'typeorm';
-import { Queue, Job } from 'bullmq';
+import { Queue } from 'bullmq';
 import { TsWorkerName } from '../../ts-sdk/src/constant';
 import { BLOCK_STATUS } from '@common/ts-typeorm/account/blockStatus.enum';
-import { BullWorker, BullWorkerProcess } from '@anchan828/nest-bullmq';
+// import { BullWorker, BullWorkerProcess } from '@anchan828/nest-bullmq';
+import { Cron } from '@nestjs/schedule';
 
-// @Injectable({
-//   scope: Scope.DEFAULT,
-// })
-@BullWorker({
-  queueName: TsWorkerName.CORE,
-  options: {
-    concurrency: 1,
-  },
+@Injectable({
+  scope: Scope.DEFAULT,
 })
+// @BullWorker({
+//   queueName: TsWorkerName.CORE,
+//   options: {
+//     concurrency: 1,
+//   },
+// })
 export class ProducerService {
   private currentPendingTxId = 0;
   private currentPendingBlock = 0;
@@ -40,15 +41,16 @@ export class ProducerService {
 
   }
 
-  @BullWorkerProcess({
-    autorun: true,
-  })
-  async process(job: Job<TransactionInfo>) {
-    const name = job.name;
-    console.log('==============process============', name);
-    if(name === 'TransactionInfo') {
-      await this.dispatchPendingTransaction();
-    }
+  // @BullWorkerProcess({
+  //   autorun: true,
+  // })
+  @Cron('5 * * * * *')
+  async process() {
+    // const name = job.name;
+    // console.log('==============process============', name);
+    // if(name === 'TransactionInfo') {
+    // }
+    await this.dispatchPendingTransaction();
   }
   async subscribe() {
     await this.messageBrokerService.addChannels([CHANNEL.ORDER_CREATED, CHANNEL.ORDER_PROCCESSD, CHANNEL.ORDER_VERIFIED]);
@@ -63,8 +65,7 @@ export class ProducerService {
 
   private prevJobId?: string;
   async dispatchPendingTransaction() {
-    console.log('==============dispatchPendingTransaction============');
-    this.logger.log('dispatchPendingTransaction');
+    this.logger.log('dispatchPendingTransaction...');
     const transactions = await this.txRepository.find({
       select: {
         txId: true,
