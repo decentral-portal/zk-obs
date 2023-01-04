@@ -57,9 +57,9 @@ export class OperatorProducer {
     this.logger.log(`OperatorProducer.listenRegisterEvent contract=${this.contract.address}`);
     const filters = this.contract.filters.Register();
     const handler = (log: any) => {
-      // console.log({
-      //   registerLog: log,
-      // });
+      console.log({
+        registerLog: log,
+      });
       this.logger.log(`OperatorProducer.listenRegisterEvent log:${JSON.stringify(log)}`);
       this.handleRegisterEvent(log.args.sender, log.args.accountId, log.args.tsPubX, log.args.tsPubY, log.args.l2Addr, log);
     };
@@ -115,9 +115,9 @@ export class OperatorProducer {
     // const { lastSyncBlocknumberForDepositEvent } = await this.rollupInfoRepository.findOneOrFail({ where: { id: 1 } });
     const handler = (log: any) => {
       this.logger.log(`OperatorProducer.listenDepositEvent log:${JSON.stringify(log)}`);
-      // console.log({
-      //   depositLog: log,
-      // });
+      console.log({
+        depositLog: log,
+      });
       this.handleDepositEvent(log.args.sender, log.args.accountId, log.args.tokenId, log.args.amount, log.transactionHash);
     };
     this.contract.queryFilter(filters, 0, 'latest').then((logs) => {
