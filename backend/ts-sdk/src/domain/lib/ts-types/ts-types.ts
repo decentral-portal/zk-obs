@@ -35,24 +35,24 @@ export const TsDefaultValue = {
 };
 
 export enum TsTxType {
-  UNKNOWN = '0',
-  NOOP = '0',
-  REGISTER = '1',
-  DEPOSIT = '2',
+  UNKNOWN = 0,
+  NOOP = 0,
+  REGISTER = 1,
+  DEPOSIT = 2,
   // TRANSFER = '3',
-  WITHDRAW = '3',
-  SecondLimitOrder = '4',
-  SecondLimitStart = '5',
-  SecondLimitExchange = '6',
-  SecondLimitEnd = '7',
-  SecondMarketOrder = '8',
-  SecondMarketExchange = '9',
-  SecondMarketEnd = '10',
-  CancelOrder = '11',
+  WITHDRAW = 3,
+  SecondLimitOrder = 4,
+  SecondLimitStart = 5,
+  SecondLimitExchange = 6,
+  SecondLimitEnd = 7,
+  SecondMarketOrder = 8,
+  SecondMarketExchange = 9,
+  SecondMarketEnd = 10,
+  CancelOrder = 11,
 
-  AUCTION_LEND = '99',
-  AUCTION_BORROW = '100',
-  AUCTION_CANCEL = '101',
+  AUCTION_LEND = 99,
+  AUCTION_BORROW = 100,
+  AUCTION_CANCEL = 101,
 }
 
 export const TsDeciaml = {

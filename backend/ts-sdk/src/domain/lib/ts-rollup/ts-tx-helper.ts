@@ -138,7 +138,7 @@ export function encodeRChunkBuffer(
     makerBuyAmt: bigint;
   },
 ) {
-  const reqType = txTransferReq.reqType.toString();
+  const reqType = txTransferReq.reqType;
   switch (reqType) {
     case TsTxType.REGISTER:
       if (!txTransferReq.arg0) {

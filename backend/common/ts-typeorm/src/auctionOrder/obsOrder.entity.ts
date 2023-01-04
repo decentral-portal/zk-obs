@@ -1,7 +1,6 @@
 import { matchE } from 'fp-ts/lib/IOEither';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { AccountInformation } from '../account/accountInformation.entity';
-import { TsTxType } from '../account/dto/ts-type';
 import { MatchObsOrderEntity } from './matchObsOrder.entity';
 import { ObsOrderLeafEntity } from './obsOrderLeaf.entity';
 import { TsSide } from './tsSide.enum';

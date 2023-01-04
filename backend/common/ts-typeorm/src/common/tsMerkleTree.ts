@@ -7,6 +7,9 @@ export abstract class TsMerkleTree<T> {
   private levelsDefaultHash!: Map<number, string>;
   public hashFunc!: (x: BytesLike| BytesLike[]) => string;
   constructor(treeHeight: number, hashFunc: ((x: BytesLike| BytesLike[]) => string)) {
+    console.log({
+      treeHeight,
+    });
     this.treeHeigt = Number(treeHeight);
     this.hashFunc = hashFunc;
     this.lastLevel = Number(this.treeHeigt);

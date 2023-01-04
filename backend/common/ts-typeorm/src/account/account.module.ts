@@ -17,7 +17,7 @@ import { TsTokenTreeService } from './tsTokenTree.service';
 @Global()
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule,
     TypeOrmModule.forFeature([
       AccountInformation,
       AccountLeafNode, 

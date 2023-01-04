@@ -8,27 +8,21 @@ import { TransactionInfo } from 'common/ts-typeorm/src/account/transactionInfo.e
 import { Repository } from 'typeorm';
 import { TS_STATUS } from 'common/ts-typeorm/src/account/tsStatus.enum';
 import { recursiveToString } from '@ts-sdk/domain/lib/helper';
-import { TsRollupAccount } from '@ts-sdk/domain/lib/ts-rollup/ts-account';
-import { RESERVED_ACCOUNTS } from '@ts-sdk/domain/lib/ts-rollup/ts-env';
-import { NullifierEmptyItem } from '@ts-sdk/domain/lib/ts-rollup/ts-obs-order';
 import { TsRollupConfigType, RollupStatus, CircuitAccountTxPayload, CircuitOrderTxPayload, CircuitNullifierTxPayload } from '@ts-sdk/domain/lib/ts-rollup/ts-rollup';
 import { CircuitReqDataType, encodeRollupWithdrawMessage } from '@ts-sdk/domain/lib/ts-rollup/ts-rollup-helper';
-import { txsToRollupCircuitInput, encodeTokenLeaf, encodeRChunkBuffer, bigint_to_chunk_array } from '@ts-sdk/domain/lib/ts-rollup/ts-tx-helper';
+import { txsToRollupCircuitInput, encodeRChunkBuffer, bigint_to_chunk_array } from '@ts-sdk/domain/lib/ts-rollup/ts-tx-helper';
 import { TsRollupCircuitInputType, TsRollupCircuitInputItemType } from '@ts-sdk/domain/lib/ts-types/ts-circuit-types';
-import { TsTokenLeafType } from '@ts-sdk/domain/lib/ts-types/ts-merkletree.types';
 import { ObsOrderLeaf } from '@ts-sdk/domain/lib/ts-types/ts-req-types';
 import { TxNoop, CHUNK_BITS_SIZE, MAX_CHUNKS_PER_REQ, TsTxType, TsSystemAccountAddress, TsTokenAddress } from '@ts-sdk/domain/lib/ts-types/ts-types';
 import assert from 'assert';
-import { TsMerkleTree } from '@ts-sdk/domain/lib/merkle-tree-dp';
-import { toTreeLeaf, tsHashFunc } from '@ts-sdk/domain/lib/ts-rollup/ts-helper';
 import { dpPoseidonHash } from '@ts-sdk/domain/lib/poseidon-hash-dp';
 import { TsAccountTreeService } from '@common/ts-typeorm/account/tsAccountTree.service';
 import { TsTokenTreeService } from '@common/ts-typeorm/account/tsTokenTree.service';
 import { ObsOrderTreeService } from '@common/ts-typeorm/auctionOrder/obsOrderTree.service';
 import { AccountLeafNode } from '@common/ts-typeorm/account/accountLeafNode.entity';
-import { ObsOrderLeafMerkleTreeNode } from '@common/ts-typeorm/auctionOrder/obsOrderLeafMerkleTreeNode.entity';
 import { ObsOrderLeafEntity } from '@common/ts-typeorm/auctionOrder/obsOrderLeaf.entity';
-import { getDefaultAccountLeafMessage, getDefaultTokenLeafMessage, getDefaultTokenTreeRoot } from '@common/ts-typeorm/account/helper/mkAccount.helper';
+import { getDefaultAccountLeafMessage, getDefaultTokenLeafMessage } from '@common/ts-typeorm/account/helper/mkAccount.helper';
+import { AccountInformation } from '@common/ts-typeorm/account/accountInformation.entity';
 
 const DefaultRollupConfig: TsRollupConfigType = {
   order_tree_height: 8,
@@ -93,7 +87,10 @@ export class SequencerConsumer {
     private txRepository: Repository<TransactionInfo>,
     @InjectRepository(BlockInformation)
     private blockRepository: Repository<BlockInformation>,
-
+    @InjectRepository(AccountLeafNode)
+    private accountLeafNodeRepository: Repository<AccountLeafNode>,
+    @InjectRepository(AccountInformation)
+    private accountInfoRepository: Repository<AccountInformation>,
     private readonly tsAccountTreeService: TsAccountTreeService,  
     private readonly tsTokenTreeService: TsTokenTreeService,
     private readonly obsOrderTreeService: ObsOrderTreeService,
@@ -170,7 +167,10 @@ export class SequencerConsumer {
     return acc;
   }
 
-  addAccount(l2addr: bigint, account: TsRollupAccount): bigint {
+  addAccount(l2addr: bigint, account: {
+    l2Addr: bigint;
+    tsAddr: bigint;
+  }): bigint {
     // TODO: check account is exist
     // TODO: check register has tokenInfo
     this.tsAccountTreeService.addLeaf({
@@ -185,7 +185,7 @@ export class SequencerConsumer {
     if (!acc) {
       throw new Error(`updateAccountToken: account id=${accountId} not found`);
     }
-    await this.tsTokenTreeService.updateLeaf(BigInt(tokenAddr), {
+    await this.tsAccountTreeService.updateTokenLeaf(BigInt(tokenAddr), {
       lockedAmt: lockedAmt.toString(),
       availableAmt: tokenAmt.toString(),
       leafId: tokenAddr,
@@ -377,7 +377,7 @@ export class SequencerConsumer {
     }
     if (!account) {
       const mkp = await this.tsTokenTreeService.getMerklerProofByAccountId(0n, '0');
-      this.currentAccountPayload.r_tokenRootFlow.push([getDefaultTokenTreeRoot(this.config.token_tree_height)]);
+      this.currentAccountPayload.r_tokenRootFlow.push([this.tsTokenTreeService.getDefaultRoot()]);
       this.currentAccountPayload.r_oriTokenLeaf.push(getDefaultTokenLeafMessage());
       this.currentAccountPayload.r_tokenMkPrf.push(mkp);
     } else {
@@ -458,7 +458,7 @@ export class SequencerConsumer {
 
       this.currentAccountPayload.r_oriAccountLeaf.push(leaf);
       this.currentAccountPayload.r_accountMkPrf.push(AccountMkp);
-      this.currentAccountPayload.r_tokenRootFlow.push([getDefaultTokenTreeRoot(this.config.token_tree_height)]);
+      this.currentAccountPayload.r_tokenRootFlow.push([this.tsTokenTreeService.getDefaultRoot()]);
       this.currentAccountPayload.r_oriTokenLeaf.push(getDefaultTokenLeafMessage());
       this.currentAccountPayload.r_tokenMkPrf.push(tokenMkp);
     } else {
@@ -570,7 +570,7 @@ export class SequencerConsumer {
       await this.startRollup();
     }
     let inputs: TsRollupCircuitInputItemType;
-    const reqType = req.reqType.toString();
+    const reqType = req.reqType;
     switch (reqType) {
       case TsTxType.REGISTER:
         inputs = await this.doRegister(req);
@@ -649,7 +649,7 @@ export class SequencerConsumer {
     const txId = this.latestTxId;
     const order = new ObsOrderLeaf(
       txId,
-      req.reqType.toString() as TsTxType,
+      req.reqType as TsTxType,
       req.accountId,
       req.tokenId,
       req.amount,
@@ -1020,9 +1020,17 @@ export class SequencerConsumer {
       },
     };
     const tokenInfos = req.tokenAddr !== TsTokenAddress.Unknown && Number(req.amount) > 0 ? t : {};
-    const registerAccount = new TsRollupAccount(tokenInfos, this.config.token_tree_height, [BigInt(req.tsPubKeyX), BigInt(req.tsPubKeyY)]);
+    const accountInfo = await this.accountInfoRepository.findOneOrFail({
+      where: {
+        accountId: registerL2Addr,
+      }
+    });
+    const hashedTsPubKey = accountInfo.hashedTsPubKey;
+    const registerAccount = this.accountLeafNodeRepository.create();
+    registerAccount.leafId = registerL2Addr.toString();
+    registerAccount.tsAddr = hashedTsPubKey;
+    // const registerAccount = new TsRollupAccount(tokenInfos, this.config.token_tree_height, [BigInt(req.tsPubKeyX), BigInt(req.tsPubKeyY)]);
     const orderLeafId = 0;
-    const hashedTsPubKey = registerAccount.hashedTsPubKey;
     const reqData = [
       BigInt(TsTxType.REGISTER),
       BigInt(TsSystemAccountAddress.MINT_ADDR),
@@ -1039,7 +1047,10 @@ export class SequencerConsumer {
     this.orderBeforeUpdate(orderLeafId);
 
     /** update state */
-    this.addAccount(registerL2Addr, registerAccount);
+    this.addAccount(registerL2Addr, {
+      l2Addr: registerL2Addr,
+      tsAddr: hashedTsPubKey,
+    });
 
     this.accountAndTokenAfterUpdate(registerL2Addr, registerTokenId);
     this.orderAfterUpdate(orderLeafId);
@@ -1054,7 +1065,7 @@ export class SequencerConsumer {
 
     const tx = {
       reqData,
-      tsPubKey: [req.tsPubKeyX, req.tsPubKeyY],
+      tsPubKey: [accountInfo.tsPubKeyX, accountInfo.tsPubKeyY],
       sigR: ['0', '0'], // register account no need sig
       sigS: '0', // register account no need sig
 

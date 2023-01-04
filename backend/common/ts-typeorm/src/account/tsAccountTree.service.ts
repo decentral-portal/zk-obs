@@ -8,33 +8,40 @@ import { toTreeLeaf, tsHashFunc } from '../common/ts-helper';
 import { TsMerkleTree } from '../common/tsMerkleTree';
 import { UpdateAccountTreeDto } from './dto/updateAccountTree.dto';
 import { ConfigService } from '@nestjs/config';
-import { getDefaultAccountLeaf, getDefaultAccountTreeRoot, getDefaultTokenTreeRoot } from './helper/mkAccount.helper';
-import assert from 'assert';
+import { getDefaultAccountLeaf} from './helper/mkAccount.helper';
+import { TsTokenTreeService } from './tsTokenTree.service';
+import { UpdateTokenTreeDto } from './dto/updateTokenTree.dto';
 
 @Injectable()
 export class TsAccountTreeService extends TsMerkleTree<AccountLeafNode>{
   private logger: Logger = new Logger(TsAccountTreeService.name);
+  private TOKENS_TREE_HEIGHT: number;
   constructor(
     @InjectRepository(AccountLeafNode)
     private accountLeafNodeRepository: Repository<AccountLeafNode>,
     @InjectRepository(AccountMerkleTreeNode)
     private accountMerkleTreeRepository: Repository<AccountMerkleTreeNode>,
     private connection: Connection,
+    private readonly tokenTreeService: TsTokenTreeService,
     private readonly configService: ConfigService,
   ) {
     console.time('create Account Tree');
-    super(configService.get<number>('ACCOUNTS_TREE_HEIGHT', 32), tsHashFunc);
+    super(configService.getOrThrow<number>('ACCOUNTS_TREE_HEIGHT'), tsHashFunc);
     console.timeEnd('create Account Tree');
+    this.TOKENS_TREE_HEIGHT = configService.getOrThrow<number>('TOKENS_TREE_HEIGHT');
   }
   async getCurrentLeafIdCount(): Promise<number> {
     const leafIdCount = await this.accountLeafNodeRepository.count();
     return leafIdCount;
   }
   getDefaultTokenTreeRoot() {
-    return getDefaultTokenTreeRoot(this.configService.getOrThrow<number>('TOKENS_TREE_HEIGHT'));
+    console.log({
+      tokenTreeService: this.tokenTreeService,
+    });
+    return this.tokenTreeService.getDefaultRoot();
   }
   getDefaultRoot(): string {
-    return getDefaultAccountTreeRoot(this.treeHeigt, this.getDefaultTokenTreeRoot());
+    return this.getDefaultHashByLevel(1);
   }
   getLeafDefaultVavlue(): string {
     return getDefaultAccountLeaf(this.getDefaultTokenTreeRoot());
@@ -109,6 +116,17 @@ export class TsAccountTreeService extends TsMerkleTree<AccountLeafNode>{
       j++;
     }
   }
+
+  async updateTokenLeaf(leafId: bigint, value: UpdateTokenTreeDto) {
+    return await this.connection.transaction(async (manager) => {
+      const tokenRoot = await this.tokenTreeService._updateLeaf(manager, leafId, value);
+      await this._updateLeaf(manager, BigInt(value.accountId), {
+        leafId: value.accountId,
+        tokenRoot: tokenRoot.hash,
+      });
+    });
+  }
+
 
   async getLeaf(leaf_id: bigint): Promise<AccountLeafNode> {
     const result = await this.accountLeafNodeRepository.findOneBy({leafId: leaf_id.toString()});

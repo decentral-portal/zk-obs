@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Connection, Repository, In } from 'typeorm';
-import { getDefaultObsOrderLeaf, getDefaultObsOrderTreeRoot } from '../account/helper/mkAccount.helper';
+import { getDefaultObsOrderLeaf } from '../account/helper/mkAccount.helper';
 import { toTreeLeaf, tsHashFunc } from '../common/ts-helper';
 import { TsMerkleTree } from '../common/tsMerkleTree';
 import { UpdateObsOrderTreeDto } from './dto/updateObsOrderTree.dto';
@@ -22,7 +22,7 @@ export class ObsOrderTreeService extends TsMerkleTree<ObsOrderLeafEntity> {
     private configService: ConfigService,
   ) {
     console.time('init order tree');
-    super(configService.get<number>('ORDER_TREE_HEIGHT', 32), tsHashFunc);
+    super(configService.getOrThrow<number>('ORDER_TREE_HEIGHT'), tsHashFunc);
     console.timeEnd('init order tree');
   }
   async updateLeaf(leafId: bigint, value: UpdateObsOrderTreeDto) {
@@ -150,7 +150,7 @@ export class ObsOrderTreeService extends TsMerkleTree<ObsOrderLeafEntity> {
     };
   }
   getDefaultRoot(): string {
-    return getDefaultObsOrderTreeRoot(this.treeHeigt);
+    return this.getDefaultHashByLevel(1);
   }
   getLeafDefaultVavlue(): string {
     // TODO: @abner please help me to check is the order is right?

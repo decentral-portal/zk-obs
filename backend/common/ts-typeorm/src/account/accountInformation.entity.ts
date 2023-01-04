@@ -2,6 +2,7 @@ import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryColumn } from '
 // import { AuctionOrderLeafNode } from '../auctionOrder/auctionOrderLeafNode.entity';
 import { ObsOrderEntity } from '../auctionOrder/obsOrder.entity';
 import { BaseTimeEntity } from '../common/baseTimeEntity';
+import { tsHashFunc } from '../common/ts-helper';
 import { AccountMerkleTreeNode } from './accountMerkleTreeNode.entity';
 import { Role } from './role.enum';
 import { TransactionInfo } from './transactionInfo.entity';
@@ -23,7 +24,7 @@ export class AccountInformation extends BaseTimeEntity {
     scale: 0,
     nullable: false,
   })
-  accountId!: string;
+  accountId!: bigint;
   @Column({
     type: 'varchar',
     name: 'email',
@@ -121,4 +122,12 @@ export class AccountInformation extends BaseTimeEntity {
     referencedColumnName: 'accountId',
   })
   obsOrders!: ObsOrderEntity[] | null;
+
+  get hashedTsPubKey() {
+    const raw = BigInt(tsHashFunc([
+      this.tsPubKeyX, this.tsPubKeyY
+    ]));
+    const hash = raw % BigInt(2 ** 160);
+    return hash;
+  }
 }

@@ -1,4 +1,4 @@
-import {BigNumber, BytesLike} from 'ethers';
+import {BytesLike} from 'ethers';
 export const DEFAULT_LEAF = '0x00';
 export class TsMerkleTree {
   public nodes: string[] = [];
@@ -25,6 +25,9 @@ export class TsMerkleTree {
   }
 
   private parse() {
+    console.log({
+      treeHeight: this.treeHeight,
+    });
     const nodes = new Array(Math.pow(2, this.treeHeight + 1)).fill(this.defaultLeaf);
     for (let i = Math.pow(2, this.treeHeight) - 1; i > 0; --i) {
       nodes[i] = this.hash([

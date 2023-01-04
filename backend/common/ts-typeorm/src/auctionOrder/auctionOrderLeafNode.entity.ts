@@ -1,6 +1,5 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryColumn } from 'typeorm';
-import { AccountInformation } from '../account/accountInformation.entity';
-import { TsTxType } from '../account/dto/ts-type';
+import { TsTxType } from '@ts-sdk/domain/lib/ts-types/ts-types';
+import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm';
 import { AuctionOrderMerkleTreeNode } from './auctionOrderMerkleTreeNode.entity';
 
 @Entity('AuctionOrderLeafNode', {schema: 'public'})

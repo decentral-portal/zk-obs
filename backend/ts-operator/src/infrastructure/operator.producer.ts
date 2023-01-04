@@ -14,12 +14,12 @@ import { RollupInformation } from 'common/ts-typeorm/src/rollup/rollupInformatio
 import { WorkerService } from '@common/cluster/worker.service';
 import { firstValueFrom } from 'rxjs/internal/firstValueFrom';
 import { AccountInformation } from '@common/ts-typeorm/account/accountInformation.entity';
-import { TsTxType } from '@common/ts-typeorm/account/dto/ts-type';
 import { MessageBroker } from '@common/db-pubsub/ports/messageBroker';
 import { CHANNEL } from '@common/db-pubsub/domains/value-objects/pubSub.constants';
 import { TsWorkerName } from '@ts-sdk/constant';
 import { BullQueueInject } from '@anchan828/nest-bullmq';
 import { Queue } from 'bullmq';
+import { TsTxType } from '@ts-sdk/domain/lib/ts-types/ts-types';
 @Injectable({
   scope: Scope.DEFAULT,
 })
@@ -83,7 +83,7 @@ export class OperatorProducer {
     }
     const txRegister = {
       L1Address: sender,
-      accountId: accountId.toString(),
+      accountId: BigInt(accountId.toString()),
       tsPubKeyX: tsPubX.toString(),
       tsPubKeyY: tsPubY.toString(),
     };
