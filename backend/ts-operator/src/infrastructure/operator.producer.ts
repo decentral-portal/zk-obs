@@ -94,7 +94,7 @@ export class OperatorProducer {
     const { lastSyncBlocknumberForRegisterEvent } =
       await this.rollupInfoRepository.findOneOrFail({ where: { id: 1 } });
     this.contract
-      .queryFilter(filters, lastSyncBlocknumberForRegisterEvent, 'latest')
+      .queryFilter(filters, lastSyncBlocknumberForRegisterEvent + 1, 'latest')
       .then((logs) => {
         logs.forEach((log) => {
           handler(log);
@@ -182,7 +182,7 @@ export class OperatorProducer {
       );
     };
     this.contract
-      .queryFilter(filters, lastSyncBlocknumberForDepositEvent, 'latest')
+      .queryFilter(filters, lastSyncBlocknumberForDepositEvent + 1, 'latest')
       .then((logs) => {
         logs.forEach((log) => {
           handler(log);
