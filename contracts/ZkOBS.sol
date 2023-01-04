@@ -16,6 +16,7 @@ import "hardhat/console.sol";
 /// @author zkManic
 contract ZkOBS is Ownable {
     event ReceivedETH(address indexed sender, uint256 amount);
+    event TokenWhitelisted(address indexed token, uint16 tokenId);
     event Register(address indexed sender, uint32 accountId, uint256 tsPubX, uint256 tsPubY, bytes20 l2Addr);
     event Deposit(address indexed sender, uint32 accountId, uint16 tokenId, uint128 amount);
     event Withdraw(address indexed sender, uint32 accountId, uint16 tokenId, uint128 amount);
@@ -111,12 +112,14 @@ contract ZkOBS is Ownable {
         storedBlockHashes[0] = keccak256(abi.encode(storedBlock));
         tokenNum = RESERVED_TOKEN_NUM;
         tokenIdOf[wETHAddr] = tokenNum;
+        emit TokenWhitelisted(wETHAddr, tokenNum);
         ++tokenNum;
     }
 
     function addToken(address tokenAddr) external onlyOwner {
         require(tokenIdOf[tokenAddr] == 0, "Token already registered");
         tokenIdOf[tokenAddr] = tokenNum;
+        emit TokenWhitelisted(tokenAddr, tokenNum);
         ++tokenNum;
     }
 
