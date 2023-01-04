@@ -429,7 +429,7 @@ export class SequencerConsumer {
   }
 
   private async tokenBeforeUpdate(accountLeafId: string, tokenAddr: TsTokenAddress) {
-    const account = this.getAccount(accountLeafId);
+    const account = await this.getAccount(accountLeafId);
     if (this.currentAccountPayload.r_tokenLeafId[this.currentAccountPayload.r_tokenLeafId.length - 1]?.length === 1) {
       this.currentAccountPayload.r_tokenLeafId[this.currentAccountPayload.r_tokenLeafId.length - 1].push(tokenAddr);
     } else {
@@ -450,7 +450,7 @@ export class SequencerConsumer {
     }
   }
   private async tokenAfterUpdate(accountLeafId: string, tokenAddr: TsTokenAddress) {
-    const account = this.getAccount(accountLeafId);
+    const account = await this.getAccount(accountLeafId);
     if (!account) {
       throw new Error('accountAfterUpdate: account not found');
     }
@@ -497,7 +497,7 @@ export class SequencerConsumer {
   }
 
   private async accountAndTokenBeforeUpdate(accountLeafId: string, tokenAddr: TsTokenAddress) {
-    const account = this.getAccount(accountLeafId);
+    const account = await this.getAccount(accountLeafId);
     if (this.currentAccountPayload.r_accountLeafId[this.currentAccountPayload.r_accountLeafId.length - 1]?.length === 1) {
       this.currentAccountPayload.r_accountLeafId[this.currentAccountPayload.r_accountLeafId.length - 1].push(accountLeafId);
     } else {
@@ -537,10 +537,10 @@ export class SequencerConsumer {
   }
 
   private async accountAndTokenAfterUpdate(accountLeafId: string, tokenAddr: TsTokenAddress) {
-    const account = this.getAccount(accountLeafId);
-    if (!account) {
-      throw new Error('accountAfterUpdate: account not found');
-    }
+    // const account = await this.getAccount(accountLeafId);
+    // if (!account) {
+    //   throw new Error('accountAfterUpdate: account not found');
+    // }
     const tokenInfo = await this.tsTokenTreeService.getLeaf((tokenAddr), accountLeafId.toString());
     const tokenRoot = await this.tsTokenTreeService.getRoot(accountLeafId.toString());
     const accountRoot = await this.tsAccountTreeService.getRoot();
@@ -1084,7 +1084,7 @@ export class SequencerConsumer {
       0n,
     ];
     const orderLeafId = '0';
-    const depositAccount = this.getAccount(req.arg0);
+    const depositAccount = await this.getAccount(req.arg0);
     if (!depositAccount) {
       throw new Error(`Deposit account not found L2Addr=${depositL2Addr}`);
     }
