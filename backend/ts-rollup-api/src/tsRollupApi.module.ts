@@ -33,16 +33,15 @@ const services: Provider[] = [
   controllers,
   imports: [
     TerminusModule,
-    ConfigModule,
     CqrsModule,
-    ConfigModule,
+    ConfigModule.forRoot(),
     LoggerModule,
     JwtModule.register({
       signOptions: { expiresIn: '15m' },
     }),
     TsTypeOrmModule,
     // TypeOrmModule.forFeature([AvailableViewEntity, AccountInformation, TokenLeafNode, AccountLeafNode, BlockInformation, TransactionInfo]),
-    WebSocketModule
+    // WebSocketModule
   ],
   providers: [
     ...controllers,
