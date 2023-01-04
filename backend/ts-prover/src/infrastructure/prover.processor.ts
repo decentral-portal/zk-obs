@@ -29,11 +29,26 @@ export class ProverConsumer {
   @BullWorkerProcess()
   async process(job: Job<BlockInformation>) {
     this.logger.log(`ProverConsumer.process ${job.data.blockNumber}`);
+    const currentBlock = await this.blockRepository.findOne({
+      where: {
+        blockStatus: BLOCK_STATUS.L2EXECUTED
+      },
+      order: {
+        blockNumber: 'ASC'
+      }
+    });
+    if(!currentBlock) {
+      this.logger.log(`ProverConsumer.process ${job.data.blockNumber} no block found`);
+      return false;
+    }
 
-    // const { circuitInput } = job.data;
-    const inputName = job.data.blockNumber.toString();
+    const inputName = `block-${currentBlock.blockNumber}`;
     const inputPath = this.getCircuitInputPath(inputName);
-    // fs.writeFileSync(inputPath, JSON.stringify(circuitInput));
+    if(!currentBlock.rawData) {
+      this.logger.log(`ProverConsumer.process ${job.data.blockNumber} rawData not found`);
+      return false;
+    }
+    fs.writeFileSync(inputPath, currentBlock.rawData);
 
     const { proofPath, publicPath } = await prove(inputName, inputPath, 'circuit');
     const proof = JSON.parse(fs.readFileSync(proofPath, 'utf8'));

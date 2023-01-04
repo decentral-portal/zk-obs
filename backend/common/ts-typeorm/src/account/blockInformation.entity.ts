@@ -51,7 +51,7 @@ export class BlockInformation extends BaseTimeEntity {
   callData!: object | '{}';
   @Column({
     type: 'json',
-    name: 'callData',
+    name: 'state',
     nullable: true,
     default: () => '\'{}\'',
   })
