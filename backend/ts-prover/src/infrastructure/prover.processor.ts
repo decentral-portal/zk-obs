@@ -13,13 +13,16 @@ import { Job } from 'bullmq';
 import { BLOCK_STATUS } from '@common/ts-typeorm/account/blockStatus.enum';
 @BullWorker({queueName: TsWorkerName.PROVER})
 export class ProverConsumer {
+  private circuitName = 'circuit';
   constructor(
     private readonly config: ConfigService,
     private readonly logger: PinoLoggerService,
     @InjectRepository(BlockInformation)
     private blockRepository: Repository<BlockInformation>,
   // eslint-disable-next-line no-empty-function
-  ) { }
+  ) {
+    this.circuitName = this.config.getOrThrow<string>('CIRCUIT_NAME');
+  }
 
   
   getCircuitInputPath(name: string) {
@@ -50,10 +53,11 @@ export class ProverConsumer {
     }
     fs.writeFileSync(inputPath, currentBlock.rawData);
 
-    const { proofPath, publicPath } = await prove(inputName, inputPath, 'circuit');
+    const { proofPath, publicPath } = await prove(inputName, inputPath, this.circuitName);
     const proof = JSON.parse(fs.readFileSync(proofPath, 'utf8'));
     const publicInput = JSON.parse(fs.readFileSync(publicPath, 'utf8'));
-    
+    // await verify(publicPath, proofPath, vKetPath, item.circuitName);
+    // await genSolidityCalldata(item.name, proofPath, publicPath, item.circuitName);
     await this.blockRepository.update({
       blockNumber: job.data.blockNumber,
     },{

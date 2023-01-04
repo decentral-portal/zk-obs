@@ -27,6 +27,7 @@ import { BullQueueInject } from '@anchan828/nest-bullmq';
 import { Queue } from 'bullmq';
 import { TsTxType } from '@ts-sdk/domain/lib/ts-types/ts-types';
 import { TsTokenAddress } from '../../../ts-sdk/src/domain/lib/ts-types/ts-types';
+import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 @Injectable({
   scope: Scope.DEFAULT,
 })
@@ -148,6 +149,7 @@ export class OperatorProducer {
         { lastSyncBlocknumberForRegisterEvent: blockNumber },
       ),
     ]);
+    this.checkoutHoldTx(accountId.toString());
     this.coreQueue.add('TransactionInfo', {
       test: true,
     });
@@ -193,6 +195,15 @@ export class OperatorProducer {
     });
   }
 
+  private async checkoutHoldTx(accountId: string) {
+    const reqs = this.holdTx.filter((tx) => tx.arg0 === accountId);
+    for (let index = 0; index < reqs.length; index++) {
+      const req = reqs[index];
+      await this.txRepository.insert(req);
+    }
+  }
+
+  private holdTx: QueryDeepPartialEntity<TransactionInfo>[] | QueryDeepPartialEntity<TransactionInfo>[] =[];
   async handleDepositEvent(
     sender: string,
     accountId: BigNumber,
@@ -218,13 +229,20 @@ export class OperatorProducer {
         accountId,
       })}`,
     );
-
-    await this.txRepository.insert({
+    const req = {
       reqType: Number(TsTxType.DEPOSIT),
       tokenId: tokenId.toString(),
       amount: amount.toString(),
       arg0: BigInt(accountId.toString()).toString(),
+    };
+    const account = await this.accountRepository.findOne({
+      where: { accountId: accountId.toString() },
     });
+    if(!account || !account.L1Address) {
+      this.holdTx.push(req);
+    } else {
+      await this.txRepository.insert(req);
+    }
     this.coreQueue.add('TransactionInfo', {
       test: true,
     });

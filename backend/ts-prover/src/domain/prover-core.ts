@@ -1,6 +1,10 @@
 const util = require('util');
 import {resolve} from 'path';
+import path from 'path';
+import fs from 'fs';
 
+const snarkjs = require('snarkjs');
+const groth16 = snarkjs.groth16;
 const _exec = util.promisify(require('child_process').exec);
 const CIRCUIT_BASE = process.env.CIRCUIT_BASE || '';
 const RAPIDSNARK_PATH = process.env.RAPIDSNARK_PATH ? resolve(__dirname, process.env.RAPIDSNARK_PATH) : '';
@@ -51,6 +55,33 @@ export async function generateWitness(inputName: string, inputPath: string, circ
   };
 }
 
+export async function verify(publicPath: string, proofPath:string, vkeyPath: string, circuitName: string) {
+  console.time(`verify ${proofPath}`);
+  const { stdout, } = await exec(`npx snarkjs groth16 verify ${vkeyPath} ${publicPath} ${proofPath}`);
+  console.timeEnd(`verify ${proofPath}`);
+  return {
+    stdout
+  };
+}
+
+export async function genSolidityCalldata(inputName:string, proofPath: string, publicPath: string, circuitName: string) {
+  console.time(`soliditycalldata ${publicPath}`);
+  // const calldataPath = path.resolve(BatchesDir, `${inputName}-calldata.json`);
+  const calldataRawPath = path.resolve(BatchesDir, `${inputName}-calldata-raw.json`);
+  // const { stdout, } = await spawn(`snarkjs zkey export soliditycalldata ${publicPath} ${proofPath}`);
+  const pub = JSON.parse(fs.readFileSync(publicPath, 'utf8'));
+  const proof = JSON.parse(fs.readFileSync(proofPath, 'utf8'));
+  const stdout = await groth16.exportSolidityCallData(proof, pub);
+  // const calldata = JSON.parse(`[${stdout}]`);
+  fs.writeFileSync(calldataRawPath, `[${stdout}]`);
+  // const outputObj = await typeDispatch(calldata, circuitName);
+
+  // fs.writeFileSync(calldataPath, JSON.stringify(outputObj, null, 2));
+  console.timeEnd(`soliditycalldata ${publicPath}`);
+  return {
+    calldataPath: calldataRawPath
+  };
+}
 
 function exec(cmd: string): Promise<{id: number, cmd: string, stdout: string}> {
   cmdLogs.push(cmd);
