@@ -10,7 +10,7 @@ import {
   TsTxRegisterRequest,
   TsTxWithdrawNonSignatureRequest,
 } from '../ts-types/ts-req-types';
-import { CHUNK_BYTES_SIZE, MAX_CHUNKS_BYTES_PER_REQ, TsTokenAddress, TsTokenInfo, TsTxType } from '../ts-types/ts-types';
+import { CHUNK_BYTES_SIZE, MAX_CHUNKS_BYTES_PER_REQ, TsTokenAddress, TsTokenInfo, TsTxRequestDatasType, TsTxType } from '../ts-types/ts-types';
 import { txToCircuitInput } from './ts-helper';
 import { amountToTxAmountV3_40bit } from '../bigint-helper';
 import { TransactionInfo } from '@common/ts-typeorm/account/transactionInfo.entity';
