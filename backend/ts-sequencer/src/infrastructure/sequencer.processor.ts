@@ -97,7 +97,7 @@ export class SequencerConsumer {
     private accountInfoRepository: Repository<AccountInformation>,
     @InjectRepository(ObsOrderEntity)
     private obsOrderRepository: Repository<ObsOrderEntity>,
-    private readonly tsAccountTreeService: TsAccountTreeService,  
+    private readonly tsAccountTreeService: TsAccountTreeService,
     private readonly tsTokenTreeService: TsTokenTreeService,
     private readonly obsOrderTreeService: ObsOrderTreeService,
     private connection: Connection,
