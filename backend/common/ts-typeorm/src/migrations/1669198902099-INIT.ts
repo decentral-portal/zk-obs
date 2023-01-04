@@ -366,6 +366,12 @@ export class INIT_1669198902099 implements MigrationInterface {
           },
           {
             type: 'json',
+            name: 'state',
+            isNullable: true,
+            default: '\'{}\'',
+          },
+          {
+            type: 'json',
             name: 'proof',
             isNullable: true,
             default: '\'{}\'',
