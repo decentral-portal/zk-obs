@@ -44,8 +44,10 @@ export function getRollupData(inputs: any, root: any, calldata: any) {
   const oriStateRoot = root.oriStateRoot;
   const newStateRoot = root.newStateRoot;
   const newTsRoot = root.newTsRoot;
+  const o_chunk = root.o_chunk;
   const { commitment, commitmentMessage, commitmentHashOrigin } =
     stateToCommitment(root);
+  // console.log({ commitmentMessage });
   const proof_a = [
     BigNumber.from(calldata[0][0]),
     BigNumber.from(calldata[0][1]),
@@ -59,6 +61,13 @@ export function getRollupData(inputs: any, root: any, calldata: any) {
     BigNumber.from(calldata[2][1]),
   ];
   const proof_commitment = [BigNumber.from(calldata[3][0])];
+  let pubdataOffset = [];
+  for (let i = 0; i < root.isCriticalChunk.length; i++) {
+    if (root.isCriticalChunk[i] == '1') {
+      pubdataOffset.push((Math.floor(i / 2) - 1) * 12);
+    }
+  }
+  // console.log({ pubdataOffset });
   return {
     pubKeyX,
     pubKeyY,
@@ -67,6 +76,8 @@ export function getRollupData(inputs: any, root: any, calldata: any) {
     newStateRoot,
     newTsRoot,
     commitmentHashOrigin,
+    o_chunk,
+    pubdataOffset,
     proof_a,
     proof_b,
     proof_c,
