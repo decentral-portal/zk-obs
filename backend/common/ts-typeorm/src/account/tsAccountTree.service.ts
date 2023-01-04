@@ -144,14 +144,23 @@ export class TsAccountTreeService extends TsMerkleTree<AccountLeafNode>{
     });
     if (result == null) {
       const hashDecString = BigInt(this.getDefaultHashByLevel(1)).toString();
-      await this.accountMerkleTreeRepository.insert({
-        id: 1n.toString(),
-        hash: hashDecString
-      });
-      return {
-        id: 1n.toString(),
-        hash: hashDecString
-      };
+      try {
+        await this.accountMerkleTreeRepository.insert({
+          id: 1n.toString(),
+          hash: hashDecString
+        });
+        return {
+          id: 1n.toString(),
+          hash: hashDecString
+        };
+
+      } catch (error: any) {
+        this.logger.error('accountMerkleTreeRepository insert root error');
+        return {
+          id: 1n.toString(),
+          hash: hashDecString
+        };
+      }
     }
     return result;  
   }
