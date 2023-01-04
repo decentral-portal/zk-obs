@@ -1087,9 +1087,9 @@ export class SequencerConsumer {
       0n,
     ];
     const orderLeafId = '0';
-    const depositAccount = await this.getAccount(req.arg0);
+    const depositAccount = await this.getAccount(accountLeafId);
     if (!depositAccount) {
-      throw new Error(`Deposit account not found L2Addr=${depositL2Addr}`);
+      throw new Error(`Deposit account not found L2Addr=${accountLeafId}`);
     }
     const tokenId = req.tokenId.toString() as TsTokenAddress;
 

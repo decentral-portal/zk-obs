@@ -29,6 +29,7 @@ import { TsTxType } from '@ts-sdk/domain/lib/ts-types/ts-types';
 import { TsTokenAddress } from '../../../ts-sdk/src/domain/lib/ts-types/ts-types';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { TsAccountTreeService } from '@common/ts-typeorm/account/tsAccountTree.service';
+import { accountId } from '@common/rbac/domain/value-objects/accountId';
 @Injectable({
   scope: Scope.DEFAULT,
 })
@@ -240,7 +241,7 @@ export class OperatorProducer {
     // const account = await this.accountRepository.findOne({
     //   where: { accountId: accountId.toString() },
     // });
-    if(!account) {
+    if(!account || account.tsAddr === '0') {
       this.holdTx.push(req);
       console.log({
         msg: 'pending depopsit req',
