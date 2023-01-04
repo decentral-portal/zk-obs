@@ -51,6 +51,25 @@ export class BlockInformation extends BaseTimeEntity {
   callData!: object | '{}';
   @Column({
     type: 'json',
+    name: 'callData',
+    nullable: true,
+    default: () => '\'{}\'',
+  })
+  state!: {
+    blockNumber?: string | null,
+    orderRoot?: string | null,
+    accountRoot?: string | null,
+    stateRoot?: string | null,
+    l1RequestNum?: string | null,
+    pendingRollupTxHash?: string | null,
+    commitment?: string | null,
+    timestamp?: string | null,
+    tsRoot?: string | null,
+    publicData?: string | null,
+    publicDataOffsets?: string[],
+  };
+  @Column({
+    type: 'json',
     name: 'proof',
     nullable: true,
     default: () => '\'{}\'',
@@ -79,4 +98,5 @@ export class BlockInformation extends BaseTimeEntity {
     referencedColumnName: 'blockNumber'
   })
   transactionInfos!: TransactionInfo[] | null;
+
 }
