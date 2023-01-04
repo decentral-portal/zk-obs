@@ -13,3 +13,4 @@
 .env
 .*.local
 .history
+/build_circuits
