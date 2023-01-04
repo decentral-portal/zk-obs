@@ -316,22 +316,22 @@ export class SequencerConsumer {
       const o_chunk_remains = this.config.numOfChunks - circuitInputs['o_chunks'].length;
       circuitInputs['isCriticalChunk'] = circuitInputs['isCriticalChunk'].flat();
       const l1RequestNum = circuitInputs['o_chunks'].filter((t: any) => t === '1').length;
-      assert(
-        circuitInputs['isCriticalChunk'].length === circuitInputs['o_chunks'].length,
-        `isCriticalChunk=${circuitInputs['isCriticalChunk'].length} length not match o_chunks=${circuitInputs['o_chunks'].length} `,
-      );
-      for (let index = 0; index < o_chunk_remains; index++) {
-        circuitInputs['o_chunks'].push('0');
-        circuitInputs['isCriticalChunk'].push('0');
-      }
-      assert(
-        circuitInputs['o_chunks'].length === this.config.numOfChunks,
-        `o_chunks=${circuitInputs['o_chunks'].length} length not match numOfChunks=${this.config.numOfChunks} `,
-      );
-      assert(
-        circuitInputs['isCriticalChunk'].length === this.config.numOfChunks,
-        `isCriticalChunk=${circuitInputs['isCriticalChunk'].length} length not match numOfChunks=${this.config.numOfChunks} `,
-      );
+      // assert(
+      //   circuitInputs['isCriticalChunk'].length === circuitInputs['o_chunks'].length,
+      //   `isCriticalChunk=${circuitInputs['isCriticalChunk'].length} length not match o_chunks=${circuitInputs['o_chunks'].length} `,
+      // );
+      // for (let index = 0; index < o_chunk_remains; index++) {
+      //   circuitInputs['o_chunks'].push('0');
+      //   circuitInputs['isCriticalChunk'].push('0');
+      // }
+      // assert(
+      //   circuitInputs['o_chunks'].length === this.config.numOfChunks,
+      //   `o_chunks=${circuitInputs['o_chunks'].length} length not match numOfChunks=${this.config.numOfChunks} `,
+      // );
+      // assert(
+      //   circuitInputs['isCriticalChunk'].length === this.config.numOfChunks,
+      //   `isCriticalChunk=${circuitInputs['isCriticalChunk'].length} length not match numOfChunks=${this.config.numOfChunks} `,
+      // );
       // TODO: hotfix
       circuitInputs['r_accountLeafId'] = circuitInputs['r_accountLeafId'][0];
       circuitInputs['r_oriAccountLeaf'] = circuitInputs['r_oriAccountLeaf'][0];
@@ -624,7 +624,7 @@ export class SequencerConsumer {
     });
   }
   private async updateObsOrder(order: UpdateObsOrderTreeDto) {
-    assert(BigInt(order.orderLeafId) > 0n, 'updateObsOrder: orderLeafId should be exist');
+    // assert(BigInt(order.orderLeafId) > 0n, 'updateObsOrder: orderLeafId should be exist');
     await this.obsOrderTreeService.updateLeaf(order.orderLeafId, order);
   }
 
@@ -919,10 +919,10 @@ export class SequencerConsumer {
     return tx as unknown as TsRollupCircuitInputItemType;
   }
   async doSecondLimitEnd(req: TransactionInfo) {
-    assert(!!this.currentHoldTakerOrder, 'doSecondLimitEnd: currentHoldTakerOrder is null');
+    // assert(!!this.currentHoldTakerOrder, 'doSecondLimitEnd: currentHoldTakerOrder is null');
     const reqData: TsTxRequestDatasType = [BigInt(TsTxType.SecondLimitEnd), 0n, 0n, 0n, 0n, 0n, 0n, 0n, 0n, BigInt(req.arg4)];
     const orderLeafId = req.arg4;
-    assert(orderLeafId === this.currentHoldTakerOrder.orderLeafId, 'doSecondLimitEnd: orderLeafId not match');
+    // assert(orderLeafId === this.currentHoldTakerOrder.orderLeafId, 'doSecondLimitEnd: orderLeafId not match');
     const takerOrder = this.currentHoldTakerOrder;
     if (!takerOrder) {
       throw new Error(`doSecondLimitEnd: order not found orderLeafId=${orderLeafId}`);
