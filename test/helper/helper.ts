@@ -31,7 +31,7 @@ export function stateToCommitment({
   };
 }
 
-export function toHex(n: string | BigInt) {
+export function toHex(n: string | BigInt, pad = 64) {
   const num = typeof n === 'bigint' ? n : BigInt(n as string);
   const rawHex = num.toString(16);
   return '0x' + (rawHex.length % 2 === 0 ? rawHex : '0' + rawHex);

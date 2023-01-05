@@ -19,13 +19,24 @@ import { AccountInformation } from '@common/ts-typeorm/account/accountInformatio
 import { BlockInformation } from '@common/ts-typeorm/account/blockInformation.entity';
 import { AccountModule } from '@common/ts-typeorm/account/account.module';
 
-const localNetwork = {
+const LocalNetwork = {
   name: 'LOCAL',
   chainId: 31337,
   _defaultProvider: (providers: any) => {
     return new providers.JsonRpcProvider('http://localhost:8545');
   },
 };
+
+function getNetwork(networkEnv: string) {
+  switch (networkEnv) {
+    case 'MAINNET':
+      return MAINNET_NETWORK;
+    case 'TESTNET':
+      return GOERLI_NETWORK;
+    default:
+      return LocalNetwork;
+  }
+}
 @Module({
   imports: [
     ConfigModule,
@@ -43,12 +54,12 @@ const localNetwork = {
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        network: configService.get('ETHEREUM_NETWORK', 'TESTNET') === 'MAINNET' ? MAINNET_NETWORK : GOERLI_NETWORK,
+        network: getNetwork(configService.getOrThrow<string>('ETHEREUM_NETWORK')),
         etherscan: configService.get('ETHERSCAN_API_KEY'),
         // custom: {
         //   url: 'http://localhost:8545',
         // },
-        // infura: configService.get('INFURA_API_KEY'),
+        infura: configService.getOrThrow<string>('ETHEREUM_NETWORK') === 'MAINNET' ? configService.get('INFURA_API_KEY') : '',
         quorum: 1,
         useDefaultProvider: true,
       }),

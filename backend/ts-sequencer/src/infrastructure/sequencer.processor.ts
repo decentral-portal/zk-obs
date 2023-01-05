@@ -13,7 +13,6 @@ import {
   RollupStatus,
   CircuitAccountTxPayload,
   CircuitOrderTxPayload,
-  CircuitNullifierTxPayload,
 } from '@ts-sdk/domain/lib/ts-rollup/ts-rollup';
 import {
   encodeRollupWithdrawMessage,
@@ -53,6 +52,8 @@ import { AccountInformation } from '@common/ts-typeorm/account/accountInformatio
 import { UpdateObsOrderTreeDto } from '@common/ts-typeorm/auctionOrder/dto/updateObsOrderTree.dto';
 import { BLOCK_STATUS } from '@common/ts-typeorm/account/blockStatus.enum';
 import { ObsOrderEntity } from '@common/ts-typeorm/auctionOrder/obsOrder.entity';
+import { arrayChunkToHexString } from '@ts-sdk/domain/lib/bigint-helper';
+import { utils } from 'ethers';
 
 const DefaultRollupConfig: TsRollupConfigType = {
   order_tree_height: 10,

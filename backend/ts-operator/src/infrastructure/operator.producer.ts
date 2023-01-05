@@ -235,4 +235,13 @@ export class OperatorProducer {
       { lastSyncBlocknumberForDepositEvent: blockNumber },
     );
   }
+  private async checkoutHoldTx(accountId: string) {
+    const reqs = this.holdTx.filter((tx) => tx.arg0 === accountId);
+    for (let index = 0; index < reqs.length; index++) {
+      const req = reqs[index];
+      await this.txRepository.insert(req);
+    }
+  }
+
+  private holdTx: QueryDeepPartialEntity<TransactionInfo>[] | QueryDeepPartialEntity<TransactionInfo>[] =[];
 }
