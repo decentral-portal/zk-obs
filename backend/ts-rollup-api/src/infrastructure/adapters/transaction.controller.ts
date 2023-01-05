@@ -44,6 +44,7 @@ export class TsTransactionController {
     @ApiOperation({})
     @ApiCreatedResponse({type: PlaceOrderResponseDto})
   async placeOrder(@Body()dto : PlaceOrderRequest) {
+    console.log('placeOrder', dto);
     // check reqType TsTxType.MARKET_ORDER buyAmt should be '0'
     if (dto.reqType === '8'  && dto.buyAmt !== '0') {
       throw new BadRequestException('buyAmt should be 0 for market order');
