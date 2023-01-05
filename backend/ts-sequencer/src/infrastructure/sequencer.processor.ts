@@ -88,15 +88,15 @@ export class SequencerConsumer {
   constructor(
     private readonly logger: PinoLoggerService,
     @InjectRepository(TransactionInfo)
-    private txRepository: Repository<TransactionInfo>,
+    private readonly txRepository: Repository<TransactionInfo>,
     @InjectRepository(BlockInformation)
-    private blockRepository: Repository<BlockInformation>,
+    private readonly blockRepository: Repository<BlockInformation>,
     @InjectRepository(AccountLeafNode)
-    private accountLeafNodeRepository: Repository<AccountLeafNode>,
+    private readonly accountLeafNodeRepository: Repository<AccountLeafNode>,
     @InjectRepository(AccountInformation)
-    private accountInfoRepository: Repository<AccountInformation>,
+    private readonly accountInfoRepository: Repository<AccountInformation>,
     @InjectRepository(ObsOrderEntity)
-    private obsOrderRepository: Repository<ObsOrderEntity>,
+    private readonly obsOrderRepository: Repository<ObsOrderEntity>,
     private readonly tsAccountTreeService: TsAccountTreeService,
     private readonly tsTokenTreeService: TsTokenTreeService,
     private readonly obsOrderTreeService: ObsOrderTreeService,
@@ -598,6 +598,7 @@ export class SequencerConsumer {
     }, {
       orderLeafId: Number(order.orderLeafId),
     });
+
     await this.obsOrderTreeService.updateLeaf(order.orderLeafId, order);
     await this.obsOrderTreeService.addCurrentOrderId();
   }
@@ -1104,8 +1105,6 @@ export class SequencerConsumer {
     // TODO: fill left reqs
     await this.accountAndTokenBeforeUpdate(accountLeafId, tokenId);
     await this.accountAndTokenAfterUpdate(accountLeafId, tokenId);
-    // await this.orderBeforeUpdate(orderLeafId);
-    // await this.orderAfterUpdate(orderLeafId);
     const { r_chunks_bigint, o_chunks_bigint, isCriticalChunk } = this.getTxChunks(req);
 
     const tx = {
