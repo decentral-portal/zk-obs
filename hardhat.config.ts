@@ -76,6 +76,10 @@ const config: HardhatUserConfig = {
         process.env.ALLOW_UNLIMITED_CONTRACT_SIZE,
         false,
       ),
+      accounts: {
+        count: getNumber(process.env.CUSTOM_NETWORK_ACCOUNTS_COUNT, 10),
+        mnemonic: process.env.CUSTOM_NETWORK_ACCOUNTS_MNEMONIC || '',
+      },
     },
     custom: {
       url: process.env.CUSTOM_NETWORK_URL || '',
