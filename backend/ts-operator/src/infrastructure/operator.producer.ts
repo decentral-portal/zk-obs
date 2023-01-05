@@ -46,7 +46,7 @@ export class OperatorProducer {
     @InjectRepository(AccountInformation)
     private accountRepository: Repository<AccountInformation>,
     private readonly messageBrokerService: MessageBroker,
-    private readonly tsAccountTreeService: TsAccountTreeService,
+
     private readonly connection: Connection,
     private readonly workerService: WorkerService,
   ) {
@@ -92,7 +92,7 @@ export class OperatorProducer {
     const { lastSyncBlocknumberForRegisterEvent } =
       await this.rollupInfoRepository.findOneOrFail({ where: { id: 1 } });
     this.contract
-      .queryFilter(filters, lastSyncBlocknumberForRegisterEvent + 1, 'latest')
+      .queryFilter(filters, lastSyncBlocknumberForRegisterEvent, 'latest')
       .then((logs) => {
         logs.forEach((log) => {
           handler(log);
@@ -180,7 +180,7 @@ export class OperatorProducer {
       );
     };
     this.contract
-      .queryFilter(filters, lastSyncBlocknumberForDepositEvent + 1, 'latest')
+      .queryFilter(filters, lastSyncBlocknumberForDepositEvent, 'latest')
       .then((logs) => {
         logs.forEach((log) => {
           handler(log);
@@ -194,15 +194,6 @@ export class OperatorProducer {
     });
   }
 
-  private async checkoutHoldTx(accountId: string) {
-    const reqs = this.holdTx.filter((tx) => tx.arg0 === accountId);
-    for (let index = 0; index < reqs.length; index++) {
-      const req = reqs[index];
-      await this.txRepository.insert(req);
-    }
-  }
-
-  private holdTx: QueryDeepPartialEntity<TransactionInfo>[] | QueryDeepPartialEntity<TransactionInfo>[] =[];
   async handleDepositEvent(
     sender: string,
     accountId: BigNumber,
@@ -228,25 +219,13 @@ export class OperatorProducer {
         accountId,
       })}`,
     );
-    const req = {
+
+    await this.txRepository.insert({
       reqType: Number(TsTxType.DEPOSIT),
       tokenId: tokenId.toString(),
       amount: amount.toString(),
       arg0: BigInt(accountId.toString()).toString(),
-    };
-    const account = await this.tsAccountTreeService.getLeaf(accountId.toString());
-    // const account = await this.accountRepository.findOne({
-    //   where: { accountId: accountId.toString() },
-    // });
-    if(!account || account.tsAddr === '0') {
-      this.holdTx.push(req);
-      console.log({
-        msg: 'pending depopsit req',
-        req,
-      });
-    } else {
-      await this.txRepository.insert(req);
-    }
+    });
     this.coreQueue.add('TransactionInfo', {
       test: true,
     });

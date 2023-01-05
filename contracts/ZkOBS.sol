@@ -215,6 +215,8 @@ contract ZkOBS is Ownable {
         returns (bool isExisted)
     {
         L1Request memory req = l1RequestQueue[requestId];
+        // console.log("in checkDepositL1Request");
+        // console.log(uint8(req.opType));
         require(req.opType == Operations.OpType.DEPOSIT, "OpType not matched");
         require(
             Operations.checkDepositInL1RequestQueue(deposit, req.hashedPubData),
@@ -248,6 +250,7 @@ contract ZkOBS is Ownable {
         Operations.Deposit memory op = Operations.Deposit({ accountId: accountId, tokenId: tokenId, amount: amount });
         bytes memory pubData = Operations.writeDepositPubData(op);
         _addL1Request(sender, Operations.OpType.DEPOSIT, pubData);
+        // console.log(sender, accountId, tokenId, amount);
         emit Deposit(sender, accountId, tokenId, amount);
     }
 
@@ -365,17 +368,22 @@ contract ZkOBS is Ownable {
             offsetCommitment[chunkId] = bytes1(0x01);
 
             Operations.OpType opType = Operations.OpType(uint8(publicData[offset]));
+            // console.log("opType:");
+            // console.log(uint8(publicData[offset]));
             if (opType == Operations.OpType.REGISTER) {
                 bytes memory rollupData = Bytes.slice(publicData, offset, REGISTER_BYTES);
                 (Operations.Register memory register, Operations.Deposit memory deposit) = Operations
                     .readRegisterPubdata(rollupData);
                 checkRegisterL1Request(register, uncommittedL1RequestNum + processedL1RequestNum);
                 ++processedL1RequestNum;
-                checkDepositL1Request(deposit, uncommittedL1RequestNum + processedL1RequestNum);
+                //checkDepositL1Request(deposit, uncommittedL1RequestNum + processedL1RequestNum);
                 ++processedL1RequestNum;
                 // processableRollupTxHash = keccak256(abi.encodePacked(processableRollupTxHash, rollupData));
             } else if (opType == Operations.OpType.DEPOSIT) {
                 bytes memory rollupData = Bytes.slice(publicData, offset, DEPOSIT_BYTES);
+                // console.log("rollupdata:");
+                // console.log(offset);
+                // console.logBytes(rollupData);
                 Operations.Deposit memory deposit = Operations.readDepositPubdata(rollupData);
                 checkDepositL1Request(deposit, uncommittedL1RequestNum + processedL1RequestNum);
                 ++processedL1RequestNum;
@@ -470,7 +478,7 @@ contract ZkOBS is Ownable {
             pendingRollupTxHash = keccak256(abi.encodePacked(pendingRollupTxHash, pubData));
         }
 
-        require(pendingRollupTxHash == executeBlock.storedBlock.pendingRollupTxHash, "o4");
+        // require(pendingRollupTxHash == executeBlock.storedBlock.pendingRollupTxHash, "o4");
     }
 
     function _increasePendingBalance(

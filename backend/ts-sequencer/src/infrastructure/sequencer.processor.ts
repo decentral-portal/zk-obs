@@ -8,11 +8,35 @@ import { TransactionInfo } from 'common/ts-typeorm/src/account/transactionInfo.e
 import { Repository, Connection } from 'typeorm';
 import { TS_STATUS } from 'common/ts-typeorm/src/account/tsStatus.enum';
 import { recursiveToString } from '@ts-sdk/domain/lib/helper';
-import { TsRollupConfigType, RollupStatus, CircuitAccountTxPayload, CircuitOrderTxPayload, CircuitNullifierTxPayload } from '@ts-sdk/domain/lib/ts-rollup/ts-rollup';
-import { encodeRollupWithdrawMessage, stateToCommitment } from '@ts-sdk/domain/lib/ts-rollup/ts-rollup-helper';
-import { txsToRollupCircuitInput, encodeRChunkBuffer, bigint_to_chunk_array } from '@ts-sdk/domain/lib/ts-rollup/ts-tx-helper';
-import { TsRollupCircuitInputType, TsRollupCircuitInputItemType } from '@ts-sdk/domain/lib/ts-types/ts-circuit-types';
-import { TxNoop, CHUNK_BITS_SIZE, MAX_CHUNKS_PER_REQ, TsTxType, TsSystemAccountAddress, TsTokenAddress, TsTxRequestDatasType } from '@ts-sdk/domain/lib/ts-types/ts-types';
+import {
+  TsRollupConfigType,
+  RollupStatus,
+  CircuitAccountTxPayload,
+  CircuitOrderTxPayload,
+  CircuitNullifierTxPayload,
+} from '@ts-sdk/domain/lib/ts-rollup/ts-rollup';
+import {
+  encodeRollupWithdrawMessage,
+  stateToCommitment,
+} from '@ts-sdk/domain/lib/ts-rollup/ts-rollup-helper';
+import {
+  txsToRollupCircuitInput,
+  encodeRChunkBuffer,
+  bigint_to_chunk_array,
+} from '@ts-sdk/domain/lib/ts-rollup/ts-tx-helper';
+import {
+  TsRollupCircuitInputType,
+  TsRollupCircuitInputItemType,
+} from '@ts-sdk/domain/lib/ts-types/ts-circuit-types';
+import {
+  TxNoop,
+  CHUNK_BITS_SIZE,
+  MAX_CHUNKS_PER_REQ,
+  TsTxType,
+  TsSystemAccountAddress,
+  TsTokenAddress,
+  TsTxRequestDatasType,
+} from '@ts-sdk/domain/lib/ts-types/ts-types';
 import assert from 'assert';
 import { dpPoseidonHash } from '@ts-sdk/domain/lib/poseidon-hash-dp';
 import { TsAccountTreeService } from '@common/ts-typeorm/account/tsAccountTree.service';
@@ -20,13 +44,15 @@ import { TsTokenTreeService } from '@common/ts-typeorm/account/tsTokenTree.servi
 import { ObsOrderTreeService } from '@common/ts-typeorm/auctionOrder/obsOrderTree.service';
 import { AccountLeafNode } from '@common/ts-typeorm/account/accountLeafNode.entity';
 import { ObsOrderLeafEntity } from '@common/ts-typeorm/auctionOrder/obsOrderLeaf.entity';
-import { getDefaultAccountLeafMessage, getDefaultObsOrderLeafMessage, getDefaultTokenLeafMessage } from '@common/ts-typeorm/account/helper/mkAccount.helper';
+import {
+  getDefaultAccountLeafMessage,
+  getDefaultObsOrderLeafMessage,
+  getDefaultTokenLeafMessage,
+} from '@common/ts-typeorm/account/helper/mkAccount.helper';
 import { AccountInformation } from '@common/ts-typeorm/account/accountInformation.entity';
 import { UpdateObsOrderTreeDto } from '@common/ts-typeorm/auctionOrder/dto/updateObsOrderTree.dto';
 import { BLOCK_STATUS } from '@common/ts-typeorm/account/blockStatus.enum';
 import { ObsOrderEntity } from '@common/ts-typeorm/auctionOrder/obsOrder.entity';
-import { arrayChunkToHexString } from '@ts-sdk/domain/lib/bigint-helper';
-import { utils } from 'ethers';
 
 const DefaultRollupConfig: TsRollupConfigType = {
   order_tree_height: 10,
@@ -56,21 +82,21 @@ export class SequencerConsumer {
   async process(job: Job<TransactionInfo>) {
     this.logger.log(`SEQUENCER.process ${job.data.txId} start`);
     console.log({
-      log: 'SEQUENCER.process start'
+      log: 'SEQUENCER.process start',
     });
     const req = await this.txRepository.findOne({
-      where: {  
+      where: {
         txId: job.data.txId,
       },
     });
-    if(!req) {
+    if (!req) {
       this.logger.log(`SEQUENCER.process ${job.data.txId} not found`);
       return false;
     }
     req.txStatus = TS_STATUS.PROCESSING;
     this.txRepository.save(req);
     console.log({
-      log: 'SEQUENCER.doTransaction start'
+      log: 'SEQUENCER.doTransaction start',
     });
     await this.doTransaction(req);
     this.logger.log(`SEQUENCER.process ${job.data.txId} done`);
@@ -94,9 +120,9 @@ export class SequencerConsumer {
     @InjectRepository(AccountLeafNode)
     private readonly accountLeafNodeRepository: Repository<AccountLeafNode>,
     @InjectRepository(AccountInformation)
-    private readonly accountInfoRepository: Repository<AccountInformation>,
+    private accountInfoRepository: Repository<AccountInformation>,
     @InjectRepository(ObsOrderEntity)
-    private readonly obsOrderRepository: Repository<ObsOrderEntity>,
+    private obsOrderRepository: Repository<ObsOrderEntity>,
     private readonly tsAccountTreeService: TsAccountTreeService,
     private readonly tsTokenTreeService: TsTokenTreeService,
     private readonly obsOrderTreeService: ObsOrderTreeService,
@@ -105,7 +131,7 @@ export class SequencerConsumer {
     this.logger.log('SEQUENCER.process START');
     this.config = DefaultRollupConfig;
   }
-  
+
   // ===============================
   // TODO: amt_size, l2_token_addr_size
   public config: TsRollupConfigType = DefaultRollupConfig;
@@ -144,8 +170,10 @@ export class SequencerConsumer {
   private currentAccountRootFlow: bigint[] = [];
   private currentOrderRootFlow: bigint[] = [];
   /** Transaction Information */
-  private currentAccountPayload: CircuitAccountTxPayload = this.prepareTxAccountPayload();
-  private currentOrderPayload: CircuitOrderTxPayload = this.prepareTxOrderPayload();
+  private currentAccountPayload: CircuitAccountTxPayload =
+    this.prepareTxAccountPayload();
+  private currentOrderPayload: CircuitOrderTxPayload =
+    this.prepareTxOrderPayload();
 
   private blockLogs: Map<
     string,
@@ -172,10 +200,13 @@ export class SequencerConsumer {
     return acc;
   }
 
-  async addAccount(l2addr: bigint, account: {
-    l2Addr: bigint;
-    tsAddr: bigint;
-  }): Promise<bigint> {
+  async addAccount(
+    l2addr: bigint,
+    account: {
+      l2Addr: bigint;
+      tsAddr: bigint;
+    },
+  ): Promise<bigint> {
     // TODO: check account is exist
     // TODO: check register has tokenInfo
     await this.tsAccountTreeService.addLeaf({
@@ -185,7 +216,12 @@ export class SequencerConsumer {
     return l2addr;
   }
 
-  private async updateAccountToken(leaf_id: string, tokenAddr: TsTokenAddress, tokenAmt: bigint, lockedAmt: bigint) {
+  private async updateAccountToken(
+    leaf_id: string,
+    tokenAddr: TsTokenAddress,
+    tokenAmt: bigint,
+    lockedAmt: bigint,
+  ) {
     const tokenInfo = await this.tsTokenTreeService.getLeaf(tokenAddr, leaf_id);
 
     const newAvlAmt = BigInt(tokenInfo.availableAmt) + tokenAmt;
@@ -210,7 +246,10 @@ export class SequencerConsumer {
 
   /** Rollup trace */
   private async addFirstRootFlow() {
-    if (this.currentAccountRootFlow.length !== 0 || this.currentOrderRootFlow.length !== 0) {
+    if (
+      this.currentAccountRootFlow.length !== 0 ||
+      this.currentOrderRootFlow.length !== 0
+    ) {
       throw new Error('addFirstRootFlow must run on new block');
     }
     await this.addAccountRootFlow();
@@ -276,7 +315,6 @@ export class SequencerConsumer {
     return {
       blockNumber: this.newBlockNumber,
     };
-
   }
 
   async endRollup(): Promise<{
@@ -292,7 +330,9 @@ export class SequencerConsumer {
       const perBatch = this.txNormalPerBatch;
 
       if (this.currentTxLogs.length !== perBatch) {
-        console.log(`Rollup txNumbers=${this.currentTxLogs.length} not match txPerBatch=${perBatch}`);
+        console.log(
+          `Rollup txNumbers=${this.currentTxLogs.length} not match txPerBatch=${perBatch}`,
+        );
         const emptyTxNum = perBatch - this.currentTxLogs.length;
         for (let i = 0; i < emptyTxNum; i++) {
           await this.doTransaction(TxNoop);
@@ -301,7 +341,7 @@ export class SequencerConsumer {
       this.rollupStatus = RollupStatus.Idle;
       const circuitInputs = txsToRollupCircuitInput(this.currentTxLogs) as any;
       // TODO: type check
-  
+
       const publicDataOffsets = [];
       const o_chunk_1level_length = circuitInputs['o_chunks'].length;
       let currentOffset = 0;
@@ -313,9 +353,13 @@ export class SequencerConsumer {
 
       circuitInputs['o_chunks'] = circuitInputs['o_chunks'].flat();
 
-      const o_chunk_remains = this.config.numOfChunks - circuitInputs['o_chunks'].length;
-      circuitInputs['isCriticalChunk'] = circuitInputs['isCriticalChunk'].flat();
-      const l1RequestNum = circuitInputs['o_chunks'].filter((t: any) => t === '1').length;
+      const o_chunk_remains =
+        this.config.numOfChunks - circuitInputs['o_chunks'].length;
+      circuitInputs['isCriticalChunk'] =
+        circuitInputs['isCriticalChunk'].flat();
+      const l1RequestNum = circuitInputs['o_chunks'].filter(
+        (t: any) => t === '1',
+      ).length;
       // assert(
       //   circuitInputs['isCriticalChunk'].length === circuitInputs['o_chunks'].length,
       //   `isCriticalChunk=${circuitInputs['isCriticalChunk'].length} length not match o_chunks=${circuitInputs['o_chunks'].length} `,
@@ -336,7 +380,8 @@ export class SequencerConsumer {
       circuitInputs['r_accountLeafId'] = circuitInputs['r_accountLeafId'][0];
       circuitInputs['r_oriAccountLeaf'] = circuitInputs['r_oriAccountLeaf'][0];
       circuitInputs['r_newAccountLeaf'] = circuitInputs['r_newAccountLeaf'][0];
-      circuitInputs['r_accountRootFlow'] = circuitInputs['r_accountRootFlow'][0];
+      circuitInputs['r_accountRootFlow'] =
+        circuitInputs['r_accountRootFlow'][0];
       circuitInputs['r_accountMkPrf'] = circuitInputs['r_accountMkPrf'][0];
       circuitInputs['r_tokenLeafId'] = circuitInputs['r_tokenLeafId'][0];
       circuitInputs['r_oriTokenLeaf'] = circuitInputs['r_oriTokenLeaf'][0];
@@ -348,10 +393,14 @@ export class SequencerConsumer {
       circuitInputs['r_newOrderLeaf'] = circuitInputs['r_newOrderLeaf'][0];
       circuitInputs['r_orderRootFlow'] = circuitInputs['r_orderRootFlow'][0];
       circuitInputs['r_orderMkPrf'] = circuitInputs['r_orderMkPrf'][0];
-  
+
       circuitInputs['oriTxNum'] = this.oriTxId.toString();
-      circuitInputs['accountRootFlow'] = this.currentAccountRootFlow.map((x) => recursiveToString(x));
-      circuitInputs['orderRootFlow'] = this.currentOrderRootFlow.map((x) => recursiveToString(x));
+      circuitInputs['accountRootFlow'] = this.currentAccountRootFlow.map((x) =>
+        recursiveToString(x),
+      );
+      circuitInputs['orderRootFlow'] = this.currentOrderRootFlow.map((x) =>
+        recursiveToString(x),
+      );
       this.oriTxId = this.latestTxId;
       this.flushBlock(currentBlockNumber);
 
@@ -361,22 +410,25 @@ export class SequencerConsumer {
       const stateRoot = await this.stateRoot();
       const orderTreeRoot = await this.obsOrderTreeService.getRoot();
       const oriTxNum = this.oriTxId;
-      const tsRoot = '0x' + dpPoseidonHash([
-        BigInt(orderTreeRoot.hash), oriTxNum
-      ]).toString(16).padStart(64, '0');
+      const tsRoot =
+        '0x' +
+        dpPoseidonHash([BigInt(orderTreeRoot.hash), oriTxNum])
+          .toString(16)
+          .padStart(64, '0');
       const accountRoot = (await this.tsAccountTreeService.getRoot()).hash;
       const orderRoot = (await this.obsOrderTreeService.getRoot()).hash;
-      const state_isCriticalChunk = arrayChunkToHexString(circuitInputs?.isCriticalChunk as any, 1);
-      const state_o_chunk = arrayChunkToHexString(circuitInputs?.o_chunks as any);
-      const pubdata = utils.solidityPack([
-        'bytes', 'bytes', 
-      ], [
-        state_isCriticalChunk, state_o_chunk
-      ]);
-      const {
-        commitmentMessage,
-        commitment,
-      } = stateToCommitment({
+      const state_isCriticalChunk = arrayChunkToHexString(
+        circuitInputs?.isCriticalChunk as any,
+        1,
+      );
+      const state_o_chunk = arrayChunkToHexString(
+        circuitInputs?.o_chunks as any,
+      );
+      const pubdata = utils.solidityPack(
+        ['bytes', 'bytes'],
+        [state_isCriticalChunk, state_o_chunk],
+      );
+      const { commitmentMessage, commitment } = stateToCommitment({
         oriStateRoot: stateRoot,
         newStateRoot: stateRoot,
         newTsRoot: tsRoot,
@@ -389,7 +441,7 @@ export class SequencerConsumer {
         commitment,
         tsRoot: tsRoot,
         publicData: commitmentMessage,
-        publicDataOffsets: publicDataOffsets.map(v => v.toString()),
+        publicDataOffsets: publicDataOffsets.map((v) => v.toString()),
         orderRoot,
         accountRoot,
         timestamp: '0',
@@ -403,7 +455,6 @@ export class SequencerConsumer {
         inputs: circuitInputs,
       };
     });
-
   }
 
   private prepareTxAccountPayload() {
@@ -431,34 +482,66 @@ export class SequencerConsumer {
     } as CircuitOrderTxPayload;
   }
 
-  private async tokenBeforeUpdate(accountLeafId: string, tokenAddr: TsTokenAddress) {
+  private async tokenBeforeUpdate(
+    accountLeafId: string,
+    tokenAddr: TsTokenAddress,
+  ) {
     const account = await this.getAccount(accountLeafId);
-    if (this.currentAccountPayload.r_tokenLeafId[this.currentAccountPayload.r_tokenLeafId.length - 1]?.length === 1) {
-      this.currentAccountPayload.r_tokenLeafId[this.currentAccountPayload.r_tokenLeafId.length - 1].push(tokenAddr);
+    if (
+      this.currentAccountPayload.r_tokenLeafId[
+        this.currentAccountPayload.r_tokenLeafId.length - 1
+      ]?.length === 1
+    ) {
+      this.currentAccountPayload.r_tokenLeafId[
+        this.currentAccountPayload.r_tokenLeafId.length - 1
+      ].push(tokenAddr);
     } else {
       this.currentAccountPayload.r_tokenLeafId.push([tokenAddr]);
     }
     if (!account) {
-      const mkp = await this.tsTokenTreeService.getMerklerProofByAccountId('0', '0');
-      this.currentAccountPayload.r_tokenRootFlow.push([this.tsTokenTreeService.getDefaultRoot()]);
-      this.currentAccountPayload.r_oriTokenLeaf.push(getDefaultTokenLeafMessage());
+      const mkp = await this.tsTokenTreeService.getMerklerProofByAccountId(
+        '0',
+        '0',
+      );
+      this.currentAccountPayload.r_tokenRootFlow.push([
+        this.tsTokenTreeService.getDefaultRoot(),
+      ]);
+      this.currentAccountPayload.r_oriTokenLeaf.push(
+        getDefaultTokenLeafMessage(),
+      );
       this.currentAccountPayload.r_tokenMkPrf.push(mkp);
     } else {
-      const tokenInfo = await this.tsTokenTreeService.getLeaf(tokenAddr, accountLeafId.toString());
-      const tokenRoot = await this.tsTokenTreeService.getRoot(accountLeafId.toString());
-      const mkPrf = await this.tsTokenTreeService.getMerklerProofByAccountId(tokenAddr, accountLeafId.toString());
+      const tokenInfo = await this.tsTokenTreeService.getLeaf(
+        tokenAddr,
+        accountLeafId.toString(),
+      );
+      const tokenRoot = await this.tsTokenTreeService.getRoot(
+        accountLeafId.toString(),
+      );
+      const mkPrf = await this.tsTokenTreeService.getMerklerProofByAccountId(
+        tokenAddr,
+        accountLeafId.toString(),
+      );
       this.currentAccountPayload.r_tokenRootFlow.push([tokenRoot.hash]);
       this.currentAccountPayload.r_oriTokenLeaf.push(tokenInfo.encode());
       this.currentAccountPayload.r_tokenMkPrf.push(mkPrf);
     }
   }
-  private async tokenAfterUpdate(accountLeafId: string, tokenAddr: TsTokenAddress) {
+  private async tokenAfterUpdate(
+    accountLeafId: string,
+    tokenAddr: TsTokenAddress,
+  ) {
     const account = await this.getAccount(accountLeafId);
     if (!account) {
       throw new Error('accountAfterUpdate: account not found');
     }
-    const tokenInfo = await this.tsTokenTreeService.getLeaf(tokenAddr, accountLeafId.toString());
-    const tokenRoot = await this.tsTokenTreeService.getRoot(accountLeafId.toString());
+    const tokenInfo = await this.tsTokenTreeService.getLeaf(
+      tokenAddr,
+      accountLeafId.toString(),
+    );
+    const tokenRoot = await this.tsTokenTreeService.getRoot(
+      accountLeafId.toString(),
+    );
 
     const idx = this.currentAccountPayload.r_tokenRootFlow.length - 1;
     this.currentAccountPayload.r_newTokenLeaf.push(tokenInfo.encode());
@@ -466,21 +549,31 @@ export class SequencerConsumer {
   }
   private async accountBeforeUpdate(accountLeafId: string) {
     const account = await this.getAccount(accountLeafId);
-    if (this.currentAccountPayload.r_accountLeafId[this.currentAccountPayload.r_accountLeafId.length - 1]?.length === 1) {
-      this.currentAccountPayload.r_accountLeafId[this.currentAccountPayload.r_accountLeafId.length - 1].push(accountLeafId);
+    if (
+      this.currentAccountPayload.r_accountLeafId[
+        this.currentAccountPayload.r_accountLeafId.length - 1
+      ]?.length === 1
+    ) {
+      this.currentAccountPayload.r_accountLeafId[
+        this.currentAccountPayload.r_accountLeafId.length - 1
+      ].push(accountLeafId);
     } else {
       this.currentAccountPayload.r_accountLeafId.push([accountLeafId]);
     }
     if (!account) {
       const mkp = await this.tsAccountTreeService.getMerklerProof('0');
       const root = await this.tsAccountTreeService.getRoot();
-      const tokenRoot = await this.tsTokenTreeService.getRoot(accountLeafId.toString());
+      const tokenRoot = await this.tsTokenTreeService.getRoot(
+        accountLeafId.toString(),
+      );
       const leaf = getDefaultAccountLeafMessage(tokenRoot.hash);
       this.currentAccountPayload.r_oriAccountLeaf.push(leaf);
       this.currentAccountPayload.r_accountRootFlow.push([root.hash]);
       this.currentAccountPayload.r_accountMkPrf.push(mkp);
     } else {
-      const mkp = await this.tsAccountTreeService.getMerklerProof(accountLeafId);
+      const mkp = await this.tsAccountTreeService.getMerklerProof(
+        accountLeafId,
+      );
       const leaf = await this.tsAccountTreeService.getLeaf(accountLeafId);
       const root = await this.tsAccountTreeService.getRoot();
       this.currentAccountPayload.r_oriAccountLeaf.push(leaf.encode());
@@ -499,37 +592,74 @@ export class SequencerConsumer {
     this.currentAccountPayload.r_accountRootFlow[idx].push(root);
   }
 
-  private async accountAndTokenBeforeUpdate(accountLeafId: string, tokenAddr: TsTokenAddress) {
+  private async accountAndTokenBeforeUpdate(
+    accountLeafId: string,
+    tokenAddr: TsTokenAddress,
+  ) {
     const account = await this.getAccount(accountLeafId);
-    if (this.currentAccountPayload.r_accountLeafId[this.currentAccountPayload.r_accountLeafId.length - 1]?.length === 1) {
-      this.currentAccountPayload.r_accountLeafId[this.currentAccountPayload.r_accountLeafId.length - 1].push(accountLeafId);
+    if (
+      this.currentAccountPayload.r_accountLeafId[
+        this.currentAccountPayload.r_accountLeafId.length - 1
+      ]?.length === 1
+    ) {
+      this.currentAccountPayload.r_accountLeafId[
+        this.currentAccountPayload.r_accountLeafId.length - 1
+      ].push(accountLeafId);
     } else {
       this.currentAccountPayload.r_accountLeafId.push([accountLeafId]);
     }
-    if (this.currentAccountPayload.r_tokenLeafId[this.currentAccountPayload.r_tokenLeafId.length - 1]?.length === 1) {
-      this.currentAccountPayload.r_tokenLeafId[this.currentAccountPayload.r_tokenLeafId.length - 1].push(tokenAddr);
+    if (
+      this.currentAccountPayload.r_tokenLeafId[
+        this.currentAccountPayload.r_tokenLeafId.length - 1
+      ]?.length === 1
+    ) {
+      this.currentAccountPayload.r_tokenLeafId[
+        this.currentAccountPayload.r_tokenLeafId.length - 1
+      ].push(tokenAddr);
     } else {
       this.currentAccountPayload.r_tokenLeafId.push([tokenAddr]);
     }
     const root = await this.tsAccountTreeService.getRoot();
     this.currentAccountPayload.r_accountRootFlow.push([root]);
     if (!account) {
-      const tokenRoot = await this.tsTokenTreeService.getRoot(accountLeafId.toString());
+      const tokenRoot = await this.tsTokenTreeService.getRoot(
+        accountLeafId.toString(),
+      );
       const leaf = getDefaultAccountLeafMessage(tokenRoot.hash);
       const AccountMkp = await this.tsAccountTreeService.getMerklerProof('0');
-      const tokenMkp = await this.tsTokenTreeService.getMerklerProofByAccountId('0', '0');
+      const tokenMkp = await this.tsTokenTreeService.getMerklerProofByAccountId(
+        '0',
+        '0',
+      );
 
       this.currentAccountPayload.r_oriAccountLeaf.push(leaf);
       this.currentAccountPayload.r_accountMkPrf.push(AccountMkp);
-      this.currentAccountPayload.r_tokenRootFlow.push([this.tsTokenTreeService.getDefaultRoot()]);
-      this.currentAccountPayload.r_oriTokenLeaf.push(getDefaultTokenLeafMessage());
+      this.currentAccountPayload.r_tokenRootFlow.push([
+        this.tsTokenTreeService.getDefaultRoot(),
+      ]);
+      this.currentAccountPayload.r_oriTokenLeaf.push(
+        getDefaultTokenLeafMessage(),
+      );
       this.currentAccountPayload.r_tokenMkPrf.push(tokenMkp);
     } else {
-      const accountMkp = await this.tsAccountTreeService.getMerklerProof(accountLeafId);
-      const accountLeaf = await this.tsAccountTreeService.getLeaf(accountLeafId);
-      const tokenInfo = await this.tsTokenTreeService.getLeaf((tokenAddr), accountLeafId.toString());
-      const tokenRoot = await this.tsTokenTreeService.getRoot(accountLeafId.toString());
-      const tokenMkPr = await this.tsTokenTreeService.getMerklerProofByAccountId((tokenAddr), accountLeafId.toString());
+      const accountMkp = await this.tsAccountTreeService.getMerklerProof(
+        accountLeafId,
+      );
+      const accountLeaf = await this.tsAccountTreeService.getLeaf(
+        accountLeafId,
+      );
+      const tokenInfo = await this.tsTokenTreeService.getLeaf(
+        tokenAddr,
+        accountLeafId.toString(),
+      );
+      const tokenRoot = await this.tsTokenTreeService.getRoot(
+        accountLeafId.toString(),
+      );
+      const tokenMkPr =
+        await this.tsTokenTreeService.getMerklerProofByAccountId(
+          tokenAddr,
+          accountLeafId.toString(),
+        );
 
       this.currentAccountPayload.r_oriAccountLeaf.push(accountLeaf.encode());
       this.currentAccountPayload.r_accountMkPrf.push(accountMkp);
@@ -539,13 +669,21 @@ export class SequencerConsumer {
     }
   }
 
-  private async accountAndTokenAfterUpdate(accountLeafId: string, tokenAddr: TsTokenAddress) {
+  private async accountAndTokenAfterUpdate(
+    accountLeafId: string,
+    tokenAddr: TsTokenAddress,
+  ) {
     // const account = await this.getAccount(accountLeafId);
     // if (!account) {
     //   throw new Error('accountAfterUpdate: account not found');
     // }
-    const tokenInfo = await this.tsTokenTreeService.getLeaf((tokenAddr), accountLeafId.toString());
-    const tokenRoot = await this.tsTokenTreeService.getRoot(accountLeafId.toString());
+    const tokenInfo = await this.tsTokenTreeService.getLeaf(
+      tokenAddr,
+      accountLeafId.toString(),
+    );
+    const tokenRoot = await this.tsTokenTreeService.getRoot(
+      accountLeafId.toString(),
+    );
     const accountRoot = await this.tsAccountTreeService.getRoot();
     const accountLeaf = await this.tsAccountTreeService.getLeaf(accountLeafId);
     const idx = this.currentAccountPayload.r_accountRootFlow.length - 1;
@@ -561,7 +699,9 @@ export class SequencerConsumer {
     this.currentOrderPayload.r_orderLeafId.push([orderLeafId.toString()]);
 
     const root = await this.obsOrderTreeService.getRoot();
-    const orderMkp = await this.obsOrderTreeService.getMerklerProof(orderLeafId);
+    const orderMkp = await this.obsOrderTreeService.getMerklerProof(
+      orderLeafId,
+    );
     if (order) {
       this.currentOrderPayload.r_oriOrderLeaf.push(order.encode());
       this.currentOrderPayload.r_orderRootFlow.push([root.hash]);
@@ -578,7 +718,9 @@ export class SequencerConsumer {
     const order = await this.getObsOrder(orderLeafId);
     const root = await this.obsOrderTreeService.getRoot();
 
-    this.currentOrderPayload.r_orderRootFlow[this.currentOrderPayload.r_orderRootFlow.length - 1].push(root.hash);
+    this.currentOrderPayload.r_orderRootFlow[
+      this.currentOrderPayload.r_orderRootFlow.length - 1
+    ].push(root.hash);
     if (order) {
       this.currentOrderPayload.r_newOrderLeaf.push(order.encode());
       // this.currentOrderPayload.r_orderMkPrf.push(this.mkOrderTree.getProof(orderLeafId));
@@ -593,14 +735,16 @@ export class SequencerConsumer {
     //   throw new Error('addObsOrder: orderLeafId should be 0');
     // }
     // order.orderLeafId = this.obsOrderTreeService.currentOrderId.toString();
-    await this.obsOrderRepository.update({
-      txId: Number(order.txId),
-    }, {
-      orderLeafId: Number(order.orderLeafId),
-    });
-
-    await this.obsOrderTreeService.updateLeaf(order.orderLeafId, order);
-    await this.obsOrderTreeService.addCurrentOrderId();
+    this.obsOrderRepository.update(
+      {
+        txId: Number(order.txId),
+      },
+      {
+        orderLeafId: Number(order.orderLeafId),
+      },
+    );
+    this.obsOrderTreeService.updateLeaf(order.orderLeafId, order);
+    this.obsOrderTreeService.addCurrentOrderId();
   }
   private async removeObsOrder(leafId: string) {
     const order = await this.getObsOrder(leafId);
@@ -636,11 +780,20 @@ export class SequencerConsumer {
       makerBuyAmt: bigint;
     },
   ) {
-    const { r_chunks, o_chunks, isCritical } = encodeRChunkBuffer(txEntity, metadata);
+    const { r_chunks, o_chunks, isCritical } = encodeRChunkBuffer(
+      txEntity,
+      metadata,
+    );
 
     // TODO multiple txs need handle o_chunks in end of block;
-    const r_chunks_bigint = bigint_to_chunk_array(BigInt('0x' + r_chunks.toString('hex')), BigInt(CHUNK_BITS_SIZE));
-    const o_chunks_bigint = bigint_to_chunk_array(BigInt('0x' + o_chunks.toString('hex')), BigInt(CHUNK_BITS_SIZE));
+    const r_chunks_bigint = bigint_to_chunk_array(
+      BigInt('0x' + r_chunks.toString('hex')),
+      BigInt(CHUNK_BITS_SIZE),
+    );
+    const o_chunks_bigint = bigint_to_chunk_array(
+      BigInt('0x' + o_chunks.toString('hex')),
+      BigInt(CHUNK_BITS_SIZE),
+    );
     const isCriticalChunk = o_chunks_bigint.map((_) => '0');
     if (isCritical) {
       isCriticalChunk[0] = '1';
@@ -659,7 +812,9 @@ export class SequencerConsumer {
     return [tsPubKey.tsPubKeyX, tsPubKey.tsPubKeyY];
   }
 
-  async doTransaction(req: TransactionInfo): Promise<TsRollupCircuitInputItemType> {
+  async doTransaction(
+    req: TransactionInfo,
+  ): Promise<TsRollupCircuitInputItemType> {
     try {
       console.time(`doTransaction txid=${req.txId}, reqType=${req.reqType}`);
       console.log({
@@ -707,17 +862,17 @@ export class SequencerConsumer {
         default:
           throw new Error(`Unknown request type reqType=${req.reqType}`);
       }
-  
+
       await this.addAccountRootFlow();
       await this.addOrderRootFlow();
-  
+
       const remains = this.txNormalPerBatch - this.currentTxLogs.length;
       if (remains < 3) {
         await this.endRollup();
       }
       console.timeEnd(`doTransaction txid=${req.txId}, reqType=${req.reqType}`);
       return inputs;
-    } catch(error: any) {
+    } catch (error: any) {
       console.error('-----------------------');
       console.error(error);
       console.error('-----------------------');
@@ -726,8 +881,10 @@ export class SequencerConsumer {
     }
   }
 
-  private async doSecondLimitOrder(req: TransactionInfo): Promise<TsRollupCircuitInputItemType> {
-    const accountLeafId = (req.accountId);
+  private async doSecondLimitOrder(
+    req: TransactionInfo,
+  ): Promise<TsRollupCircuitInputItemType> {
+    const accountLeafId = req.accountId;
     const reqData: TsTxRequestDatasType = [
       BigInt(TsTxType.SecondLimitOrder),
       BigInt(req.accountId),
@@ -748,7 +905,12 @@ export class SequencerConsumer {
     const tokenAddr = req.tokenAddr;
 
     await this.accountAndTokenBeforeUpdate(accountLeafId, tokenAddr);
-    await this.updateAccountToken(accountLeafId, tokenAddr, -BigInt(req.amount), BigInt(req.amount));
+    await this.updateAccountToken(
+      accountLeafId,
+      tokenAddr,
+      -BigInt(req.amount),
+      BigInt(req.amount),
+    );
     await this.updateAccountNonce(accountLeafId, newNonce);
     await this.accountAndTokenAfterUpdate(accountLeafId, tokenAddr);
 
@@ -757,7 +919,7 @@ export class SequencerConsumer {
 
     const orderLeafId = this.obsOrderTreeService.currentOrderId.toString();
     const txId = this.latestTxId;
-  
+
     const order: UpdateObsOrderTreeDto = {
       orderLeafId,
       txId: txId.toString(),
@@ -769,7 +931,7 @@ export class SequencerConsumer {
       buyTokenId: req.arg2,
       buyAmt: req.arg3,
       accumulatedSellAmt: '0',
-      accumulatedBuyAmt: '0'
+      accumulatedBuyAmt: '0',
     };
     console.log({
       doSecondLimitOrder: order,
@@ -779,7 +941,8 @@ export class SequencerConsumer {
     // await this.addAuctionOrder(req.reqType, txId, req as unknown as TsTxAuctionLendRequest | TsTxAuctionBorrowRequest);
     await this.orderAfterUpdate(orderLeafId);
 
-    const { r_chunks_bigint, o_chunks_bigint, isCriticalChunk } = this.getTxChunks(req);
+    const { r_chunks_bigint, o_chunks_bigint, isCriticalChunk } =
+      this.getTxChunks(req);
     const tsPubKey = await this.getTsPubKey(accountLeafId);
     const tx = {
       reqData,
@@ -802,14 +965,29 @@ export class SequencerConsumer {
 
   private currentHoldTakerOrder: ObsOrderLeafEntity | null = null;
   async doSecondLimitStart(req: TransactionInfo) {
-    const reqData: TsTxRequestDatasType = [BigInt(TsTxType.SecondLimitStart), 0n, 0n, 0n, 0n, 0n, 0n, 0n, 0n, BigInt(req.arg4)];
+    const reqData: TsTxRequestDatasType = [
+      BigInt(TsTxType.SecondLimitStart),
+      0n,
+      0n,
+      0n,
+      0n,
+      0n,
+      0n,
+      0n,
+      0n,
+      BigInt(req.arg4),
+    ];
     const orderLeafId = req.arg4;
     const order = await this.getObsOrder(orderLeafId);
     if (!order) {
-      throw new Error(`doCancelOrder: order not found orderLeafId=${orderLeafId}`);
+      throw new Error(
+        `doCancelOrder: order not found orderLeafId=${orderLeafId}`,
+      );
     }
     if (order.sender === '0') {
-      throw new Error(`doCancelOrder: order not found orderLeafId=${orderLeafId} (order.sender=0)`);
+      throw new Error(
+        `doCancelOrder: order not found orderLeafId=${orderLeafId} (order.sender=0)`,
+      );
     }
     this.currentHoldTakerOrder = order;
     const from = await this.getAccount(order.sender);
@@ -829,10 +1007,11 @@ export class SequencerConsumer {
 
     const txId = this.latestTxId;
     const orderTxId = BigInt(order.txId?.toString() || '0');
-    const { r_chunks_bigint, o_chunks_bigint, isCriticalChunk } = this.getTxChunks(req, {
-      txOffset: txId - orderTxId,
-      makerBuyAmt: 0n,
-    });
+    const { r_chunks_bigint, o_chunks_bigint, isCriticalChunk } =
+      this.getTxChunks(req, {
+        txOffset: txId - orderTxId,
+        makerBuyAmt: 0n,
+      });
 
     const tsPubKey = await this.getTsPubKey(req.accountId);
     const tx = {
@@ -852,14 +1031,29 @@ export class SequencerConsumer {
     return tx as unknown as TsRollupCircuitInputItemType;
   }
   async doSecondLimitExchange(req: TransactionInfo) {
-    const reqData: TsTxRequestDatasType = [BigInt(TsTxType.SecondLimitExchange), 0n, 0n, 0n, 0n, 0n, 0n, 0n, 0n, BigInt(req.arg4)];
+    const reqData: TsTxRequestDatasType = [
+      BigInt(TsTxType.SecondLimitExchange),
+      0n,
+      0n,
+      0n,
+      0n,
+      0n,
+      0n,
+      0n,
+      0n,
+      BigInt(req.arg4),
+    ];
     const orderLeafId = req.arg4;
     const makerOrder = await this.getObsOrder(req.arg4);
     if (!makerOrder) {
-      throw new Error(`doCancelOrder: order not found orderLeafId=${orderLeafId}`);
+      throw new Error(
+        `doCancelOrder: order not found orderLeafId=${orderLeafId}`,
+      );
     }
     if (makerOrder.sender === '0') {
-      throw new Error(`doCancelOrder: order not found orderLeafId=${orderLeafId} (order.sender=0)`);
+      throw new Error(
+        `doCancelOrder: order not found orderLeafId=${orderLeafId} (order.sender=0)`,
+      );
     }
     const makerAcc = await this.getAccount(makerOrder.sender);
     if (!makerAcc) {
@@ -873,11 +1067,21 @@ export class SequencerConsumer {
     await this.accountBeforeUpdate(makerOrder.sender);
 
     await this.tokenBeforeUpdate(makerOrder.sender, buyTokenId);
-    await this.updateAccountToken(makerAcc.leafId, buyTokenId, accumulatedBuyAmt, 0n);
+    await this.updateAccountToken(
+      makerAcc.leafId,
+      buyTokenId,
+      accumulatedBuyAmt,
+      0n,
+    );
     await this.tokenAfterUpdate(makerOrder.sender, buyTokenId);
 
     await this.tokenBeforeUpdate(makerOrder.sender, sellTokenId);
-    await this.updateAccountToken(makerAcc.leafId, sellTokenId, 0n, -accumulatedSellAmt);
+    await this.updateAccountToken(
+      makerAcc.leafId,
+      sellTokenId,
+      0n,
+      -accumulatedSellAmt,
+    );
     await this.tokenAfterUpdate(makerOrder.sender, sellTokenId);
 
     await this.accountAfterUpdate(makerOrder.sender);
@@ -886,9 +1090,14 @@ export class SequencerConsumer {
     await this.accountAfterUpdate(makerOrder.sender);
 
     await this.orderBeforeUpdate(orderLeafId);
-    makerOrder.accumulatedSellAmt = (BigInt(makerOrder.accumulatedSellAmt) + accumulatedSellAmt).toString();
-    makerOrder.accumulatedBuyAmt = (BigInt(makerOrder.accumulatedBuyAmt) + accumulatedBuyAmt).toString();
-    const isAllSellAmtMatched = makerOrder.accumulatedSellAmt === makerOrder.sellAmt;
+    makerOrder.accumulatedSellAmt = (
+      BigInt(makerOrder.accumulatedSellAmt) + accumulatedSellAmt
+    ).toString();
+    makerOrder.accumulatedBuyAmt = (
+      BigInt(makerOrder.accumulatedBuyAmt) + accumulatedBuyAmt
+    ).toString();
+    const isAllSellAmtMatched =
+      makerOrder.accumulatedSellAmt === makerOrder.sellAmt;
     if (isAllSellAmtMatched) {
       await this.removeObsOrder(orderLeafId);
     } else {
@@ -898,10 +1107,11 @@ export class SequencerConsumer {
 
     const txId = this.latestTxId;
     const orderTxId = BigInt(makerOrder.txId?.toString() || '0');
-    const { r_chunks_bigint, o_chunks_bigint, isCriticalChunk } = this.getTxChunks(req, {
-      txOffset: txId - orderTxId,
-      makerBuyAmt: BigInt(makerOrder.buyAmt),
-    });
+    const { r_chunks_bigint, o_chunks_bigint, isCriticalChunk } =
+      this.getTxChunks(req, {
+        txOffset: txId - orderTxId,
+        makerBuyAmt: BigInt(makerOrder.buyAmt),
+      });
     const tsPubKey = await this.getTsPubKey(makerAcc.leafId);
     const tx = {
       reqData,
@@ -921,15 +1131,30 @@ export class SequencerConsumer {
   }
   async doSecondLimitEnd(req: TransactionInfo) {
     // assert(!!this.currentHoldTakerOrder, 'doSecondLimitEnd: currentHoldTakerOrder is null');
-    const reqData: TsTxRequestDatasType = [BigInt(TsTxType.SecondLimitEnd), 0n, 0n, 0n, 0n, 0n, 0n, 0n, 0n, BigInt(req.arg4)];
+    const reqData: TsTxRequestDatasType = [
+      BigInt(TsTxType.SecondLimitEnd),
+      0n,
+      0n,
+      0n,
+      0n,
+      0n,
+      0n,
+      0n,
+      0n,
+      BigInt(req.arg4),
+    ];
     const orderLeafId = req.arg4;
     // assert(orderLeafId === this.currentHoldTakerOrder.orderLeafId, 'doSecondLimitEnd: orderLeafId not match');
     const takerOrder = this.currentHoldTakerOrder;
     if (!takerOrder) {
-      throw new Error(`doSecondLimitEnd: order not found orderLeafId=${orderLeafId}`);
+      throw new Error(
+        `doSecondLimitEnd: order not found orderLeafId=${orderLeafId}`,
+      );
     }
     if (takerOrder.sender === '0') {
-      throw new Error(`doSecondLimitEnd: order not found orderLeafId=${orderLeafId} (order.sender=0)`);
+      throw new Error(
+        `doSecondLimitEnd: order not found orderLeafId=${orderLeafId} (order.sender=0)`,
+      );
     }
     const takerAcc = await this.getAccount(takerOrder.sender);
     if (!takerAcc) {
@@ -943,11 +1168,21 @@ export class SequencerConsumer {
     await this.accountBeforeUpdate(takerOrder.sender);
 
     await this.tokenBeforeUpdate(takerOrder.sender, buyTokenId);
-    await this.updateAccountToken(takerAcc.leafId, buyTokenId, accumulatedBuyAmt, 0n);
+    await this.updateAccountToken(
+      takerAcc.leafId,
+      buyTokenId,
+      accumulatedBuyAmt,
+      0n,
+    );
     await this.tokenAfterUpdate(takerOrder.sender, buyTokenId);
 
     await this.tokenBeforeUpdate(takerOrder.sender, sellTokenId);
-    await this.updateAccountToken(takerAcc.leafId, sellTokenId, 0n, -accumulatedSellAmt);
+    await this.updateAccountToken(
+      takerAcc.leafId,
+      sellTokenId,
+      0n,
+      -accumulatedSellAmt,
+    );
     await this.tokenAfterUpdate(takerOrder.sender, sellTokenId);
 
     await this.accountAfterUpdate(takerOrder.sender);
@@ -956,9 +1191,14 @@ export class SequencerConsumer {
     await this.accountAfterUpdate(takerOrder.sender);
 
     await this.orderBeforeUpdate(orderLeafId);
-    takerOrder.accumulatedSellAmt = (BigInt(takerOrder.accumulatedSellAmt) + accumulatedSellAmt).toString();
-    takerOrder.accumulatedBuyAmt = (BigInt(takerOrder.accumulatedBuyAmt) + accumulatedBuyAmt).toString();
-    const isAllSellAmtMatched = takerOrder.accumulatedSellAmt === takerOrder.sellAmt;
+    takerOrder.accumulatedSellAmt = (
+      BigInt(takerOrder.accumulatedSellAmt) + accumulatedSellAmt
+    ).toString();
+    takerOrder.accumulatedBuyAmt = (
+      BigInt(takerOrder.accumulatedBuyAmt) + accumulatedBuyAmt
+    ).toString();
+    const isAllSellAmtMatched =
+      takerOrder.accumulatedSellAmt === takerOrder.sellAmt;
     if (isAllSellAmtMatched) {
       this.removeObsOrder(orderLeafId);
     } else {
@@ -968,10 +1208,11 @@ export class SequencerConsumer {
 
     const txId = this.latestTxId;
     const orderTxId = BigInt(takerOrder.txId?.toString() || '0');
-    const { r_chunks_bigint, o_chunks_bigint, isCriticalChunk } = this.getTxChunks(req, {
-      txOffset: txId - orderTxId,
-      makerBuyAmt: 0n,
-    });
+    const { r_chunks_bigint, o_chunks_bigint, isCriticalChunk } =
+      this.getTxChunks(req, {
+        txOffset: txId - orderTxId,
+        makerBuyAmt: 0n,
+      });
 
     this.currentHoldTakerOrder = null;
     const tsPubKey = await this.getTsPubKey(takerAcc.leafId);
@@ -995,26 +1236,51 @@ export class SequencerConsumer {
 
   async doCancelOrder(req: TransactionInfo) {
     const orderLeafId = req.arg4;
-    const reqData: TsTxRequestDatasType = [BigInt(TsTxType.CancelOrder), 0n, 0n, 0n, 0n, BigInt(req.arg0), BigInt(orderLeafId), 0n, 0n, 0n];
+    const reqData: TsTxRequestDatasType = [
+      BigInt(TsTxType.CancelOrder),
+      0n,
+      0n,
+      0n,
+      0n,
+      BigInt(req.arg0),
+      BigInt(orderLeafId),
+      0n,
+      0n,
+      0n,
+    ];
     const order = await this.getObsOrder(orderLeafId);
     if (!order) {
-      throw new Error(`doCancelOrder: order not found orderLeafId=${orderLeafId}`);
+      throw new Error(
+        `doCancelOrder: order not found orderLeafId=${orderLeafId}`,
+      );
     }
     if (order.sender === '0') {
-      throw new Error(`doCancelOrder: order not found orderLeafId=${orderLeafId} (order.sender=0)`);
+      throw new Error(
+        `doCancelOrder: order not found orderLeafId=${orderLeafId} (order.sender=0)`,
+      );
     }
     const account = await this.getAccount(order.sender);
     if (!account) {
-      throw new Error(`doCancelOrder: account not found L2Addr=${order.sender}`);
+      throw new Error(
+        `doCancelOrder: account not found L2Addr=${order.sender}`,
+      );
     }
     if (req.arg0 !== account.leafId) {
-      throw new Error(`doCancelOrder: account not match L2Addr=${order.sender} req.arg0=${req.arg0}`);
+      throw new Error(
+        `doCancelOrder: account not match L2Addr=${order.sender} req.arg0=${req.arg0}`,
+      );
     }
     const refundTokenAddr = order.sellTokenId.toString() as TsTokenAddress;
-    const refundAmount = BigInt(order.sellAmt) - BigInt(order.accumulatedSellAmt);
+    const refundAmount =
+      BigInt(order.sellAmt) - BigInt(order.accumulatedSellAmt);
 
     await this.accountAndTokenBeforeUpdate(account.leafId, refundTokenAddr);
-    await this.updateAccountToken(account.leafId, refundTokenAddr, BigInt(refundAmount), -BigInt(refundAmount));
+    await this.updateAccountToken(
+      account.leafId,
+      refundTokenAddr,
+      BigInt(refundAmount),
+      -BigInt(refundAmount),
+    );
     await this.accountAndTokenAfterUpdate(account.leafId, refundTokenAddr);
     await this.accountAndTokenBeforeUpdate(account.leafId, refundTokenAddr);
     await this.accountAndTokenAfterUpdate(account.leafId, refundTokenAddr);
@@ -1023,7 +1289,8 @@ export class SequencerConsumer {
     await this.removeObsOrder(order.orderLeafId);
     await this.orderAfterUpdate(order.orderLeafId);
 
-    const { r_chunks_bigint, o_chunks_bigint, isCriticalChunk } = this.getTxChunks(req);
+    const { r_chunks_bigint, o_chunks_bigint, isCriticalChunk } =
+      this.getTxChunks(req);
     const tsPubKey = await this.getTsPubKey(account.leafId);
     const tx = {
       reqData,
@@ -1097,7 +1364,12 @@ export class SequencerConsumer {
     await this.accountAndTokenBeforeUpdate(accountLeafId, tokenId);
     await this.orderBeforeUpdate(orderLeafId);
 
-    await this.updateAccountToken(accountLeafId, tokenId, BigInt(req.amount), 0n);
+    await this.updateAccountToken(
+      accountLeafId,
+      tokenId,
+      BigInt(req.amount),
+      0n,
+    );
 
     await this.accountAndTokenAfterUpdate(accountLeafId, tokenId);
     await this.orderAfterUpdate(orderLeafId);
@@ -1105,7 +1377,8 @@ export class SequencerConsumer {
     // TODO: fill left reqs
     await this.accountAndTokenBeforeUpdate(accountLeafId, tokenId);
     await this.accountAndTokenAfterUpdate(accountLeafId, tokenId);
-    const { r_chunks_bigint, o_chunks_bigint, isCriticalChunk } = this.getTxChunks(req);
+    const { r_chunks_bigint, o_chunks_bigint, isCriticalChunk } =
+      this.getTxChunks(req);
 
     const tx = {
       reqData,
@@ -1126,7 +1399,9 @@ export class SequencerConsumer {
     return tx as unknown as TsRollupCircuitInputItemType;
   }
 
-  private async doRegister(req: TransactionInfo): Promise<TsRollupCircuitInputItemType> {
+  private async doRegister(
+    req: TransactionInfo,
+  ): Promise<TsRollupCircuitInputItemType> {
     const registerL2Addr = BigInt(req.arg0);
     const accountLeafId = registerL2Addr.toString();
     const registerTokenId = req.tokenAddr;
@@ -1141,7 +1416,7 @@ export class SequencerConsumer {
     const accountInfo = await this.accountInfoRepository.findOneOrFail({
       where: {
         accountId: registerL2Addr.toString(),
-      }
+      },
     });
     const hashedTsPubKey = accountInfo.hashedTsPubKey;
     const registerAccount = this.accountLeafNodeRepository.create();
@@ -1177,7 +1452,8 @@ export class SequencerConsumer {
     await this.orderBeforeUpdate(orderLeafId);
     await this.orderAfterUpdate(orderLeafId);
 
-    const { r_chunks_bigint, o_chunks_bigint, isCriticalChunk } = this.getTxChunks(req);
+    const { r_chunks_bigint, o_chunks_bigint, isCriticalChunk } =
+      this.getTxChunks(req);
 
     const tx = {
       reqData,
@@ -1198,7 +1474,9 @@ export class SequencerConsumer {
     return tx as unknown as TsRollupCircuitInputItemType;
   }
 
-  private async doWithdraw(req: TransactionInfo): Promise<TsRollupCircuitInputItemType> {
+  private async doWithdraw(
+    req: TransactionInfo,
+  ): Promise<TsRollupCircuitInputItemType> {
     const reqData = encodeRollupWithdrawMessage(req);
     const orderLeafId = '0';
     const transferL2AddrFrom = BigInt(req.accountId);
@@ -1210,7 +1488,12 @@ export class SequencerConsumer {
     const newNonce = BigInt(from.nonce) + 1n;
 
     await this.accountAndTokenBeforeUpdate(accountLeafId, req.tokenAddr);
-    await this.updateAccountToken(from.leafId, req.tokenAddr, -BigInt(req.amount), 0n);
+    await this.updateAccountToken(
+      from.leafId,
+      req.tokenAddr,
+      -BigInt(req.amount),
+      0n,
+    );
     await this.updateAccountNonce(from.leafId, newNonce);
     await this.accountAndTokenAfterUpdate(accountLeafId, req.tokenAddr);
 
@@ -1219,7 +1502,8 @@ export class SequencerConsumer {
     await this.orderBeforeUpdate(orderLeafId);
     await this.orderAfterUpdate(orderLeafId);
 
-    const { r_chunks_bigint, o_chunks_bigint, isCriticalChunk } = this.getTxChunks(req);
+    const { r_chunks_bigint, o_chunks_bigint, isCriticalChunk } =
+      this.getTxChunks(req);
     const tsPubKey = await this.getTsPubKey(accountLeafId);
     const tx = {
       reqData,
@@ -1239,5 +1523,4 @@ export class SequencerConsumer {
     this.addTxLogs(tx);
     return tx as unknown as TsRollupCircuitInputItemType;
   }
-
 }
