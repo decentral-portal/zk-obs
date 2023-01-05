@@ -114,6 +114,7 @@ export class TsTransactionController {
       txInfoEntity.tokenId = txInfo.tokenId.toString();
       txInfoEntity.arg2 = txInfo.arg2.toString();
       txInfoEntity.arg3 = txInfo.arg3.toString();
+      console.log('txInfoEntity',txInfoEntity);
       const txResult = await manager.getRepository(TransactionInfo).save(txInfoEntity);
       const result = await manager.getRepository(ObsOrderEntity).insert({
         txId: txResult.txId,
