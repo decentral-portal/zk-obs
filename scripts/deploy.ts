@@ -44,31 +44,39 @@ async function main() {
         amount: mintAmt,
         id: network.chainId,
       });
-      const signature = await acc._signTypedData(
-        {
+      const typeData = {
+        domains: {
           name: 'zkOBS',
           version: '1',
           chainId: network.chainId,
           verifyingContract: zkOBS.address,
         },
-        {
+        types: {
           Main: [
             { name: 'Authentication', type: 'string' },
             { name: 'Action', type: 'string' },
           ],
         },
-        {
+        valuse: {
           Authentication: 'zkOBS',
           Action: 'Authentication on zkOBS',
         },
+      };
+      const signature = await acc._signTypedData(
+        typeData.domains,
+        typeData.types,
+        typeData.valuse,
       );
-      let hash = '';
+      let hash = signature;
       for (let index = 0; index < PRIV_HASH_ITERATIONS; index++) {
-        hash = ethers.utils.keccak256(arrayify(signature));
+        hash = ethers.utils.keccak256(arrayify(hash));
       }
       const tsPrivKeyBuf = Buffer.from(hash.replace('0x', ''), 'hex');
       const tsSigner = new TsRollupSigner(tsPrivKeyBuf);
       console.log('tsSigner', {
+        typeData,
+        signature,
+        hash,
         tsPubKey: tsSigner.tsPubKey,
       });
 
@@ -85,10 +93,10 @@ async function main() {
         .approve(zkOBS.address, ethers.constants.MaxUint256);
       await zkOBS
         .connect(acc)
-        .depositERC20(zkUSDC.address, ethers.utils.parseUnits('5000', 6));
+        .depositERC20(zkUSDC.address, ethers.utils.parseUnits('6000', 6));
       console.log('Deposit ERC20', {
         zkUSDC: zkUSDC.address,
-        amount: ethers.utils.parseUnits('5000', 6),
+        amount: ethers.utils.parseUnits('6000', 6),
       });
     }
   }
