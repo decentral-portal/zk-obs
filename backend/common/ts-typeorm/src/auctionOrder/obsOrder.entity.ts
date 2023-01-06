@@ -1,11 +1,19 @@
 import { matchE } from 'fp-ts/lib/IOEither';
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { AccountInformation } from '../account/accountInformation.entity';
 import { MatchObsOrderEntity } from './matchObsOrder.entity';
 import { ObsOrderLeafEntity } from './obsOrderLeaf.entity';
 import { TsSide } from './tsSide.enum';
 
-@Entity('ObsOrder', { schema: 'public'})
+@Entity('ObsOrder', { schema: 'public' })
 export class ObsOrderEntity {
   @PrimaryGeneratedColumn({
     type: 'int8',
@@ -16,10 +24,7 @@ export class ObsOrderEntity {
     type: 'enum',
     name: 'side',
     enumName: 'SIDE',
-    enum: [
-      TsSide.BUY,
-      TsSide.SELL,
-    ],
+    enum: [TsSide.BUY, TsSide.SELL],
     nullable: false,
     default: () => `\'${TsSide.BUY}\'`,
   })
@@ -64,13 +69,25 @@ export class ObsOrderEntity {
     default: 0n,
   })
   price!: string;
+
+  static ORDER_STATUS_IDX_RUNNING = 1;
+  static ORDER_STATUS_IDX_CANCELED = 2;
+  static ORDER_STATUS_IDX_VOID = 4;
   @Column({
     type: 'integer',
     name: 'orderStatus',
     nullable: false,
-    default: 1, // pending=1, canceled=2, matched=3
+    default: 1,
   })
   orderStatus!: number;
+  get isCanceled() {
+    return this.orderStatus & ObsOrderEntity.ORDER_STATUS_IDX_CANCELED;
+  }
+
+  get isVoid() {
+    return this.orderStatus & ObsOrderEntity.ORDER_STATUS_IDX_CANCELED;
+  }
+
   @Column({
     type: 'decimal',
     name: 'mainQty',
@@ -155,7 +172,7 @@ export class ObsOrderEntity {
     type: 'boolean',
     name: 'isMaker',
     nullable: false,
-    default: false, 
+    default: false,
   })
   isMaker!: boolean;
   @Column({
@@ -176,11 +193,11 @@ export class ObsOrderEntity {
   // obsOrderLeaf!: ObsOrderLeafEntity;
   @OneToMany(
     () => MatchObsOrderEntity,
-    (matchOrders: MatchObsOrderEntity) => matchOrders.marketPair
+    (matchOrders: MatchObsOrderEntity) => matchOrders.marketPair,
   )
   @JoinColumn({
     name: 'id',
-    referencedColumnName: 'referenceOrder'
+    referencedColumnName: 'referenceOrder',
   })
   matchOrders!: MatchObsOrderEntity[];
   @ManyToOne(
@@ -188,12 +205,12 @@ export class ObsOrderEntity {
     (accountInfo: AccountInformation) => accountInfo.obsOrders,
     {
       onDelete: 'RESTRICT',
-      onUpdate: 'CASCADE'
-    }
+      onUpdate: 'CASCADE',
+    },
   )
   @JoinColumn({
     name: 'accountId',
-    referencedColumnName: 'accountId'
+    referencedColumnName: 'accountId',
   })
-  accountInfo!: AccountInformation; 
+  accountInfo!: AccountInformation;
 }

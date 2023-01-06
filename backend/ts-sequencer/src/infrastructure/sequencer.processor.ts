@@ -343,24 +343,24 @@ export class SequencerConsumer {
       const circuitInputs = txsToRollupCircuitInput(this.currentTxLogs) as any;
       // TODO: type check
 
-      const publicDataOffsets = [];
-      const o_chunk_1level_length = circuitInputs['o_chunks'].length;
-      let currentOffset = 0;
-      for (let index = 0; index < o_chunk_1level_length; index++) {
-        publicDataOffsets.push(currentOffset);
-        const reqChunkLength = circuitInputs['o_chunks'][index].length;
-        currentOffset += reqChunkLength;
-      }
+      // const publicDataOffsets = [];
+      // const o_chunk_1level_length = circuitInputs['o_chunks'].length;
+      // let currentOffset = 0;
+      // for (let index = 0; index < o_chunk_1level_length; index++) {
+      //   publicDataOffsets.push(currentOffset);
+      //   const reqChunkLength = circuitInputs['o_chunks'][index].length;
+      //   currentOffset += reqChunkLength;
+      // }
 
-      circuitInputs['o_chunks'] = circuitInputs['o_chunks'].flat();
+      // circuitInputs['o_chunks'] = circuitInputs['o_chunks'].flat();
 
-      const o_chunk_remains =
-        this.config.numOfChunks - circuitInputs['o_chunks'].length;
-      circuitInputs['isCriticalChunk'] =
-        circuitInputs['isCriticalChunk'].flat();
-      const l1RequestNum = circuitInputs['o_chunks'].filter(
-        (t: any) => t === '1',
-      ).length;
+      // const o_chunk_remains =
+      //   this.config.numOfChunks - circuitInputs['o_chunks'].length;
+      // circuitInputs['isCriticalChunk'] =
+      //   circuitInputs['isCriticalChunk'].flat();
+      // const l1RequestNum = circuitInputs['o_chunks'].filter(
+      //   (t: any) => t === '1',
+      // ).length;
       // assert(
       //   circuitInputs['isCriticalChunk'].length === circuitInputs['o_chunks'].length,
       //   `isCriticalChunk=${circuitInputs['isCriticalChunk'].length} length not match o_chunks=${circuitInputs['o_chunks'].length} `,
@@ -418,31 +418,31 @@ export class SequencerConsumer {
           .padStart(64, '0');
       const accountRoot = (await this.tsAccountTreeService.getRoot()).hash;
       const orderRoot = (await this.obsOrderTreeService.getRoot()).hash;
-      const state_isCriticalChunk = arrayChunkToHexString(
-        circuitInputs?.isCriticalChunk as any,
-        1,
-      );
-      const state_o_chunk = arrayChunkToHexString(
-        circuitInputs?.o_chunks as any,
-      );
-      const pubdata = utils.solidityPack(
-        ['bytes', 'bytes'],
-        [state_isCriticalChunk, state_o_chunk],
-      );
-      const { commitmentMessage, commitment } = stateToCommitment({
-        oriStateRoot: stateRoot,
-        newStateRoot: stateRoot,
-        newTsRoot: tsRoot,
-        pubdata,
-      });
+      // const state_isCriticalChunk = arrayChunkToHexString(
+      //   circuitInputs?.isCriticalChunk as any,
+      //   1,
+      // );
+      // const state_o_chunk = arrayChunkToHexString(
+      //   circuitInputs?.o_chunks as any,
+      // );
+      // const pubdata = utils.solidityPack(
+      //   ['bytes', 'bytes'],
+      //   [state_isCriticalChunk, state_o_chunk],
+      // );
+      // const { commitmentMessage, commitment } = stateToCommitment({
+      //   oriStateRoot: stateRoot,
+      //   newStateRoot: stateRoot,
+      //   newTsRoot: tsRoot,
+      //   pubdata,
+      // });
       currentBlcok.state = {
         blockNumber: currentBlockNumber.toString(),
         stateRoot,
-        l1RequestNum,
-        commitment,
+        // l1RequestNum,
+        // commitment,
         tsRoot: tsRoot,
-        publicData: commitmentMessage,
-        publicDataOffsets: publicDataOffsets.map((v) => v.toString()),
+        // publicData: commitmentMessage,
+        // publicDataOffsets: publicDataOffsets.map((v) => v.toString()),
         orderRoot,
         accountRoot,
         timestamp: '0',
@@ -736,6 +736,12 @@ export class SequencerConsumer {
     //   throw new Error('addObsOrder: orderLeafId should be 0');
     // }
     // order.orderLeafId = this.obsOrderTreeService.currentOrderId.toString();
+    console.log({
+      addObsOrder: 'addObsOrder',
+      order,
+      txId: Number(order.txId),
+      orderLeafId: Number(order.orderLeafId),
+    });
     this.obsOrderRepository.update(
       {
         txId: Number(order.txId),
@@ -919,11 +925,11 @@ export class SequencerConsumer {
     await this.accountAndTokenAfterUpdate(accountLeafId, tokenAddr);
 
     const orderLeafId = this.obsOrderTreeService.currentOrderId.toString();
-    const txId = this.latestTxId;
+    // const txId = this.latestTxId;
 
     const order: UpdateObsOrderTreeDto = {
       orderLeafId,
-      txId: txId.toString(),
+      txId: req.txId.toString(),
       reqType: req.reqType.toString(),
       sender: accountLeafId,
       sellTokenId: req.tokenAddr,
