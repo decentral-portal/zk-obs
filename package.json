@@ -4,6 +4,7 @@
   "private": true,
   "description": "Solidity Hardhat TypeScript Boilerplate",
   "scripts": {
+    "node": "npx hardhat node",
     "prepare": "husky install",
     "cucumber": "node ./node_modules/@cucumber/cucumber/bin/cucumber-js features/**/*.feature --require test/register.ts --require-module ts-node/register --format-options \"{\\\"snippetInterface\\\": \\\"async-await\\\"}\"  --format html:reports/report.html --format summary --format @cucumber/pretty-formatter --format cucumber-console-formatter --publish-quiet",
     "start": "hardhat node",
@@ -100,5 +101,8 @@
     "ts-node": "^10.9.1",
     "typechain": "^8.1.0",
     "typescript": "^4.7.4"
+  },
+  "dependencies": {
+    "zk-obs-sdk": "^0.0.22"
   }
 }

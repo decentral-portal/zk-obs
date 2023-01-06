@@ -33,8 +33,8 @@ export function stateToCommitment({
 
 export function toHex(n: string | BigInt, pad = 64) {
   const num = typeof n === 'bigint' ? n : BigInt(n as string);
-  const rawHex = num.toString(16);
-  return '0x' + (rawHex.length % 2 === 0 ? rawHex : '0' + rawHex);
+  const rawHex = num.toString(16).padStart(pad, '0');
+  return '0x' + rawHex;
 }
 
 export function getRollupData(inputs: any, root: any, calldata: any) {
