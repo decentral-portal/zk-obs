@@ -19,7 +19,7 @@ export class BlockInformationServcie {
     const { pageNumber, perPage } = paginationDto;
     console.log({ blockNumber, pageNumber, perPage });
     const queryBuilder = this.transactionInfoRepository.createQueryBuilder('transactionInfo');
-    // queryBuilder.from(TransactionInfo, 'transactionInfo');
+    queryBuilder.from(TransactionInfo, 'transactionInfo');
     queryBuilder.where('transactionInfo."blockNumber" = :blockNumber', { blockNumber });
     queryBuilder.orderBy('transactionInfo."txId"', 'DESC');
     queryBuilder.skip((pageNumber - 1) * perPage);
@@ -102,6 +102,7 @@ export class BlockInformationServcie {
   }
   async getBlockInformationByBlockNumber(blockNumber: number): Promise<BlockInformationWithTxDto> {
     const queryBuilder = this.blockInformationRepository.createQueryBuilder('blockInformation');
+    queryBuilder.from(BlockInformation, 'blockInformation');
     queryBuilder.where('blockInformation.blockNumber = :blockNumber', { blockNumber });
     const [block] = await queryBuilder.getMany();
     const transactions = await this.getTransactionInfoByBlockNumber(block.blockNumber, { pageNumber: 1, perPage: 10 });
