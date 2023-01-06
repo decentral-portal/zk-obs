@@ -18,10 +18,10 @@ export class BlockInformationServcie {
   async getTransactionInfoByBlockNumber(blockNumber: number, paginationDto: PaginationDto): Promise<TransactionInfoPagination> {
     const { pageNumber, perPage } = paginationDto;
     console.log({ blockNumber, pageNumber, perPage });
-    const queryBuilder = this.transactionInfoRepository.createQueryBuilder('transactionInfo');
-    queryBuilder.from(TransactionInfo, 'transactionInfo');
-    queryBuilder.where('transactionInfo."blockNumber" = :blockNumber', { blockNumber });
-    queryBuilder.orderBy('transactionInfo."txId"', 'DESC');
+    const queryBuilder = this.transactionInfoRepository.createQueryBuilder('TransactionInfo');
+    queryBuilder.from(TransactionInfo, 'TransactionInfo');
+    queryBuilder.where('TransactionInfo."blockNumber" = :blockNumber', { blockNumber });
+    queryBuilder.orderBy('TransactionInfo."txId"', 'DESC');
     queryBuilder.skip((pageNumber - 1) * perPage);
     queryBuilder.take(perPage);
     console.log(queryBuilder.getSql());
@@ -81,8 +81,8 @@ export class BlockInformationServcie {
     };
   }
   async getLatestBlockInformation(): Promise<BlockInformationWithTxDto> {
-    const queryBuilder = this.blockInformationRepository.createQueryBuilder('blockInformation');
-    queryBuilder.orderBy('blockInformation."blockNumber"', 'DESC');
+    const queryBuilder = this.blockInformationRepository.createQueryBuilder('BlockInformation');
+    queryBuilder.orderBy('BlockInformation."blockNumber"', 'DESC');
     queryBuilder.limit(1);
     const [block] = await queryBuilder.getMany();
     const transactions = await this.getTransactionInfoByBlockNumber(block.blockNumber, { pageNumber: 1, perPage: 10 });
@@ -101,9 +101,9 @@ export class BlockInformationServcie {
     };
   }
   async getBlockInformationByBlockNumber(blockNumber: number): Promise<BlockInformationWithTxDto> {
-    const queryBuilder = this.blockInformationRepository.createQueryBuilder('blockInformation');
-    queryBuilder.from(BlockInformation, 'blockInformation');
-    queryBuilder.where('blockInformation.blockNumber = :blockNumber', { blockNumber });
+    const queryBuilder = this.blockInformationRepository.createQueryBuilder('BlockInformation');
+    // queryBuilder.from(BlockInformation, 'blockInformation');
+    queryBuilder.where('BlockInformation."blockNumber" = :blockNumber', { blockNumber });
     const [block] = await queryBuilder.getMany();
     const transactions = await this.getTransactionInfoByBlockNumber(block.blockNumber, { pageNumber: 1, perPage: 10 });
     return {
