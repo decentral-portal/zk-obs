@@ -609,6 +609,12 @@ export class INIT_1669198902099 implements MigrationInterface {
             default: `'${TS_STATUS.PENDING}'`,
           },
           {
+            type: 'varchar',
+            name: 'L1TxHash',
+            length: '100',
+            isNullable: true
+          },
+          {
             type: 'timestamp without time zone',
             name: 'createdAt',
             isNullable: false,

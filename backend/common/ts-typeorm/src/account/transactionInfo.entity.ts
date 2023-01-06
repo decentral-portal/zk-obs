@@ -194,7 +194,12 @@ export class TransactionInfo extends BaseTimeEntity {
     nullable: false,
     default: () => '\'{}\'',
   })
-  metadata!: object | null;
+  metadata!: {
+    accumalatedSellAmt: string,
+    accumalatedBuyAmt: string,
+    lendingCumAmt: string,
+    bondCumAmt: string,
+  } | null;
   @Column({
     type: 'enum',
     name: 'txStatus',
@@ -211,6 +216,15 @@ export class TransactionInfo extends BaseTimeEntity {
     default: `'${TS_STATUS.PENDING}'`,
   })
   txStatus!: TS_STATUS;
+
+  @Column({
+    type: 'varchar',
+    name: 'L1TxHash',
+    length: '100',
+    nullable: true
+  })
+  L1TxHash?: string;
+
   @ManyToOne(
     () => AccountInformation,
     (accountInformation: AccountInformation) =>

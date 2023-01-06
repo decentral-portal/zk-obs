@@ -12,6 +12,7 @@ import {
   InjectContractProvider,
   EthersContract,
   TransactionResponse,
+  Log,
 } from 'nestjs-ethers';
 import { Connection, Repository } from 'typeorm';
 import * as ABI from '../domain/verified-abi.json';
@@ -66,6 +67,9 @@ export class OperatorProducer {
     });
     this.listenRegisterEvent();
     this.listenDepositEvent(); //! new
+    setInterval(() => {
+      this.checkoutHoldTx();
+    }, 5000);
   }
 
   async listenRegisterEvent() {
@@ -74,14 +78,11 @@ export class OperatorProducer {
       `OperatorProducer.listenRegisterEvent contract=${this.contract.address}`,
     );
     const filters = this.contract.filters.Register();
-    const handler = (log: any) => {
-      console.log({
-        registerLog: log,
-      });
+    const handler = async (log: any) => {
       this.logger.log(
         `OperatorProducer.listenRegisterEvent log:${JSON.stringify(log)}`,
       );
-      this.handleRegisterEvent(
+      return await this.handleRegisterEvent(
         log.args.sender,
         log.args.accountId,
         log.args.tsPubX,
@@ -90,18 +91,23 @@ export class OperatorProducer {
         log,
       );
     };
-    const { lastSyncBlocknumberForRegisterEvent } =
-      await this.rollupInfoRepository.findOneOrFail({ where: { id: 1 } });
-    this.contract
-      .queryFilter(filters, lastSyncBlocknumberForRegisterEvent, 'latest')
-      .then((logs) => {
-        logs.forEach((log) => {
-          handler(log);
-        });
-      });
+    const { lastSyncBlocknumberForRegisterEvent } = await this.rollupInfoRepository.findOneOrFail({ where: { id: 1 } });
+    
+    const logs = await this.contract.queryFilter(filters, lastSyncBlocknumberForRegisterEvent, 'latest');
     this.contract.on(filters, (...args) => {
       handler(args[5]);
     });
+    for (let index = 0; index < logs.length; index++) {
+      const log = logs[index];
+      await handler(log);
+    }
+    const blockNumbers = logs.map((log) => Number(log.blockNumber)).sort((a, b) => b - a);
+    this.rollupInfoRepository.update(
+      { id: 1 },
+      { lastSyncBlocknumberForRegisterEvent: blockNumbers[blockNumbers.length - 1] },
+    );
+    
+    
   }
 
   async handleRegisterEvent(
@@ -110,16 +116,18 @@ export class OperatorProducer {
     tsPubX: BigNumber,
     tsPubY: BigNumber,
     l2Addr: string,
-    tx: TransactionResponse,
+    tx: Log,
   ) {
-    const rollupInfo = await this.rollupInfoRepository.findOneOrFail({
-      where: { id: 1 },
+    const oldTx = await this.txRepository.findOne({
+      where: {
+        L1TxHash: tx.transactionHash,
+      },
     });
-    const { blockNumber = 0 } = tx;
-
-    if (blockNumber < rollupInfo.lastSyncBlocknumberForRegisterEvent) {
+    if (oldTx) {
       this.logger.log(
-        `OperatorProducer.listenRegisterEvent SKIP blockNumber=${blockNumber} lastSyncBlocknumberForRegisterEvent=${rollupInfo.lastSyncBlocknumberForRegisterEvent}`,
+        `OperatorProducer.handleRegisterEvent tx already exist:${JSON.stringify(
+          oldTx,
+        )}`,
       );
       return;
     }
@@ -142,16 +150,13 @@ export class OperatorProducer {
         amount: '0',
         arg0: BigInt(accountId.toString()).toString(),
         arg1: BigInt(l2Addr).toString(),
+        L1TxHash: tx.transactionHash,
       }),
-      this.rollupInfoRepository.update(
-        { id: 1 },
-        { lastSyncBlocknumberForRegisterEvent: blockNumber },
-      ),
+      this.accountRepository.upsert(txRegister, ['L1Address']),
+      this.coreQueue.add('TransactionInfo', {
+        test: true,
+      })
     ]);
-    await this.accountRepository.upsert(txRegister, ['L1Address']);
-    this.coreQueue.add('TransactionInfo', {
-      test: true,
-    });
     // this.messageBrokerService.publish(CHANNEL.ORDER_CREATED, {});
   }
 
@@ -164,13 +169,10 @@ export class OperatorProducer {
     const filters = this.contract.filters.Deposit();
     const { lastSyncBlocknumberForDepositEvent } =
       await this.rollupInfoRepository.findOneOrFail({ where: { id: 1 } });
-    const handler = (log: any) => {
+    const handler = async (log: any) => {
       this.logger.log(
         `OperatorProducer.listenDepositEvent log:${JSON.stringify(log)}`,
       );
-      console.log({
-        depositLog: log,
-      });
       this.handleDepositEvent(
         log.args.sender,
         log.args.accountId,
@@ -179,19 +181,19 @@ export class OperatorProducer {
         log,
       );
     };
-    this.contract
-      .queryFilter(filters, lastSyncBlocknumberForDepositEvent, 'latest')
-      .then((logs) => {
-        logs.forEach((log) => {
-          handler(log);
-        });
-      });
+    const logs = await this.contract.queryFilter(filters, lastSyncBlocknumberForDepositEvent, 'latest');
     this.contract.on(filters, (...args) => {
-      console.log({
-        args,
-      });
       handler(args[4]);
     });
+    for (let index = 0; index < logs.length; index++) {
+      const log = logs[index];
+      await handler(log);
+    }
+    const blockNumbers = logs.map((log) => Number(log.blockNumber)).sort((a, b) => b - a);
+    this.rollupInfoRepository.update(
+      { id: 1 },
+      { lastSyncBlocknumberForDepositEvent: blockNumbers[blockNumbers.length - 1] },
+    );
   }
 
   async handleDepositEvent(
@@ -199,16 +201,18 @@ export class OperatorProducer {
     accountId: BigNumber,
     tokenId: BigNumber,
     amount: BigNumber,
-    tx: TransactionResponse,
+    tx: Log,
   ) {
-    const rollupInfo = await this.rollupInfoRepository.findOneOrFail({
-      where: { id: 1 },
+    const oldTx = await this.txRepository.findOne({
+      where: {
+        L1TxHash: tx.transactionHash,
+      },
     });
-    const { blockNumber = 0 } = tx;
-
-    if (blockNumber < rollupInfo.lastSyncBlocknumberForDepositEvent) {
+    if (oldTx) {
       this.logger.log(
-        `OperatorProducer.listenDepositEvent SKIP blockNumber=${blockNumber} lastSyncBlocknumberForDepositEvent=${rollupInfo.lastSyncBlocknumberForDepositEvent}`,
+        `OperatorProducer.handleDepositEvent tx already exist:${JSON.stringify(
+          oldTx,
+        )}`,
       );
       return;
     }
@@ -224,6 +228,7 @@ export class OperatorProducer {
       tokenId: tokenId.toString(),
       amount: amount.toString(),
       arg0: BigInt(accountId.toString()).toString(),
+      L1TxHash: tx.transactionHash,
     };
     const account = await this.accountRepository.findOne({
       where: { accountId: accountId.toString() },
@@ -232,32 +237,41 @@ export class OperatorProducer {
       this.holdTx.push(req);
     } else {
       await this.txRepository.insert(req);
+      this.coreQueue.add('TransactionInfo', {
+        test: true,
+      });
     }
-    this.coreQueue.add('TransactionInfo', {
-      test: true,
-    });
-    // this.messageBrokerService.publish(CHANNEL.ORDER_CREATED, {});
-    await this.rollupInfoRepository.update(
-      { id: 1 },
-      { lastSyncBlocknumberForDepositEvent: blockNumber },
-    );
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS)
+  // @Cron(CronExpression.EVERY_10_SECONDS)
   private async checkoutHoldTx() {
-    console.log({
-      holdTx: this.holdTx,
-    })
-    for (let index = 0; index < this.holdTx.length; index++) {
-      const req = this.holdTx[index];
-      const account = await this.accountRepository.findOne({
-        where: { accountId: req.accountId?.toString() },
-      });
-      if(account && account.L1Address) {
-        await this.txRepository.insert(req);
+    if(this.holdTxProcessing) {
+      this.logger.log('checkoutHoldTx holdTxProcessing');
+      return;
+    }
+    this.holdTxProcessing = true;
+    try {
+      const newArr = [];
+      for (let index = 0; index < this.holdTx.length; index++) {
+        const req = this.holdTx[index];
+        const account = await this.accountRepository.findOne({
+          where: { accountId: req.accountId?.toString() },
+        });
+        if(account && account.L1Address) {
+          await this.txRepository.insert(req);
+        } else {
+          newArr.push(req);
+        }
       }
+      this.logger.log(`checkoutHoldTx has ${newArr.length} remain txs`);
+      this.holdTx = newArr;
+    } catch (error) {
+      console.error(error); 
+    } finally {
+      this.holdTxProcessing = false;
     }
   }
 
   private holdTx: QueryDeepPartialEntity<TransactionInfo>[] | QueryDeepPartialEntity<TransactionInfo>[] =[];
+  private holdTxProcessing = false;
 }
