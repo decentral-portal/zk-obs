@@ -56,7 +56,7 @@ export class BlockInformationServcie {
   async getBlockInformations(paginationDto: PaginationDto): Promise<BlockInformationPagination> {
     const { pageNumber, perPage } = paginationDto;
     const queryBuilder = this.blockInformationRepository.createQueryBuilder('blockInformation');
-    queryBuilder.from(BlockInformation, 'blockInformation');
+    // queryBuilder.from(BlockInformation, 'blockInformation');
     queryBuilder.orderBy('blockInformation."blockNumber"', 'DESC');
     queryBuilder.skip((pageNumber - 1) * perPage);
     queryBuilder.take(perPage);
