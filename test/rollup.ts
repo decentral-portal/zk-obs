@@ -464,7 +464,6 @@ describe('Unit test of rollup', function () {
     } = getRollupData(inputs2, root2, calldata2);
 
     it('Acc1 deposit with USDC', async function () {
-      console.log(inputs2.reqData);
       const reqData = inputs2.reqData;
       for (let i = 0; i < inputs2.reqData.length; i++) {
         let amt = reqData[i][3];
@@ -631,50 +630,48 @@ describe('Unit test of rollup', function () {
       proof_c,
       proof_commitment,
     } = getRollupData(inputs3, root3, calldata3);
-
+    const reqData = inputs3.reqData;
     it('Acc2 deposit with ETH', async function () {
-      // get user's states first
-      const oriBalance: BigNumber = await wETH.balanceOf(zkOBS.address);
-      const oriTotalPendingRequests = await zkOBS.pendingL1RequestNum();
+      for (let i = 0; i < reqData.length; i++) {
+        let amt = reqData[i][3];
+        // get user's states first
+        const oriBalance: BigNumber = await wETH.balanceOf(zkOBS.address);
+        const oriTotalPendingRequests = await zkOBS.pendingL1RequestNum();
 
-      // call deposit
-      await zkOBS.connect(user2).depositETH({ value: amount });
-      // check user balance
-      const newBalance: BigNumber = await wETH.balanceOf(zkOBS.address);
-      expect(newBalance.sub(oriBalance)).to.be.eq(amount);
+        // call deposit
+        await zkOBS.connect(user2).depositETH({ value: amt });
+        // check user balance
+        const newBalance: BigNumber = await wETH.balanceOf(zkOBS.address);
+        expect(newBalance.sub(oriBalance)).to.be.eq(amt);
 
-      // check totalPendingRequest increased
-      const newTotalPendingRequests = await zkOBS.pendingL1RequestNum();
-      expect(newTotalPendingRequests.sub(oriTotalPendingRequests)).to.be.eq(1);
+        // check totalPendingRequest increased
+        const newTotalPendingRequests = await zkOBS.pendingL1RequestNum();
+        expect(newTotalPendingRequests.sub(oriTotalPendingRequests)).to.be.eq(
+          1,
+        );
 
-      // check the request is existed in the L1 request queue
-      const firstL1RequestId = await zkOBS.firstL1RequestId();
-      const totalPendingL1Requests = await zkOBS.pendingL1RequestNum();
-      const accountId = await zkOBS.accountIdOf(await user2.getAddress());
-      const tokenId = await zkOBS.tokenIdOf(wETH.address);
+        // check the request is existed in the L1 request queue
+        const firstL1RequestId = await zkOBS.firstL1RequestId();
+        const totalPendingL1Requests = await zkOBS.pendingL1RequestNum();
+        const accountId = await zkOBS.accountIdOf(await user2.getAddress());
+        const tokenId = await zkOBS.tokenIdOf(wETH.address);
 
-      const deposit: Operations.DepositStruct = {
-        accountId: accountId,
-        tokenId: tokenId,
-        amount: amount,
-      };
-      let requestId = firstL1RequestId.add(totalPendingL1Requests).sub(1);
-      const success = await zkOBS.checkDepositL1Request(deposit, requestId);
-      expect(success).to.be.true;
+        const deposit: Operations.DepositStruct = {
+          accountId: accountId,
+          tokenId: tokenId,
+          amount: amt,
+        };
+
+        let requestId = firstL1RequestId.add(totalPendingL1Requests).sub(1);
+        const success = await zkOBS.checkDepositL1Request(deposit, requestId);
+        expect(success).to.be.true;
+      }
     });
 
     it('Commit Acc2 single deposit with ETH', async function () {
       zkOBS = zkOBS.connect(operator);
 
       const newBlocks: ZkOBS.CommitBlockStruct[] = [];
-      const tokenIdWETH = await zkOBS.tokenIdOf(wETH.address);
-      const accountId = await zkOBS.accountIdOf(await user2.getAddress());
-      const publicData = ethers.utils
-        .solidityPack(
-          ['uint8', 'uint32', 'uint16', 'uint128'],
-          [OpType.DEPOSIT, accountId, tokenIdWETH, amount],
-        )
-        .padEnd((CALLDATA_CHUNK * 12 * 8) / 4 + 2, '0');
 
       commitBlock = {
         blockNumber: BigNumber.from(lastCommittedBlock.blockNumber).add(1),
@@ -696,7 +693,7 @@ describe('Unit test of rollup', function () {
       );
       expect(
         newTotalCommittedL1Requests.sub(oriTotalCommittedL1Requests),
-      ).to.be.eq(1);
+      ).to.be.eq(reqData.length);
     });
 
     it('Prove Acc2 single deposit with ETH', async function () {
@@ -707,7 +704,7 @@ describe('Unit test of rollup', function () {
       const commitedBlock: ZkOBS.StoredBlockStruct = {
         blockNumber: commitBlock.blockNumber,
         stateRoot: commitBlock.newStateRoot,
-        l1RequestNum: 1,
+        l1RequestNum: reqData.length,
         pendingRollupTxHash: emptyHash,
         commitment: commitmentHashOrigin,
         timestamp: commitBlock.timestamp,
@@ -788,19 +785,9 @@ describe('Unit test of rollup', function () {
       proof_c,
       proof_commitment,
     } = getRollupData(inputs4, root4, calldata4);
-
+    const reqData = inputs4.reqData;
     it('Commit Acc1 single withdraw with ETH', async function () {
-      zkOBS = zkOBS.connect(operator);
-
       const newBlocks: ZkOBS.CommitBlockStruct[] = [];
-      const tokenIdWETH = await zkOBS.tokenIdOf(wETH.address);
-      const accountId = await zkOBS.accountIdOf(await user1.getAddress());
-      const publicData = ethers.utils
-        .solidityPack(
-          ['uint8', 'uint32', 'uint16', 'uint128'],
-          [OpType.WITHDRAW, accountId, tokenIdWETH, amount],
-        )
-        .padEnd((CALLDATA_CHUNK * 12 * 8) / 4 + 2, '0');
 
       commitBlock = {
         blockNumber: BigNumber.from(lastCommittedBlock.blockNumber).add(1),
@@ -813,10 +800,8 @@ describe('Unit test of rollup', function () {
 
       newBlocks.push(commitBlock);
       const oriTotalCommittedBlocks = await zkOBS.committedBlockNum();
-      const oriTotalCommittedL1Requests = await zkOBS.committedL1RequestNum();
       await zkOBS.commitBlocks(lastCommittedBlock, newBlocks);
       const newTotalCommittedBlocks = await zkOBS.committedBlockNum();
-      const newTotalCommittedL1Requests = await zkOBS.committedL1RequestNum();
       expect(newTotalCommittedBlocks - oriTotalCommittedBlocks).to.be.eq(
         newBlocks.length,
       );
@@ -829,18 +814,22 @@ describe('Unit test of rollup', function () {
       const committedBlocks: ZkOBS.StoredBlockStruct[] = [];
       const tokenIdWETH = await zkOBS.tokenIdOf(wETH.address);
       const accountId = await zkOBS.accountIdOf(await user1.getAddress());
-      const publicData = ethers.utils
-        .solidityPack(
-          ['uint8', 'uint32', 'uint16', 'uint128'],
-          [OpType.WITHDRAW, accountId, tokenIdWETH, amount],
-        )
-        .padEnd((2 * 12 * 8) / 4 + 2, '0');
-      const pendingRollupTxHash = ethers.utils.keccak256(
-        ethers.utils.solidityPack(
-          ['bytes32', 'bytes'],
-          [emptyHash, publicData],
-        ),
-      );
+      let pendingRollupTxHash = emptyHash;
+      for (let i = 0; i < reqData.length; i++) {
+        let amt = reqData[i][3];
+        const publicData = ethers.utils
+          .solidityPack(
+            ['uint8', 'uint32', 'uint16', 'uint128'],
+            [OpType.WITHDRAW, accountId, tokenIdWETH, amt],
+          )
+          .padEnd((2 * 12 * 8) / 4 + 2, '0');
+        pendingRollupTxHash = ethers.utils.keccak256(
+          ethers.utils.solidityPack(
+            ['bytes32', 'bytes'],
+            [pendingRollupTxHash, publicData],
+          ),
+        );
+      }
       const commitedBlock: ZkOBS.StoredBlockStruct = {
         blockNumber: commitBlock.blockNumber,
         stateRoot: commitBlock.newStateRoot,

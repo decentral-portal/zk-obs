@@ -215,8 +215,6 @@ contract ZkOBS is Ownable {
         returns (bool isExisted)
     {
         L1Request memory req = l1RequestQueue[requestId];
-        // console.log("in checkDepositL1Request");
-        // console.log(uint8(req.opType));
         require(req.opType == Operations.OpType.DEPOSIT, "OpType not matched");
         require(
             Operations.checkDepositInL1RequestQueue(deposit, req.hashedPubData),
