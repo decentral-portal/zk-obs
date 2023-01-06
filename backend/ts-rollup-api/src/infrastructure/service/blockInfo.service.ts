@@ -18,8 +18,8 @@ export class BlockInformationServcie {
   async getTransactionInfoByBlockNumber(blockNumber: number, paginationDto: PaginationDto): Promise<TransactionInfoPagination> {
     const { pageNumber, perPage } = paginationDto;
     const queryBuilder = this.transactionInfoRepository.createQueryBuilder('transactionInfo');
-    queryBuilder.where('transactionInfo.blockNumber = :blockNumber', { blockNumber });
-    queryBuilder.orderBy('transactionInfo.transactionIndex', 'DESC');
+    queryBuilder.where('transactionInfo."blockNumber" = :blockNumber', { blockNumber });
+    queryBuilder.orderBy('transactionInfo."txId"', 'DESC');
     queryBuilder.skip((pageNumber - 1) * perPage);
     queryBuilder.take(perPage);
     const [list, total] = await queryBuilder.getManyAndCount();
@@ -53,7 +53,7 @@ export class BlockInformationServcie {
   async getBlockInformations(paginationDto: PaginationDto): Promise<BlockInformationPagination> {
     const { pageNumber, perPage } = paginationDto;
     const queryBuilder = this.blockInformationRepository.createQueryBuilder('blockInformation');
-    queryBuilder.orderBy('blockInformation.blockNumber', 'DESC');
+    queryBuilder.orderBy('blockInformation."blockNumber"', 'DESC');
     queryBuilder.skip((pageNumber - 1) * perPage);
     queryBuilder.take(perPage);
     const [list, total] = await queryBuilder.getManyAndCount();
@@ -78,7 +78,7 @@ export class BlockInformationServcie {
   }
   async getLatestBlockInformation(): Promise<BlockInformationWithTxDto> {
     const queryBuilder = this.blockInformationRepository.createQueryBuilder('blockInformation');
-    queryBuilder.orderBy('blockInformation.blockNumber', 'DESC');
+    queryBuilder.orderBy('blockInformation."blockNumber"', 'DESC');
     queryBuilder.limit(1);
     const [block] = await queryBuilder.getMany();
     const transactions = await this.getTransactionInfoByBlockNumber(block.blockNumber, { pageNumber: 1, perPage: 10 });
