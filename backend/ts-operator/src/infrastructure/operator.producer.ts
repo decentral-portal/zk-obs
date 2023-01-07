@@ -11,7 +11,6 @@ import {
   EthersSigner,
   InjectContractProvider,
   EthersContract,
-  TransactionResponse,
   Log,
 } from 'nestjs-ethers';
 import { Connection, Repository } from 'typeorm';
