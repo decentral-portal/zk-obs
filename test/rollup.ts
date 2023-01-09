@@ -200,7 +200,7 @@ describe('Unit test of rollup', function () {
       );
       expect(
         newTotalCommittedL1Requests.sub(oriTotalCommittedL1Requests),
-      ).to.be.eq(2);
+      ).to.be.eq(1);
     });
 
     it('Prove single register with ETH', async function () {
@@ -211,7 +211,7 @@ describe('Unit test of rollup', function () {
       const commitedBlock: ZkOBS.StoredBlockStruct = {
         blockNumber: commitBlock.blockNumber,
         stateRoot: commitBlock.newStateRoot,
-        l1RequestNum: 2,
+        l1RequestNum: 1,
         pendingRollupTxHash: emptyHash,
         commitment: commitmentHashOrigin,
         timestamp: commitBlock.timestamp,
@@ -376,7 +376,7 @@ describe('Unit test of rollup', function () {
       );
       expect(
         newTotalCommittedL1Requests.sub(oriTotalCommittedL1Requests),
-      ).to.be.eq(2);
+      ).to.be.eq(1);
     });
 
     it('Prove single register with USDC', async function () {
@@ -387,7 +387,7 @@ describe('Unit test of rollup', function () {
       const commitedBlock: ZkOBS.StoredBlockStruct = {
         blockNumber: commitBlock.blockNumber,
         stateRoot: commitBlock.newStateRoot,
-        l1RequestNum: 2,
+        l1RequestNum: 1,
         pendingRollupTxHash: emptyHash,
         commitment: commitmentHashOrigin,
         timestamp: commitBlock.timestamp,

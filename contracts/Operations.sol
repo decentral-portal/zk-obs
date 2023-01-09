@@ -13,23 +13,31 @@ library Operations {
         UNKNOWN,
         REGISTER,
         DEPOSIT,
+        //TRANSFER,
         WITHDRAW,
+        AUCTIONLEND,
+        AUCTIONBORROW,
+        CANCELORDER,
+        SETEPOCH,
+        AUCTIONSTART,
+        AUCTIONMATCH,
+        AUCTIONEND,
         SECONDLIMITORDER,
         SECONDLIMITSTART,
         SECONDLIMITEXCHANGE,
         SECONDLIMITEND,
         SECONDMARKETORDER,
-        SECONDEXCHANGE,
-        SECONDMARKETEND,
-        CANCEL
+        SECONDMARKETEXCHANGE,
+        SECONDMARKETEND
     }
 
     // Byte length definition
     uint8 internal constant OP_TYPE_BYTES = 1;
-    uint8 internal constant L2_ADDR_BYTES = 4;
+    uint8 internal constant ACCOUNT_ID_BYTES = 4;
     uint8 internal constant TS_ADDR_BYTES = 20;
-    uint8 internal constant L2_TOKEN_ADDR_BYTES = 2;
+    uint8 internal constant TOKEN_ID_BYTES = 2;
     uint8 internal constant STATE_AMOUNT_BYTES = 16;
+    uint8 internal constant TIME_BYTES = 4;
 
     // Register pubdata
     struct Register {
@@ -48,6 +56,15 @@ library Operations {
         uint32 accountId;
         uint16 tokenId;
         uint128 amount;
+    }
+
+    struct AuctionEnd {
+        uint32 accountId;
+        uint16 collateralTokenId;
+        uint128 collateralAmt;
+        uint16 debtTokenId;
+        uint128 debtAmt;
+        uint32 maturityTime;
     }
 
     /// @notice Return the bytes of register object
@@ -89,24 +106,20 @@ library Operations {
     }
 
     uint256 internal constant REGISTER_PUBDATA_BYTES =
-        OP_TYPE_BYTES + L2_ADDR_BYTES + L2_TOKEN_ADDR_BYTES + STATE_AMOUNT_BYTES + TS_ADDR_BYTES;
+        OP_TYPE_BYTES + ACCOUNT_ID_BYTES + TOKEN_ID_BYTES + STATE_AMOUNT_BYTES + TS_ADDR_BYTES;
 
-    function readRegisterPubdata(bytes memory data)
-        internal
-        pure
-        returns (Register memory register, Deposit memory deposit)
-    {
+    function readRegisterPubdata(bytes memory data) internal pure returns (Register memory register) {
         uint256 offset = OP_TYPE_BYTES;
         (offset, register.accountId) = Bytes.readUInt32(data, offset);
-        (offset, deposit.tokenId) = Bytes.readUInt16(data, offset);
-        (offset, deposit.amount) = Bytes.readUInt128(data, offset);
+        //! Remove it for phase6
+        (offset, ) = Bytes.readUInt16(data, offset);
+        (offset, ) = Bytes.readUInt128(data, offset);
         (offset, register.l2Addr) = Bytes.readBytes20(data, offset);
-        deposit.accountId = register.accountId;
         require(offset == REGISTER_PUBDATA_BYTES, "Read register pubdata error");
     }
 
     uint256 internal constant DEPOSIT_PUBDATA_BYTES =
-        OP_TYPE_BYTES + L2_ADDR_BYTES + L2_TOKEN_ADDR_BYTES + STATE_AMOUNT_BYTES;
+        OP_TYPE_BYTES + ACCOUNT_ID_BYTES + TOKEN_ID_BYTES + STATE_AMOUNT_BYTES;
 
     function readDepositPubdata(bytes memory data) internal pure returns (Deposit memory deposit) {
         uint256 offset = OP_TYPE_BYTES;
@@ -117,7 +130,7 @@ library Operations {
     }
 
     uint256 internal constant WITHDRAW_PUBDATA_BYTES =
-        OP_TYPE_BYTES + L2_ADDR_BYTES + L2_TOKEN_ADDR_BYTES + STATE_AMOUNT_BYTES;
+        OP_TYPE_BYTES + ACCOUNT_ID_BYTES + TOKEN_ID_BYTES + STATE_AMOUNT_BYTES;
 
     function readWithdrawPubdata(bytes memory data) internal pure returns (Withdraw memory withdraw) {
         uint256 offset = OP_TYPE_BYTES;
@@ -125,5 +138,25 @@ library Operations {
         (offset, withdraw.tokenId) = Bytes.readUInt16(data, offset);
         (offset, withdraw.amount) = Bytes.readUInt128(data, offset);
         require(offset == WITHDRAW_PUBDATA_BYTES, "Read withdraw pubdata error");
+    }
+
+    uint256 internal constant AUCTIONEND_PUBDATA_BYTES =
+        OP_TYPE_BYTES +
+            ACCOUNT_ID_BYTES +
+            TOKEN_ID_BYTES +
+            STATE_AMOUNT_BYTES +
+            TOKEN_ID_BYTES +
+            STATE_AMOUNT_BYTES +
+            TIME_BYTES;
+
+    function readAuctionEndPubdata(bytes memory data) internal pure returns (AuctionEnd memory auctionEnd) {
+        uint256 offset = OP_TYPE_BYTES;
+        (offset, auctionEnd.accountId) = Bytes.readUInt32(data, offset);
+        (offset, auctionEnd.collateralTokenId) = Bytes.readUInt16(data, offset);
+        (offset, auctionEnd.collateralAmt) = Bytes.readUInt128(data, offset);
+        (offset, auctionEnd.debtTokenId) = Bytes.readUInt16(data, offset);
+        (offset, auctionEnd.debtAmt) = Bytes.readUInt128(data, offset);
+        (offset, auctionEnd.maturityTime) = Bytes.readUInt32(data, offset);
+        require(offset == AUCTIONEND_PUBDATA_BYTES, "Read auction end pubdata error");
     }
 }

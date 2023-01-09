@@ -24,6 +24,14 @@ contract ZkOBS is Ownable {
     event BlockCommitted(uint32 indexed blockNumber);
     event BlockProved(uint32 indexed blockNumber);
     event BlockExecuted(uint32 indexed blockNumber);
+    event AddLoan(
+        uint32 accountId,
+        uint32 maturityTime,
+        uint16 debtTokenId,
+        uint16 collateralTokenId,
+        uint128 debtAmt,
+        uint128 collateralAmt
+    );
 
     struct StoredBlock {
         uint32 blockNumber;
@@ -55,11 +63,21 @@ contract ZkOBS is Ownable {
         uint256[1] commitment;
     }
 
+    struct Loan {
+        uint32 accountId;
+        uint32 maturityTime;
+        uint16 debtTokenId;
+        uint16 collateralTokenId;
+        uint128 debtAmt;
+        uint128 collateralAmt;
+    }
+
     bytes32 internal constant EMPTY_STRING_KECCAK = 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470;
     uint8 internal constant CHUNK_BYTES = 12;
     uint256 internal constant REGISTER_BYTES = 4 * CHUNK_BYTES;
     uint256 internal constant DEPOSIT_BYTES = 2 * CHUNK_BYTES;
     uint256 internal constant WITHDRAW_BYTES = 2 * CHUNK_BYTES;
+    uint256 internal constant AUCTIONEND_BYTES = 4 * CHUNK_BYTES;
     uint256 internal constant INPUT_MASK = (~uint256(0) >> 3);
     uint8 internal constant RESERVED_TOKEN_NUM = 1;
 
@@ -73,6 +91,7 @@ contract ZkOBS is Ownable {
     mapping(uint64 => L1Request) public l1RequestQueue;
     mapping(uint32 => bytes32) public storedBlockHashes;
     mapping(bytes22 => uint128) public pendingBalances;
+    mapping(bytes12 => Loan) public loanOf;
 
     uint32 public accountNum = 100;
     uint16 public tokenNum;
@@ -370,23 +389,19 @@ contract ZkOBS is Ownable {
             // console.log(uint8(publicData[offset]));
             if (opType == Operations.OpType.REGISTER) {
                 bytes memory rollupData = Bytes.slice(publicData, offset, REGISTER_BYTES);
-                (Operations.Register memory register, Operations.Deposit memory deposit) = Operations
-                    .readRegisterPubdata(rollupData);
+                Operations.Register memory register = Operations.readRegisterPubdata(rollupData);
                 checkRegisterL1Request(register, uncommittedL1RequestNum + processedL1RequestNum);
                 ++processedL1RequestNum;
-                //checkDepositL1Request(deposit, uncommittedL1RequestNum + processedL1RequestNum);
-                ++processedL1RequestNum;
-                // processableRollupTxHash = keccak256(abi.encodePacked(processableRollupTxHash, rollupData));
             } else if (opType == Operations.OpType.DEPOSIT) {
                 bytes memory rollupData = Bytes.slice(publicData, offset, DEPOSIT_BYTES);
-                // console.log("rollupdata:");
-                // console.log(offset);
-                // console.logBytes(rollupData);
                 Operations.Deposit memory deposit = Operations.readDepositPubdata(rollupData);
                 checkDepositL1Request(deposit, uncommittedL1RequestNum + processedL1RequestNum);
                 ++processedL1RequestNum;
             } else if (opType == Operations.OpType.WITHDRAW) {
                 bytes memory pubdata = Bytes.slice(publicData, offset, WITHDRAW_BYTES);
+                processableRollupTxHash = keccak256(abi.encodePacked(processableRollupTxHash, pubdata));
+            } else if (opType == Operations.OpType.AUCTIONEND) {
+                bytes memory pubdata = Bytes.slice(publicData, offset, AUCTIONEND_BYTES);
                 processableRollupTxHash = keccak256(abi.encodePacked(processableRollupTxHash, pubdata));
             }
         }
@@ -396,7 +411,7 @@ contract ZkOBS is Ownable {
         StoredBlock memory previousBlock,
         CommitBlock memory newBlock,
         bytes memory offsetCommitment
-    ) internal view returns (bytes32 commitment) {
+    ) internal pure returns (bytes32 commitment) {
         bytes memory pubdata = abi.encodePacked(offsetCommitment, newBlock.publicData);
         // console.log("[in createBlockCommitment]");
         // console.logBytes(abi.encodePacked(previousBlock.stateRoot, newBlock.newStateRoot, newBlock.newTsRoot, pubdata));
@@ -405,8 +420,6 @@ contract ZkOBS is Ownable {
         );
     }
 
-    // 0x280f97ccf6ca348227c9d0ccff97b0bd90016ef3ece6a24c8cad6e1474bc6ba11229d7608dc4f2d03c7d872a7d8627ade6c3a59ec81ea0d06c56a344909aced62e364414d101f44eae889eec07ab51b1c5b5172051aaff071473504eafe38171010000000000000000040000006400010000000014000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-    // 0x280f97ccf6ca348227c9d0ccff97b0bd90016ef3ece6a24c8cad6e1474bc6ba11229d7608dc4f2d03c7d872a7d8627ade6c3a59ec81ea0d06c56a344909aced62e364414d101f44eae889eec07ab51b1c5b5172051aaff071473504eafe3817100040000006400010800000002000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
     function proveBlocks(StoredBlock[] memory committedBlocks, Proof[] memory proof) external {
         uint32 currentProvedBlockNum = provedBlockNum;
         for (uint256 i = 0; i < committedBlocks.length; i++) {
@@ -472,6 +485,10 @@ contract ZkOBS is Ownable {
             if (opType == Operations.OpType.WITHDRAW) {
                 Operations.Withdraw memory withdraw = Operations.readWithdrawPubdata(pubData);
                 _increasePendingBalance(withdraw.accountId, withdraw.tokenId, withdraw.amount);
+            } else if (opType == Operations.OpType.AUCTIONEND) {
+                //! Only after the loan is committed, proved, and executed can the borrowing amount be added for borrower
+                Operations.AuctionEnd memory auctionEnd = Operations.readAuctionEndPubdata(pubData);
+                _addLoan(auctionEnd);
             }
             pendingRollupTxHash = keccak256(abi.encodePacked(pendingRollupTxHash, pubData));
         }
@@ -491,5 +508,46 @@ contract ZkOBS is Ownable {
 
     function _packAddressAndTokenId(address addr, uint16 tokenId) internal pure returns (bytes22) {
         return bytes22((uint176(uint160(addr)) | (uint176(tokenId) << 160)));
+    }
+
+    function getLoanId(
+        uint32 accountId,
+        uint32 maturityTime,
+        uint16 debtTokenId,
+        uint16 collateralTokenId
+    ) public pure returns (bytes12) {
+        return
+            bytes12(
+                uint96(collateralTokenId) |
+                    (uint96(debtTokenId) << 16) |
+                    (uint96(maturityTime) << 32) |
+                    (uint96(accountId) << 64)
+            );
+    }
+
+    function _addLoan(Operations.AuctionEnd memory auctionEnd) internal {
+        bytes12 loanId = getLoanId(
+            auctionEnd.accountId,
+            auctionEnd.maturityTime,
+            auctionEnd.debtTokenId,
+            auctionEnd.collateralTokenId
+        );
+        Loan memory loan = Loan({
+            accountId: auctionEnd.accountId,
+            maturityTime: auctionEnd.maturityTime,
+            debtTokenId: auctionEnd.debtTokenId,
+            collateralTokenId: auctionEnd.collateralTokenId,
+            debtAmt: auctionEnd.debtAmt,
+            collateralAmt: auctionEnd.collateralAmt
+        });
+        loanOf[loanId] = loan;
+        emit AddLoan(
+            auctionEnd.accountId,
+            auctionEnd.maturityTime,
+            auctionEnd.debtTokenId,
+            auctionEnd.collateralTokenId,
+            auctionEnd.debtAmt,
+            auctionEnd.collateralAmt
+        );
     }
 }
