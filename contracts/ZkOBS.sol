@@ -15,16 +15,17 @@ import "hardhat/console.sol";
 /// @title ZkOBS contract
 /// @author zkManic
 contract ZkOBS is Ownable {
-    event ReceivedETH(address indexed sender, uint256 amount);
+    event ETHReceived(address indexed sender, uint256 amount);
     event TokenWhitelisted(address indexed token, uint16 tokenId);
     event Register(address indexed sender, uint32 accountId, uint256 tsPubX, uint256 tsPubY, bytes20 l2Addr);
-    event Deposit(address indexed sender, uint32 accountId, uint16 tokenId, uint128 amount);
-    event Withdraw(address indexed sender, uint32 accountId, uint16 tokenId, uint128 amount);
+    event Deposit(address indexed sender, uint16 tokenId, uint128 amount);
+    event Withdrawal(address indexed sender, uint16 tokenId, uint128 amount);
     event NewL1Request(address indexed sender, uint64 requestId, Operations.OpType opType, bytes pubData);
     event BlockCommitted(uint32 indexed blockNumber);
     event BlockProved(uint32 indexed blockNumber);
     event BlockExecuted(uint32 indexed blockNumber);
-    event AddLoan(
+
+    event UpdateLoan(
         uint32 accountId,
         uint32 maturityTime,
         uint16 debtTokenId,
@@ -63,6 +64,11 @@ contract ZkOBS is Ownable {
         uint256[1] commitment;
     }
 
+    struct L1Request {
+        bytes32 hashedPubData;
+        Operations.OpType opType;
+    }
+
     struct Loan {
         uint32 accountId;
         uint32 maturityTime;
@@ -73,16 +79,19 @@ contract ZkOBS is Ownable {
     }
 
     bytes32 internal constant EMPTY_STRING_KECCAK = 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470;
+    uint8 internal constant RESERVED_ACCOUNT_NUM = 100;
+    uint8 internal constant RESERVED_TOKEN_NUM = 1;
+
     uint8 internal constant CHUNK_BYTES = 12;
     uint256 internal constant REGISTER_BYTES = 4 * CHUNK_BYTES;
     uint256 internal constant DEPOSIT_BYTES = 2 * CHUNK_BYTES;
     uint256 internal constant WITHDRAW_BYTES = 2 * CHUNK_BYTES;
     uint256 internal constant AUCTIONEND_BYTES = 4 * CHUNK_BYTES;
     uint256 internal constant INPUT_MASK = (~uint256(0) >> 3);
-    uint8 internal constant RESERVED_TOKEN_NUM = 1;
 
     PoseidonUnit2 private immutable poseidon2;
     address public immutable wETHAddr;
+    uint16 public immutable wETHTokenId;
     address public immutable verifierAddr;
 
     mapping(address => uint16) public tokenIdOf;
@@ -93,7 +102,7 @@ contract ZkOBS is Ownable {
     mapping(bytes22 => uint128) public pendingBalances;
     mapping(bytes12 => Loan) public loanOf;
 
-    uint32 public accountNum = 100;
+    uint32 public accountNum;
     uint16 public tokenNum;
     uint64 public firstL1RequestId;
     uint64 public pendingL1RequestNum;
@@ -102,13 +111,8 @@ contract ZkOBS is Ownable {
     uint32 public provedBlockNum;
     uint32 public executedBlockNum;
 
-    struct L1Request {
-        bytes32 hashedPubData;
-        Operations.OpType opType;
-    }
-
     receive() external payable {
-        emit ReceivedETH(msg.sender, msg.value);
+        emit ETHReceived(msg.sender, msg.value);
     }
 
     constructor(
@@ -129,79 +133,74 @@ contract ZkOBS is Ownable {
             timestamp: 0
         });
         storedBlockHashes[0] = keccak256(abi.encode(storedBlock));
+        accountNum = RESERVED_ACCOUNT_NUM;
         tokenNum = RESERVED_TOKEN_NUM;
-        tokenIdOf[wETHAddr] = tokenNum;
-        emit TokenWhitelisted(wETHAddr, tokenNum);
-        ++tokenNum;
+        wETHTokenId = tokenNum;
+        tokenIdOf[wETHAddr] = wETHTokenId;
+        emit TokenWhitelisted(wETHAddr, wETHTokenId);
     }
 
-    function addToken(address tokenAddr) external onlyOwner {
+    function whitelistToken(address tokenAddr) external onlyOwner {
         require(tokenIdOf[tokenAddr] == 0, "Token already registered");
+        ++tokenNum;
         tokenIdOf[tokenAddr] = tokenNum;
         emit TokenWhitelisted(tokenAddr, tokenNum);
-        ++tokenNum;
     }
 
-    function registerETH(uint256 tsPubX, uint256 tsPubY) external payable {
+    function registerETH(uint256 tsPubKeyX, uint256 tsPubKeyY) external payable {
         require(accountIdOf[msg.sender] == 0, "Account already registered");
-
-        uint16 l2TokenAddr = tokenIdOf[wETHAddr];
-        uint128 depositAmount = SafeCast.toUint128(msg.value);
+        uint128 depositAmt = SafeCast.toUint128(msg.value);
         IWETH(wETHAddr).deposit{ value: msg.value }();
 
-        _register(msg.sender, tsPubX, tsPubY);
-        _deposit(msg.sender, l2TokenAddr, depositAmount);
+        _register(msg.sender, tsPubKeyX, tsPubKeyY);
+        _deposit(msg.sender, wETHTokenId, depositAmt);
     }
 
     function registerERC20(
-        uint256 tsPubX,
-        uint256 tsPubY,
+        uint256 tsPubKeyX,
+        uint256 tsPubKeyY,
         address tokenAddr,
         uint128 amount
     ) external {
         require(accountIdOf[msg.sender] == 0, "Account already registered");
         uint16 tokenId = tokenIdOf[tokenAddr];
+        require(tokenId != 0, "Token not whitelisted");
         IERC20 token = IERC20(tokenAddr);
         uint256 balanceBefore = token.balanceOf(address(this));
         token.transferFrom(msg.sender, address(this), amount);
         uint256 balanceAfter = token.balanceOf(address(this));
-        uint128 depositAmount = SafeCast.toUint128(balanceAfter - balanceBefore);
-        require(depositAmount == amount, "Deposit amount inconsistent");
+        uint128 depositAmt = SafeCast.toUint128(balanceAfter - balanceBefore);
+        require(depositAmt == amount, "Deposit amount inconsistent");
 
-        // register
-        if (accountIdOf[msg.sender] == 0) {
-            _register(msg.sender, tsPubX, tsPubY);
-        }
-        // deposit
-        _deposit(msg.sender, tokenId, depositAmount);
+        _register(msg.sender, tsPubKeyX, tsPubKeyY);
+        _deposit(msg.sender, tokenId, depositAmt);
     }
 
     function depositETH() external payable {
         require(accountIdOf[msg.sender] != 0, "Account not registered");
-        uint16 l2TokenAddr = tokenIdOf[wETHAddr];
-        uint128 depositAmount = SafeCast.toUint128(msg.value);
+        uint128 depositAmt = SafeCast.toUint128(msg.value);
         IWETH(wETHAddr).deposit{ value: msg.value }();
 
-        _deposit(msg.sender, l2TokenAddr, depositAmount);
+        _deposit(msg.sender, wETHTokenId, depositAmt);
     }
 
     function depositERC20(address tokenAddr, uint128 amount) external {
         require(accountIdOf[msg.sender] != 0, "Account not registered");
         uint16 tokenId = tokenIdOf[tokenAddr];
+        require(tokenId != 0, "Token not whitelisted");
         IERC20 token = IERC20(tokenAddr);
         uint256 balanceBefore = token.balanceOf(address(this));
         token.transferFrom(msg.sender, address(this), amount);
         uint256 balanceAfter = token.balanceOf(address(this));
-        uint128 depositAmount = SafeCast.toUint128(balanceAfter - balanceBefore);
-        require(depositAmount == amount, "Deposit amount inconsistent");
+        uint128 depositAmt = SafeCast.toUint128(balanceAfter - balanceBefore);
+        require(depositAmt == amount, "Deposit amount inconsistent");
 
-        _deposit(msg.sender, tokenId, depositAmount);
+        _deposit(msg.sender, tokenId, depositAmt);
     }
 
     function withdrawETH(uint128 amount) external payable {
         require(accountIdOf[msg.sender] != 0, "Account not registered");
-        uint16 tokenId = tokenIdOf[wETHAddr];
-        _withdraw(msg.sender, tokenId, amount);
+        _withdraw(msg.sender, wETHTokenId, amount);
         IWETH(wETHAddr).withdraw(uint256(amount));
         (bool success, ) = payable(msg.sender).call{ value: amount }("");
         require(success, "Transfer failed");
@@ -244,10 +243,10 @@ contract ZkOBS is Ownable {
 
     function _register(
         address sender,
-        uint256 tsPubX,
-        uint256 tsPubY
+        uint256 tsPubKeyX,
+        uint256 tsPubKeyY
     ) internal {
-        bytes20 l2Addr = bytes20(uint160(poseidon2.poseidon([tsPubX, tsPubY])));
+        bytes20 l2Addr = bytes20(uint160(poseidon2.poseidon([tsPubKeyX, tsPubKeyY])));
         uint32 accountId = accountNum;
         ++accountNum;
         accountIdOf[sender] = accountId;
@@ -255,7 +254,7 @@ contract ZkOBS is Ownable {
         Operations.Register memory op = Operations.Register({ accountId: accountId, l2Addr: l2Addr });
         bytes memory pubData = Operations.writeRegisterPubData(op);
         _addL1Request(sender, Operations.OpType.REGISTER, pubData);
-        emit Register(sender, accountId, tsPubX, tsPubY, l2Addr);
+        emit Register(sender, accountId, tsPubKeyX, tsPubKeyY, l2Addr);
     }
 
     function _deposit(
@@ -267,8 +266,7 @@ contract ZkOBS is Ownable {
         Operations.Deposit memory op = Operations.Deposit({ accountId: accountId, tokenId: tokenId, amount: amount });
         bytes memory pubData = Operations.writeDepositPubData(op);
         _addL1Request(sender, Operations.OpType.DEPOSIT, pubData);
-        // console.log(sender, accountId, tokenId, amount);
-        emit Deposit(sender, accountId, tokenId, amount);
+        emit Deposit(sender, tokenId, amount);
     }
 
     function _withdraw(
@@ -276,12 +274,11 @@ contract ZkOBS is Ownable {
         uint16 tokenId,
         uint128 amount
     ) internal {
-        uint32 accountId = accountIdOf[sender];
-        bytes22 key = _packAddressAndTokenId(addressOf[accountId], tokenId);
+        bytes22 key = _packAddressAndTokenId(sender, tokenId);
         uint128 pendingBalance = pendingBalances[key];
         require(pendingBalance >= amount, "Withdraw amount exceeds pending balance");
         pendingBalances[key] = pendingBalance - amount;
-        emit Withdraw(sender, accountId, tokenId, amount);
+        emit Withdrawal(sender, tokenId, amount);
     }
 
     function _addL1Request(
@@ -486,9 +483,8 @@ contract ZkOBS is Ownable {
                 Operations.Withdraw memory withdraw = Operations.readWithdrawPubdata(pubData);
                 _increasePendingBalance(withdraw.accountId, withdraw.tokenId, withdraw.amount);
             } else if (opType == Operations.OpType.AUCTIONEND) {
-                //! Only after the loan is committed, proved, and executed can the borrowing amount be added for borrower
                 Operations.AuctionEnd memory auctionEnd = Operations.readAuctionEndPubdata(pubData);
-                _addLoan(auctionEnd);
+                _updateLoan(auctionEnd);
             }
             pendingRollupTxHash = keccak256(abi.encodePacked(pendingRollupTxHash, pubData));
         }
@@ -525,29 +521,30 @@ contract ZkOBS is Ownable {
             );
     }
 
-    function _addLoan(Operations.AuctionEnd memory auctionEnd) internal {
+    function _updateLoan(Operations.AuctionEnd memory auctionEnd) internal {
         bytes12 loanId = getLoanId(
             auctionEnd.accountId,
             auctionEnd.maturityTime,
             auctionEnd.debtTokenId,
             auctionEnd.collateralTokenId
         );
-        Loan memory loan = Loan({
-            accountId: auctionEnd.accountId,
-            maturityTime: auctionEnd.maturityTime,
-            debtTokenId: auctionEnd.debtTokenId,
-            collateralTokenId: auctionEnd.collateralTokenId,
-            debtAmt: auctionEnd.debtAmt,
-            collateralAmt: auctionEnd.collateralAmt
-        });
+
+        Loan memory loan = loanOf[loanId];
+        loan.accountId = auctionEnd.accountId;
+        loan.debtTokenId = auctionEnd.debtTokenId;
+        loan.collateralTokenId = auctionEnd.collateralTokenId;
+        loan.maturityTime = auctionEnd.maturityTime;
+        loan.debtAmt += auctionEnd.debtAmt;
+        loan.collateralAmt += auctionEnd.collateralAmt;
         loanOf[loanId] = loan;
-        emit AddLoan(
-            auctionEnd.accountId,
-            auctionEnd.maturityTime,
-            auctionEnd.debtTokenId,
-            auctionEnd.collateralTokenId,
-            auctionEnd.debtAmt,
-            auctionEnd.collateralAmt
+
+        emit UpdateLoan(
+            loan.accountId,
+            loan.maturityTime,
+            loan.debtTokenId,
+            loan.collateralTokenId,
+            loan.debtAmt,
+            loan.collateralAmt
         );
     }
 }
