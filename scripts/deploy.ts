@@ -2,7 +2,7 @@ import fs from 'fs';
 import { ethers } from 'hardhat';
 import { TsRollupSigner } from 'zk-obs-sdk';
 import { ERC20FreeMint, ZkOBS } from '../typechain-types';
-import { deploy } from '../test/utils';
+import { deploy } from '../lib/utils';
 import { resolve } from 'path';
 import { arrayify } from 'ethers/lib/utils';
 const circomlibjs = require('circomlibjs');

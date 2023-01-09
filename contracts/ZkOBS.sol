@@ -86,8 +86,9 @@ contract ZkOBS is Ownable {
     uint256 internal constant REGISTER_BYTES = 4 * CHUNK_BYTES;
     uint256 internal constant DEPOSIT_BYTES = 2 * CHUNK_BYTES;
     uint256 internal constant WITHDRAW_BYTES = 2 * CHUNK_BYTES;
+    uint256 internal constant FORCED_WITHDRAW_BYTES = 2 * CHUNK_BYTES;
     uint256 internal constant AUCTIONEND_BYTES = 4 * CHUNK_BYTES;
-    uint256 internal constant INPUT_MASK = (~uint256(0) >> 3);
+    uint256 internal constant INPUT_MASK = (type(uint256).max >> 3);
 
     PoseidonUnit2 private immutable poseidon2;
     address public immutable wETHAddr;
@@ -141,7 +142,7 @@ contract ZkOBS is Ownable {
     }
 
     function whitelistToken(address tokenAddr) external onlyOwner {
-        require(tokenIdOf[tokenAddr] == 0, "Token already registered");
+        require(tokenIdOf[tokenAddr] == 0, "Token already whitelisted");
         ++tokenNum;
         tokenIdOf[tokenAddr] = tokenNum;
         emit TokenWhitelisted(tokenAddr, tokenNum);
@@ -176,6 +177,33 @@ contract ZkOBS is Ownable {
         _deposit(msg.sender, tokenId, depositAmt);
     }
 
+    function register(
+        uint256 tsPubKeyX,
+        uint256 tsPubKeyY,
+        address tokenAddr,
+        uint128 amount
+    ) external payable {
+        require(accountIdOf[msg.sender] == 0, "Account already registered");
+        uint16 tokenId;
+        uint128 depositAmt;
+        if (tokenAddr == address(0)) {
+            tokenId = wETHTokenId;
+            depositAmt = SafeCast.toUint128(msg.value);
+            IWETH(wETHAddr).deposit{ value: msg.value }();
+        } else {
+            tokenId = tokenIdOf[tokenAddr];
+            require(tokenId != 0, "Token not whitelisted");
+            IERC20 token = IERC20(tokenAddr);
+            uint256 balanceBefore = token.balanceOf(address(this));
+            token.transferFrom(msg.sender, address(this), amount);
+            uint256 balanceAfter = token.balanceOf(address(this));
+            depositAmt = SafeCast.toUint128(balanceAfter - balanceBefore);
+            require(depositAmt == amount, "Deposit amount inconsistent");
+        }
+        _register(msg.sender, tsPubKeyX, tsPubKeyY);
+        _deposit(msg.sender, tokenId, depositAmt);
+    }
+
     function depositETH() external payable {
         require(accountIdOf[msg.sender] != 0, "Account not registered");
         uint128 depositAmt = SafeCast.toUint128(msg.value);
@@ -198,6 +226,28 @@ contract ZkOBS is Ownable {
         _deposit(msg.sender, tokenId, depositAmt);
     }
 
+    function deposit(address tokenAddr, uint128 amount) external payable {
+        require(accountIdOf[msg.sender] != 0, "Account not registered");
+        uint16 tokenId;
+        uint128 depositAmt;
+        if (tokenAddr == address(0)) {
+            depositAmt = SafeCast.toUint128(msg.value);
+            IWETH(wETHAddr).deposit{ value: msg.value }();
+            tokenId = wETHTokenId;
+        } else {
+            tokenId = tokenIdOf[tokenAddr];
+            require(tokenId != 0, "Token not whitelisted");
+            IERC20 token = IERC20(tokenAddr);
+            uint256 balanceBefore = token.balanceOf(address(this));
+            token.transferFrom(msg.sender, address(this), amount);
+            uint256 balanceAfter = token.balanceOf(address(this));
+            depositAmt = SafeCast.toUint128(balanceAfter - balanceBefore);
+            require(depositAmt == amount, "Deposit amount inconsistent");
+        }
+
+        _deposit(msg.sender, tokenId, depositAmt);
+    }
+
     function withdrawETH(uint128 amount) external payable {
         require(accountIdOf[msg.sender] != 0, "Account not registered");
         _withdraw(msg.sender, wETHTokenId, amount);
@@ -213,32 +263,73 @@ contract ZkOBS is Ownable {
         IERC20(tokenAddr).transfer(msg.sender, amount);
     }
 
-    function checkRegisterL1Request(Operations.Register memory register, uint64 requestId)
-        public
-        view
-        returns (bool isExisted)
-    {
-        L1Request memory req = l1RequestQueue[requestId];
-        require(req.opType == Operations.OpType.REGISTER, "OpType not matched");
-        require(
-            Operations.checkRegisterInL1RequestQueue(register, req.hashedPubData),
-            "Register request not existed in L1 request queue"
-        );
-        return true;
+    function withdraw(address tokenAddr, uint128 amount) external payable {
+        require(accountIdOf[msg.sender] != 0, "Account not registered");
+        if (tokenAddr == address(0)) {
+            _withdraw(msg.sender, wETHTokenId, amount);
+            IWETH(wETHAddr).withdraw(uint256(amount));
+            (bool success, ) = payable(msg.sender).call{ value: amount }("");
+            require(success, "Transfer failed");
+        } else {
+            uint16 tokenId = tokenIdOf[tokenAddr];
+            _withdraw(msg.sender, tokenId, amount);
+            IERC20(tokenAddr).transfer(msg.sender, amount);
+        }
     }
 
-    function checkDepositL1Request(Operations.Deposit memory deposit, uint64 requestId)
+    function forcedWithdraw(address tokenAddr) external {
+        uint32 accountId = accountIdOf[msg.sender];
+        require(accountId != 0, "Account not registered");
+        uint16 tokenId;
+        if (tokenAddr == address(0)) {
+            tokenId = wETHTokenId;
+        } else {
+            tokenId = tokenIdOf[tokenAddr];
+            require(tokenId != 0, "Token not whitelisted");
+        }
+        Operations.ForcedWithdraw memory op = Operations.ForcedWithdraw({
+            accountId: accountId,
+            tokenId: tokenId,
+            amount: 0
+        });
+        bytes memory pubData = Operations.writeForcedWithdrawPubData(op);
+        _addL1Request(msg.sender, Operations.OpType.FORCED_WITHDRAW, pubData);
+    }
+
+    function isRegisterInL1Request(Operations.Register memory registerReq, uint64 requestId)
         public
         view
         returns (bool isExisted)
     {
         L1Request memory req = l1RequestQueue[requestId];
-        require(req.opType == Operations.OpType.DEPOSIT, "OpType not matched");
-        require(
-            Operations.checkDepositInL1RequestQueue(deposit, req.hashedPubData),
-            "Deposit request not existed in priority queue"
-        );
-        return true;
+        if (req.opType != Operations.OpType.REGISTER) {
+            return false;
+        }
+        return Operations.isRegisterInL1RequestQueue(registerReq, req.hashedPubData);
+    }
+
+    function isDepositInL1Request(Operations.Deposit memory depositReq, uint64 requestId)
+        public
+        view
+        returns (bool isExisted)
+    {
+        L1Request memory req = l1RequestQueue[requestId];
+        if (req.opType != Operations.OpType.DEPOSIT) {
+            return false;
+        }
+        return Operations.isDepositInL1RequestQueue(depositReq, req.hashedPubData);
+    }
+
+    function isForcedWithdrawInL1Request(Operations.ForcedWithdraw memory forcedWithdrawReq, uint64 requestId)
+        public
+        view
+        returns (bool isExisted)
+    {
+        L1Request memory req = l1RequestQueue[requestId];
+        if (req.opType != Operations.OpType.FORCED_WITHDRAW) {
+            return false;
+        }
+        return Operations.isForcedWithdrawInL1RequestQueue(forcedWithdrawReq, req.hashedPubData);
     }
 
     function _register(
@@ -300,10 +391,10 @@ contract ZkOBS is Ownable {
         );
 
         for (uint32 i = 0; i < newBlocks.length; ++i) {
+            require(lastCommittedBlock.blockNumber == committedBlockNum + i, "Block number inconsistency");
             lastCommittedBlock = _commitOneBlock(lastCommittedBlock, newBlocks[i]);
             committedL1RequestNum += lastCommittedBlock.l1RequestNum;
             storedBlockHashes[lastCommittedBlock.blockNumber] = keccak256(abi.encode(lastCommittedBlock));
-            emit BlockCommitted(lastCommittedBlock.blockNumber);
         }
 
         committedBlockNum += uint32(newBlocks.length);
@@ -318,19 +409,19 @@ contract ZkOBS is Ownable {
 
     function _commitOneBlock(StoredBlock memory previousBlock, CommitBlock memory newBlock)
         internal
-        view
         returns (StoredBlock memory storedNewBlock)
     {
         require(
             newBlock.timestamp >= previousBlock.timestamp,
             "Timestamp of the new block needs to be greater than or equal to the previous block"
         );
+        //! Add more time constraints
 
         (
             bytes32 pendingRollupTxHash,
             uint64 committedL1RequestNum_,
             bytes memory rollupTxOffsetCommitment
-        ) = _collectRollupRequests(newBlock);
+        ) = _collectRollupTxs(newBlock);
 
         // create commitment for verification
         bytes32 commitment = _createBlockCommitment(previousBlock, newBlock, rollupTxOffsetCommitment);
@@ -347,6 +438,7 @@ contract ZkOBS is Ownable {
         // console.logBytes32(newBlock.newStateRoot);
         // console.log("timestamp:");
         // console.log(newBlock.timestamp);
+        emit BlockCommitted(newBlock.blockNumber);
         return
             StoredBlock(
                 newBlock.blockNumber,
@@ -358,47 +450,60 @@ contract ZkOBS is Ownable {
             );
     }
 
-    function _collectRollupRequests(CommitBlock memory newBlock)
+    function _collectRollupTxs(CommitBlock memory newBlock)
         internal
         view
         returns (
             bytes32 processableRollupTxHash,
             uint64 processedL1RequestNum,
-            bytes memory offsetCommitment
+            bytes memory commitmentOffset
         )
     {
         bytes memory publicData = newBlock.publicData;
         uint64 uncommittedL1RequestNum = firstL1RequestId + committedL1RequestNum;
-        processedL1RequestNum = 0;
         processableRollupTxHash = EMPTY_STRING_KECCAK;
         require(publicData.length % CHUNK_BYTES == 0, "Public data length should be evenly divided by CHUNK_BYTES");
-        offsetCommitment = new bytes(publicData.length / CHUNK_BYTES);
+        commitmentOffset = new bytes(publicData.length / CHUNK_BYTES);
         for (uint256 i = 0; i < newBlock.publicDataOffsets.length; i++) {
             uint256 offset = newBlock.publicDataOffsets[i];
             require(offset < publicData.length, "Offset should be less than public data length");
             require(offset % CHUNK_BYTES == 0, "Offset should be evenly divided by CHUNK_BYTES");
             uint256 chunkId = offset / CHUNK_BYTES;
-            require(offsetCommitment[chunkId] == 0x00, "Offset should not be set before");
-            offsetCommitment[chunkId] = bytes1(0x01);
+            require(commitmentOffset[chunkId] == 0x00, "Offset should not be set before");
+            commitmentOffset[chunkId] = bytes1(0x01);
 
             Operations.OpType opType = Operations.OpType(uint8(publicData[offset]));
-            // console.log("opType:");
-            // console.log(uint8(publicData[offset]));
+            console.log("opType:");
+            console.log(uint8(publicData[offset]));
             if (opType == Operations.OpType.REGISTER) {
                 bytes memory rollupData = Bytes.slice(publicData, offset, REGISTER_BYTES);
-                Operations.Register memory register = Operations.readRegisterPubdata(rollupData);
-                checkRegisterL1Request(register, uncommittedL1RequestNum + processedL1RequestNum);
+                Operations.Register memory registerReq = Operations.readRegisterPubdata(rollupData);
+                require(
+                    isRegisterInL1Request(registerReq, uncommittedL1RequestNum + processedL1RequestNum),
+                    "Register request is not in L1 request queue"
+                );
+                // The number of processed L1 requests will be committed in the stored block
+                // And then be checked through prove and execute mechanism
                 ++processedL1RequestNum;
             } else if (opType == Operations.OpType.DEPOSIT) {
                 bytes memory rollupData = Bytes.slice(publicData, offset, DEPOSIT_BYTES);
-                Operations.Deposit memory deposit = Operations.readDepositPubdata(rollupData);
-                checkDepositL1Request(deposit, uncommittedL1RequestNum + processedL1RequestNum);
+                Operations.Deposit memory depositReq = Operations.readDepositPubdata(rollupData);
+                isDepositInL1Request(depositReq, uncommittedL1RequestNum + processedL1RequestNum);
                 ++processedL1RequestNum;
-            } else if (opType == Operations.OpType.WITHDRAW) {
-                bytes memory pubdata = Bytes.slice(publicData, offset, WITHDRAW_BYTES);
-                processableRollupTxHash = keccak256(abi.encodePacked(processableRollupTxHash, pubdata));
-            } else if (opType == Operations.OpType.AUCTIONEND) {
-                bytes memory pubdata = Bytes.slice(publicData, offset, AUCTIONEND_BYTES);
+            } else {
+                bytes memory pubdata;
+                if (opType == Operations.OpType.WITHDRAW) {
+                    pubdata = Bytes.slice(publicData, offset, WITHDRAW_BYTES);
+                } else if (opType == Operations.OpType.FORCED_WITHDRAW) {
+                    pubdata = Bytes.slice(publicData, offset, FORCED_WITHDRAW_BYTES);
+                    Operations.ForcedWithdraw memory forcedWithdrawReq = Operations.readForcedWithdrawPubdata(pubdata);
+                    isForcedWithdrawInL1Request(forcedWithdrawReq, uncommittedL1RequestNum + processedL1RequestNum);
+                    ++processedL1RequestNum;
+                } else if (opType == Operations.OpType.AUCTION_END) {
+                    pubdata = Bytes.slice(publicData, offset, AUCTIONEND_BYTES);
+                } else {
+                    revert("Unsupported operation type");
+                }
                 processableRollupTxHash = keccak256(abi.encodePacked(processableRollupTxHash, pubdata));
             }
         }
@@ -418,8 +523,7 @@ contract ZkOBS is Ownable {
     }
 
     function proveBlocks(StoredBlock[] memory committedBlocks, Proof[] memory proof) external {
-        uint32 currentProvedBlockNum = provedBlockNum;
-        for (uint256 i = 0; i < committedBlocks.length; i++) {
+        for (uint32 i = provedBlockNum; i < committedBlocks.length; i++) {
             // console.log("[prove blocks]");
             // console.log("block number:");
             // console.log(committedBlocks[i].blockNumber);
@@ -433,14 +537,12 @@ contract ZkOBS is Ownable {
             // console.logBytes32(committedBlocks[i].stateRoot);
             // console.log("timestamp:");
             // console.log(committedBlocks[i].timestamp);
-            require(keccak256(abi.encode(committedBlocks[i])) == storedBlockHashes[currentProvedBlockNum + 1], "o1");
+            require(keccak256(abi.encode(committedBlocks[i])) == storedBlockHashes[i + 1], "o1");
             _proveOneBlock(committedBlocks[i], proof[i]);
             emit BlockProved(committedBlocks[i].blockNumber);
-            ++currentProvedBlockNum;
         }
-
-        require(currentProvedBlockNum <= committedBlockNum, "Proved block number exceeds committed block number");
-        provedBlockNum = currentProvedBlockNum;
+        provedBlockNum += uint32(committedBlocks.length);
+        require(provedBlockNum <= committedBlockNum, "Proved block number exceeds committed block number");
     }
 
     function _proveOneBlock(StoredBlock memory committedBlock, Proof memory proof) internal view {
@@ -453,7 +555,7 @@ contract ZkOBS is Ownable {
     }
 
     function executeBlocks(ExecuteBlock[] memory pendingBlocks) external {
-        uint64 executedL1RequestNum = 0;
+        uint64 executedL1RequestNum;
         uint32 blockNum = uint32(pendingBlocks.length);
         for (uint32 i = 0; i < pendingBlocks.length; ++i) {
             _executeOneBlock(pendingBlocks[i], i);
@@ -480,11 +582,20 @@ contract ZkOBS is Ownable {
             Operations.OpType opType = Operations.OpType(uint8(pubData[0]));
 
             if (opType == Operations.OpType.WITHDRAW) {
-                Operations.Withdraw memory withdraw = Operations.readWithdrawPubdata(pubData);
-                _increasePendingBalance(withdraw.accountId, withdraw.tokenId, withdraw.amount);
-            } else if (opType == Operations.OpType.AUCTIONEND) {
+                Operations.Withdraw memory withdrawReq = Operations.readWithdrawPubdata(pubData);
+                _increasePendingBalance(withdrawReq.accountId, withdrawReq.tokenId, withdrawReq.amount);
+            } else if (opType == Operations.OpType.FORCED_WITHDRAW) {
+                Operations.ForcedWithdraw memory forcedWithdrawReq = Operations.readForcedWithdrawPubdata(pubData);
+                _increasePendingBalance(
+                    forcedWithdrawReq.accountId,
+                    forcedWithdrawReq.tokenId,
+                    forcedWithdrawReq.amount
+                );
+            } else if (opType == Operations.OpType.AUCTION_END) {
                 Operations.AuctionEnd memory auctionEnd = Operations.readAuctionEndPubdata(pubData);
                 _updateLoan(auctionEnd);
+            } else {
+                revert("Invalid opType");
             }
             pendingRollupTxHash = keccak256(abi.encodePacked(pendingRollupTxHash, pubData));
         }

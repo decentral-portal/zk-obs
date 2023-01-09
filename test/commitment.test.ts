@@ -1,6 +1,6 @@
 import fs from 'fs';
 import { expect } from 'chai';
-import { stateToCommitment } from './helper/helper';
+import { stateToCommitment } from '../lib/helper';
 import { resolve } from 'path';
 const BaseDir = './test/example/zkobs-10-8-4';
 

@@ -4,7 +4,7 @@ import { ERC20FreeMint } from '../typechain-types/contracts/ERC20FreeMint';
 import { ZkOBS } from '../typechain-types/contracts/ZkOBS';
 import { BigNumber } from 'ethers';
 import { poseidon } from '@big-whale-labs/poseidon';
-import initStates from './example/zkobs-10-8-4/initStates.json';
+import initStates from '../test/example/zkobs-10-8-4/initStates.json';
 const circomlibjs = require('circomlibjs');
 const { createCode, generateABI } = circomlibjs.poseidonContract;
 
@@ -57,7 +57,7 @@ export async function deploy() {
   return { operator, user1, user2, zkUSDC, wETH, zkOBS };
 }
 
-export function genTsAddr(x: BigNumber, y: BigNumber) {
+export function genL2Addr(x: BigNumber, y: BigNumber) {
   const hashedTsPubKey = poseidon([x, y]);
   return '0x' + hashedTsPubKey.toString(16).slice(-40);
 }

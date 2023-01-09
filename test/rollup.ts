@@ -1,4 +1,3 @@
-import { poseidon } from '@big-whale-labs/poseidon';
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { expect } from 'chai';
 import { BigNumber, Contract, Signer } from 'ethers';
@@ -6,12 +5,12 @@ import { ethers } from 'hardhat';
 import { WETH9 } from '../typechain-types';
 import { ERC20FreeMint } from '../typechain-types';
 import { Operations, ZkOBS } from '../typechain-types/contracts/ZkOBS';
-import { deploy, genTsAddr } from './utils';
+import { deploy, genL2Addr } from '../lib/utils';
 import {
   amountToTxAmountV3_40bit,
   getRollupData,
   stateToCommitment,
-} from './helper/helper';
+} from '../lib/helper';
 import inputs0 from './example/zkobs-10-8-4/0_register-acc1-eth-10-8-4-8-inputs.json';
 import root0 from './example/zkobs-10-8-4/0_register-acc1-eth-10-8-4-8-commitment.json';
 import calldata0 from './example/zkobs-10-8-4/0_register-acc1-eth-10-8-4-8-calldata-raw.json';
@@ -87,7 +86,7 @@ describe('Unit test of rollup', function () {
     zkOBS = _zkOBS;
     wETH = _wETH;
     // whitelist token
-    await zkOBS.connect(operator).addToken(zkUSDC.address);
+    await zkOBS.connect(operator).whitelistToken(zkUSDC.address);
   });
 
   describe('Rollup for single register with ETH', function () {
@@ -134,7 +133,7 @@ describe('Unit test of rollup', function () {
       const totalPendingL1Requests = await zkOBS.pendingL1RequestNum();
       const accountId = await zkOBS.accountIdOf(await user1.getAddress());
       const tokenId = await zkOBS.tokenIdOf(wETH.address);
-      const l2Addr = genTsAddr(pubKeyX, pubKeyY);
+      const l2Addr = genL2Addr(pubKeyX, pubKeyY);
       const register: Operations.RegisterStruct = {
         accountId: accountId,
         l2Addr: l2Addr,
@@ -172,7 +171,7 @@ describe('Unit test of rollup', function () {
       const newBlocks: ZkOBS.CommitBlockStruct[] = [];
       const tokenIdWETH = await zkOBS.tokenIdOf(wETH.address);
       const accountId = await zkOBS.accountIdOf(await user1.getAddress());
-      const l2Addr = genTsAddr(pubKeyX, pubKeyY);
+      const l2Addr = genL2Addr(pubKeyX, pubKeyY);
       const publicData = ethers.utils
         .solidityPack(
           ['uint8', 'uint32', 'uint16', 'uint128', 'bytes20'],
@@ -322,7 +321,7 @@ describe('Unit test of rollup', function () {
       const totalPendingL1Requests = await zkOBS.pendingL1RequestNum();
       const accountId = await zkOBS.accountIdOf(await user2.getAddress());
       const tokenId = await zkOBS.tokenIdOf(zkUSDC.address);
-      const l2Addr = genTsAddr(pubKeyX, pubKeyY);
+      const l2Addr = genL2Addr(pubKeyX, pubKeyY);
       const register: Operations.RegisterStruct = {
         accountId: accountId,
         l2Addr: l2Addr,
@@ -348,7 +347,7 @@ describe('Unit test of rollup', function () {
       const newBlocks: ZkOBS.CommitBlockStruct[] = [];
       const tokenIdUSDC = await zkOBS.tokenIdOf(zkUSDC.address);
       const accountId = await zkOBS.accountIdOf(await user2.getAddress());
-      const l2Addr = genTsAddr(pubKeyX, pubKeyY);
+      const l2Addr = genL2Addr(pubKeyX, pubKeyY);
       const publicData = ethers.utils
         .solidityPack(
           ['uint8', 'uint32', 'uint16', 'uint128', 'bytes20'],

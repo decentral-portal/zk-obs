@@ -13,22 +13,23 @@ library Operations {
         UNKNOWN,
         REGISTER,
         DEPOSIT,
-        //TRANSFER,
+        TRANSFER,
         WITHDRAW,
-        AUCTIONLEND,
-        AUCTIONBORROW,
-        CANCELORDER,
-        SETEPOCH,
-        AUCTIONSTART,
-        AUCTIONMATCH,
-        AUCTIONEND,
-        SECONDLIMITORDER,
-        SECONDLIMITSTART,
-        SECONDLIMITEXCHANGE,
-        SECONDLIMITEND,
-        SECONDMARKETORDER,
-        SECONDMARKETEXCHANGE,
-        SECONDMARKETEND
+        FORCED_WITHDRAW,
+        AUCTION_LEND,
+        AUCTION_BORROW,
+        CANCEL_ORDER,
+        SET_EPOCH,
+        AUCTION_START,
+        AUCTION_MATCH,
+        AUCTION_END,
+        SECOND_LIMIT_ORDER,
+        SECOND_LIMIT_START,
+        SECOND_LIMIT_EXCHANGE,
+        SECOND_LIMIT_END,
+        SECOND_MARKET_ORDER,
+        SECOND_MARKET_EXCHANGE,
+        SECOND_MARKET_END
     }
 
     // Byte length definition
@@ -58,6 +59,12 @@ library Operations {
         uint128 amount;
     }
 
+    struct ForcedWithdraw {
+        uint32 accountId;
+        uint16 tokenId;
+        uint128 amount;
+    }
+
     struct AuctionEnd {
         uint32 accountId;
         uint16 collateralTokenId;
@@ -81,11 +88,18 @@ library Operations {
         return abi.encodePacked(uint8(OpType.DEPOSIT), op.accountId, op.tokenId, op.amount);
     }
 
+    /// @notice Return the bytes of forced withdraw object
+    /// @param op The forced withdraw object
+    /// @return buf The bytes of forced withdraw object
+    function writeForcedWithdrawPubData(ForcedWithdraw memory op) internal pure returns (bytes memory buf) {
+        return abi.encodePacked(uint8(OpType.FORCED_WITHDRAW), op.accountId, op.tokenId, uint128(0));
+    }
+
     /// @notice Check whether the register request is in the L1 request queue
     /// @param op The register request
     /// @param hashedPubData The hashedPubData of register request
     /// @return isExisted Return true if exists, else return false
-    function checkRegisterInL1RequestQueue(Register memory op, bytes32 hashedPubData)
+    function isRegisterInL1RequestQueue(Register memory op, bytes32 hashedPubData)
         internal
         pure
         returns (bool isExisted)
@@ -97,12 +111,24 @@ library Operations {
     /// @param op The deposit request
     /// @param hashedPubData The hashedPubData of deposit request
     /// @return isExisted Return true if exists, else return false
-    function checkDepositInL1RequestQueue(Deposit memory op, bytes32 hashedPubData)
+    function isDepositInL1RequestQueue(Deposit memory op, bytes32 hashedPubData)
         internal
         pure
         returns (bool isExisted)
     {
         return keccak256(writeDepositPubData(op)) == hashedPubData;
+    }
+
+    /// @notice Check whether the forced withdraw request is in the L1 request queue
+    /// @param op The forced withdraw request
+    /// @param hashedPubData The hashedPubData of forced withdraw request
+    /// @return isExisted Return true if exists, else return false
+    function isForcedWithdrawInL1RequestQueue(ForcedWithdraw memory op, bytes32 hashedPubData)
+        internal
+        pure
+        returns (bool isExisted)
+    {
+        return keccak256(writeForcedWithdrawPubData(op)) == hashedPubData;
     }
 
     uint256 internal constant REGISTER_PUBDATA_BYTES =
@@ -138,6 +164,17 @@ library Operations {
         (offset, withdraw.tokenId) = Bytes.readUInt16(data, offset);
         (offset, withdraw.amount) = Bytes.readUInt128(data, offset);
         require(offset == WITHDRAW_PUBDATA_BYTES, "Read withdraw pubdata error");
+    }
+
+    uint256 internal constant FORCED_WITHDRAW_PUBDATA_BYTES =
+        OP_TYPE_BYTES + ACCOUNT_ID_BYTES + TOKEN_ID_BYTES + STATE_AMOUNT_BYTES;
+
+    function readForcedWithdrawPubdata(bytes memory data) internal pure returns (ForcedWithdraw memory forcedWithdraw) {
+        uint256 offset = OP_TYPE_BYTES;
+        (offset, forcedWithdraw.accountId) = Bytes.readUInt32(data, offset);
+        (offset, forcedWithdraw.tokenId) = Bytes.readUInt16(data, offset);
+        (offset, forcedWithdraw.amount) = Bytes.readUInt128(data, offset);
+        require(offset == FORCED_WITHDRAW_PUBDATA_BYTES, "Read forced withdraw pubdata error");
     }
 
     uint256 internal constant AUCTIONEND_PUBDATA_BYTES =

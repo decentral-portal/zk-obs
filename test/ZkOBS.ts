@@ -6,7 +6,7 @@ import { ERC20FreeMint } from '../typechain-types/contracts/ERC20FreeMint';
 import { Operations, ZkOBS } from '../typechain-types/contracts/ZkOBS';
 import { expect } from 'chai';
 import { WETH9 } from '../typechain-types';
-import { deploy, genTsAddr } from './utils';
+import { deploy, genL2Addr } from '../lib/utils';
 
 describe('Unit test of zkOBS', function () {
   let operator: Signer;
@@ -33,7 +33,7 @@ describe('Unit test of zkOBS', function () {
       zkOBS = _zkOBS;
       wETH = _wETH;
       // whitelist token
-      await zkOBS.connect(operator).addToken(zkUSDC.address);
+      await zkOBS.connect(operator).whitelistToken(zkUSDC.address);
     });
 
     const pubKeyX = BigNumber.from('3');
@@ -69,7 +69,7 @@ describe('Unit test of zkOBS', function () {
       const totalPendingL1Requests = await zkOBS.pendingL1RequestNum();
       const accountId = await zkOBS.accountIdOf(await user1.getAddress());
       const tokenId = await zkOBS.tokenIdOf(wETH.address);
-      const l2Addr = genTsAddr(pubKeyX, pubKeyY);
+      const l2Addr = genL2Addr(pubKeyX, pubKeyY);
       const register: Operations.RegisterStruct = {
         accountId: accountId,
         l2Addr: l2Addr,
