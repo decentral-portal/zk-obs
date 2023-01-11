@@ -2,7 +2,7 @@ import fs from 'fs';
 import { expect } from 'chai';
 import { stateToCommitment } from './helper/helper';
 import { resolve } from 'path';
-const BaseDir = './test/demo';
+const BaseDir = './test/phase5-dev2';
 
 function initTestData(baseDir: string) {
   const result = [];

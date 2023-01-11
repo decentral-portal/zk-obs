@@ -1,0 +1,113 @@
+{
+  "mainCircuitName": "main-p5dw-10-8-4-2-3-31",
+  "config": {
+    "order_tree_height": 10,
+    "account_tree_height": 8,
+    "token_tree_height": 4,
+    "nullifier_tree_height": 2,
+    "numOfReqs": 3,
+    "numOfChunks": 31
+  },
+  "mainSuffix": "10-8-4-2-3-31",
+  "outputPath": "/Users/abner.huang/Tkspring/zk-circom/circuits_src/phase5-devw",
+  "circuitMainPath": "/Users/abner.huang/Tkspring/zk-circom/build/phase5-devw/main-p5dw-10-8-4-2-3-31.circom",
+  "fileLogs": [
+    {
+      "circuitName": "main-p5dw-10-8-4-2-3-31",
+      "name": "0_register-acc1-10-8-4-2-3-31",
+      "path": "/Users/abner.huang/Tkspring/zk-circom/circuits_src/phase5-devw/0_register-acc1-10-8-4-2-3-31-inputs.json"
+    },
+    {
+      "circuitName": "main-p5dw-10-8-4-2-3-31",
+      "name": "1_deposit-acc1-usdt-10-8-4-2-3-31",
+      "path": "/Users/abner.huang/Tkspring/zk-circom/circuits_src/phase5-devw/1_deposit-acc1-usdt-10-8-4-2-3-31-inputs.json"
+    },
+    {
+      "circuitName": "main-p5dw-10-8-4-2-3-31",
+      "name": "2_register-acc2-10-8-4-2-3-31",
+      "path": "/Users/abner.huang/Tkspring/zk-circom/circuits_src/phase5-devw/2_register-acc2-10-8-4-2-3-31-inputs.json"
+    },
+    {
+      "circuitName": "main-p5dw-10-8-4-2-3-31",
+      "name": "3_deposit-acc2-eth-10-8-4-2-3-31",
+      "path": "/Users/abner.huang/Tkspring/zk-circom/circuits_src/phase5-devw/3_deposit-acc2-eth-10-8-4-2-3-31-inputs.json"
+    },
+    {
+      "circuitName": "main-p5dw-10-8-4-2-3-31",
+      "name": "4_withdraw-acc1-usdt-10-8-4-2-3-31",
+      "path": "/Users/abner.huang/Tkspring/zk-circom/circuits_src/phase5-devw/4_withdraw-acc1-usdt-10-8-4-2-3-31-inputs.json"
+    },
+    {
+      "circuitName": "main-p5dw-10-8-4-2-3-31",
+      "name": "5_auction-order-acc1-eth-10-8-4-2-3-31",
+      "path": "/Users/abner.huang/Tkspring/zk-circom/circuits_src/phase5-devw/5_auction-order-acc1-eth-10-8-4-2-3-31-inputs.json"
+    },
+    {
+      "circuitName": "main-p5dw-10-8-4-2-3-31",
+      "name": "6_auction-order-acc2-usdt-eth-10-8-4-2-3-31",
+      "path": "/Users/abner.huang/Tkspring/zk-circom/circuits_src/phase5-devw/6_auction-order-acc2-usdt-eth-10-8-4-2-3-31-inputs.json"
+    },
+    {
+      "circuitName": "main-p5dw-10-8-4-2-3-31",
+      "name": "7_cancel-order-acc1-lend-10-8-4-2-3-31",
+      "path": "/Users/abner.huang/Tkspring/zk-circom/circuits_src/phase5-devw/7_cancel-order-acc1-lend-10-8-4-2-3-31-inputs.json"
+    },
+    {
+      "circuitName": "main-p5dw-10-8-4-2-3-31",
+      "name": "8_cancel-order-acc2-borrow-10-8-4-2-3-31",
+      "path": "/Users/abner.huang/Tkspring/zk-circom/circuits_src/phase5-devw/8_cancel-order-acc2-borrow-10-8-4-2-3-31-inputs.json"
+    },
+    {
+      "circuitName": "main-p5dw-10-8-4-2-3-31",
+      "name": "9_auction-order-match-eth-10-8-4-2-3-31",
+      "path": "/Users/abner.huang/Tkspring/zk-circom/circuits_src/phase5-devw/9_auction-order-match-eth-10-8-4-2-3-31-inputs.json"
+    },
+    {
+      "circuitName": "main-p5dw-10-8-4-2-3-31",
+      "name": "10_noop-10-8-4-2-3-31",
+      "path": "/Users/abner.huang/Tkspring/zk-circom/circuits_src/phase5-devw/10_noop-10-8-4-2-3-31-inputs.json"
+    }
+  ],
+  "metadata": {
+    "TsSystemAccountAddress": {
+      "BURN_ADDR": "0",
+      "MINT_ADDR": "0",
+      "WITHDRAW_ADDR": "0",
+      "AUCTION_ADDR": "0"
+    },
+    "TsTokenAddress": {
+      "Unknown": "0",
+      "WETH": "1",
+      "USDT": "2",
+      "TSLUSDT20231231": "3"
+    },
+    "TsDefaultValue": {
+      "NONCE_ZERO": "0",
+      "BIGINT_DEFAULT_VALUE": "0",
+      "STRING_DEFAULT_VALUE": "0",
+      "ADDRESS_DEFAULT_VALUE": "0x00"
+    },
+    "TsTxType": {
+      "UNKNOWN": "0",
+      "NOOP": "0",
+      "REGISTER": "1",
+      "DEPOSIT": "2",
+      "TRANSFER": "3",
+      "WITHDRAW": "4",
+      "AUCTION_LEND": "5",
+      "AUCTION_BORROW": "6",
+      "CANCEL_ORDER": "7",
+      "SET_EPOCH": "8",
+      "AUCTION_START": "9",
+      "AUCTION_MATCH": "10",
+      "AUCTION_END": "11",
+      "SECOND_LIMIT_ORDER": "12",
+      "SECOND_LIMIT_START": "13",
+      "SECOND_LIMIT_EXCHANGE": "14",
+      "SECOND_LIMIT_END": "15",
+      "SECOND_MARKET_ORDER": "16",
+      "SECOND_MARKET_EXCHANGE": "17",
+      "SECOND_MARKET_END": "18"
+    }
+  }
+}
