@@ -61,6 +61,11 @@
       "circuitName": "main-p5dw-10-8-4-2-3-31",
       "name": "9_auction-order-match-eth-10-8-4-2-3-31",
       "path": "/Users/abner.huang/Tkspring/zk-circom/circuits_src/phase5-devw/9_auction-order-match-eth-10-8-4-2-3-31-inputs.json"
+    },
+    {
+      "circuitName": "main-p5dw-10-8-4-2-3-31",
+      "name": "10_noop-10-8-4-2-3-31",
+      "path": "/Users/abner.huang/Tkspring/zk-circom/circuits_src/phase5-devw/10_noop-10-8-4-2-3-31-inputs.json"
     }
   ],
   "metadata": {
