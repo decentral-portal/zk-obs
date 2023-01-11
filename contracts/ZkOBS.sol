@@ -318,19 +318,19 @@ contract ZkOBS is Ownable {
 
         // create commitment for verification
         bytes32 commitment = _createBlockCommitment(previousBlock, newBlock, rollupTxOffsetCommitment);
-        // console.log("[commit blocks]");
-        // console.log("block number:");
-        // console.log(newBlock.blockNumber);
-        // console.log("commitment:");
-        // console.logBytes32(commitment);
-        // console.log("l1 request num:");
-        // console.log(committedL1RequestNum_);
-        // console.log("pending rollup tx hash:");
-        // console.logBytes32(pendingRollupTxHash);
-        // console.log("state root:");
-        // console.logBytes32(newBlock.newStateRoot);
-        // console.log("timestamp:");
-        // console.log(newBlock.timestamp);
+        console.log("[commit blocks]");
+        console.log("block number:");
+        console.log(newBlock.blockNumber);
+        console.log("commitment:");
+        console.logBytes32(commitment);
+        console.log("l1 request num:");
+        console.log(committedL1RequestNum_);
+        console.log("pending rollup tx hash:");
+        console.logBytes32(pendingRollupTxHash);
+        console.log("state root:");
+        console.logBytes32(newBlock.newStateRoot);
+        console.log("timestamp:");
+        console.log(newBlock.timestamp);
         return
             StoredBlock(
                 newBlock.blockNumber,
@@ -396,7 +396,7 @@ contract ZkOBS is Ownable {
         StoredBlock memory previousBlock,
         CommitBlock memory newBlock,
         bytes memory offsetCommitment
-    ) internal view returns (bytes32 commitment) {
+    ) internal pure returns (bytes32 commitment) {
         bytes memory pubdata = abi.encodePacked(offsetCommitment, newBlock.publicData);
         // console.log("[in createBlockCommitment]");
         // console.logBytes(abi.encodePacked(previousBlock.stateRoot, newBlock.newStateRoot, newBlock.newTsRoot, pubdata));
@@ -410,19 +410,19 @@ contract ZkOBS is Ownable {
     function proveBlocks(StoredBlock[] memory committedBlocks, Proof[] memory proof) external {
         uint32 currentProvedBlockNum = provedBlockNum;
         for (uint256 i = 0; i < committedBlocks.length; i++) {
-            // console.log("[prove blocks]");
-            // console.log("block number:");
-            // console.log(committedBlocks[i].blockNumber);
-            // console.log("commitment:");
-            // console.logBytes32(committedBlocks[i].commitment);
-            // console.log("l1 request num:");
-            // console.log(committedBlocks[i].l1RequestNum);
-            // console.log("pending rollup tx hash:");
-            // console.logBytes32(committedBlocks[i].pendingRollupTxHash);
-            // console.log("state root:");
-            // console.logBytes32(committedBlocks[i].stateRoot);
-            // console.log("timestamp:");
-            // console.log(committedBlocks[i].timestamp);
+            console.log("[prove blocks]");
+            console.log("block number:");
+            console.log(committedBlocks[i].blockNumber);
+            console.log("commitment:");
+            console.logBytes32(committedBlocks[i].commitment);
+            console.log("l1 request num:");
+            console.log(committedBlocks[i].l1RequestNum);
+            console.log("pending rollup tx hash:");
+            console.logBytes32(committedBlocks[i].pendingRollupTxHash);
+            console.log("state root:");
+            console.logBytes32(committedBlocks[i].stateRoot);
+            console.log("timestamp:");
+            console.log(committedBlocks[i].timestamp);
             require(keccak256(abi.encode(committedBlocks[i])) == storedBlockHashes[currentProvedBlockNum + 1], "o1");
             _proveOneBlock(committedBlocks[i], proof[i]);
             emit BlockProved(committedBlocks[i].blockNumber);
@@ -436,6 +436,15 @@ contract ZkOBS is Ownable {
     function _proveOneBlock(StoredBlock memory committedBlock, Proof memory proof) internal view {
         IVerifier verifier = IVerifier(verifierAddr);
         require(verifier.verifyProof(proof.a, proof.b, proof.c, proof.commitment), "Invalid proof");
+        console.log("proof.commitment[0]:");
+        console.log(proof.commitment[0]);
+        console.log("proof.commitment[0] & INPUT_MASK:");
+        console.log(proof.commitment[0] & INPUT_MASK);
+        console.log("committedBlock.commitment:");
+        console.log(uint256(committedBlock.commitment));
+        console.log("committedBlock.commitment & INPUT_MASK:");
+        console.log(uint256(committedBlock.commitment) & INPUT_MASK);
+        console.log(INPUT_MASK);
         require(
             proof.commitment[0] & INPUT_MASK == uint256(committedBlock.commitment) & INPUT_MASK,
             "commitment inconsistency"
