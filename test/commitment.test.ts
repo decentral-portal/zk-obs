@@ -2,7 +2,7 @@ import fs from 'fs';
 import { expect } from 'chai';
 import { stateToCommitment } from './helper/helper';
 import { resolve } from 'path';
-const BaseDir = './test/example/zkobs-10-8-4';
+const BaseDir = './test/demo';
 
 function initTestData(baseDir: string) {
   const result = [];

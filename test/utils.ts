@@ -4,7 +4,12 @@ import { ERC20FreeMint } from '../typechain-types/contracts/ERC20FreeMint';
 import { ZkOBS } from '../typechain-types/contracts/ZkOBS';
 import { BigNumber } from 'ethers';
 import { poseidon } from '@big-whale-labs/poseidon';
-import initStates from './example/zkobs-10-8-4/initStates.json';
+import fs from 'fs';
+import { resolve } from 'path';
+
+const initStates = JSON.parse(
+  fs.readFileSync('./test/demo/initStates.json', 'utf-8'),
+);
 const circomlibjs = require('circomlibjs');
 const { createCode, generateABI } = circomlibjs.poseidonContract;
 
@@ -85,4 +90,32 @@ export async function deploy() {
 export function genTsAddr(x: BigNumber, y: BigNumber) {
   const hashedTsPubKey = poseidon([x, y]);
   return '0x' + hashedTsPubKey.toString(16).slice(-40);
+}
+
+export function initTestData(baseDir: string) {
+  const result = [];
+  const files = fs.readdirSync(baseDir, {
+    withFileTypes: true,
+  });
+  for (let index = 0; index < files.length; index++) {
+    const file = files[index];
+    if (file.isFile() && file.name.endsWith('-commitment.json')) {
+      const name = file.name.replace('-commitment.json', '');
+      const commitmentPath = resolve(baseDir, file.name);
+      const calldataPath = resolve(baseDir, `${name}-calldata-raw.json`);
+      const inputPath = resolve(baseDir, `${name}-inputs.json`);
+      const commitmentData = JSON.parse(
+        fs.readFileSync(commitmentPath, 'utf-8'),
+      );
+      const callData = JSON.parse(fs.readFileSync(calldataPath, 'utf-8'));
+      const inputs = JSON.parse(fs.readFileSync(inputPath, 'utf-8'));
+      result.push({
+        path: resolve(baseDir, file.name),
+        commitmentData,
+        callData,
+        inputs,
+      });
+    }
+  }
+  return result;
 }
