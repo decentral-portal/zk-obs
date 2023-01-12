@@ -248,7 +248,6 @@ contract ZkOBS is Ownable {
         Operations.Deposit memory op = Operations.Deposit({ accountId: accountId, tokenId: tokenId, amount: amount });
         bytes memory pubData = Operations.writeDepositPubData(op);
         _addL1Request(sender, Operations.OpType.DEPOSIT, pubData);
-        // console.log(sender, accountId, tokenId, amount);
         emit Deposit(sender, accountId, tokenId, amount);
     }
 
@@ -351,6 +350,7 @@ contract ZkOBS is Ownable {
             bytes memory offsetCommitment
         )
     {
+        console.log("in collect rollup requests");
         bytes memory publicData = newBlock.publicData;
         uint64 uncommittedL1RequestNum = firstL1RequestId + committedL1RequestNum;
         processedL1RequestNum = 0;
@@ -364,18 +364,18 @@ contract ZkOBS is Ownable {
             uint256 chunkId = offset / CHUNK_BYTES;
             require(offsetCommitment[chunkId] == 0x00, "Offset should not be set before");
             offsetCommitment[chunkId] = bytes1(0x01);
-
+            console.log("offsetCommitment:");
+            console.logBytes(offsetCommitment);
             Operations.OpType opType = Operations.OpType(uint8(publicData[offset]));
             // console.log("opType:");
             // console.log(uint8(publicData[offset]));
             if (opType == Operations.OpType.REGISTER) {
                 bytes memory rollupData = Bytes.slice(publicData, offset, REGISTER_BYTES);
-                (Operations.Register memory register, Operations.Deposit memory deposit) = Operations
-                    .readRegisterPubdata(rollupData);
+                Operations.Register memory register = Operations.readRegisterPubdata(rollupData);
                 checkRegisterL1Request(register, uncommittedL1RequestNum + processedL1RequestNum);
                 ++processedL1RequestNum;
                 //checkDepositL1Request(deposit, uncommittedL1RequestNum + processedL1RequestNum);
-                ++processedL1RequestNum;
+                // ++processedL1RequestNum;
                 // processableRollupTxHash = keccak256(abi.encodePacked(processableRollupTxHash, rollupData));
             } else if (opType == Operations.OpType.DEPOSIT) {
                 bytes memory rollupData = Bytes.slice(publicData, offset, DEPOSIT_BYTES);
@@ -444,6 +444,7 @@ contract ZkOBS is Ownable {
         console.log(uint256(committedBlock.commitment));
         console.log("committedBlock.commitment & INPUT_MASK:");
         console.log(uint256(committedBlock.commitment) & INPUT_MASK);
+        console.log("INPUT_MASK");
         console.log(INPUT_MASK);
         require(
             proof.commitment[0] & INPUT_MASK == uint256(committedBlock.commitment) & INPUT_MASK,
