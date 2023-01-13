@@ -91,10 +91,10 @@ const config: HardhatUserConfig = {
         mnemonic: process.env.CUSTOM_NETWORK_ACCOUNTS_MNEMONIC || '',
       },
     },
-    goerli: {
-      url: `https://eth-goerli.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
-      accounts: [getString(process.env.GOERLI_KEY)],
-    },
+    // goerli: {
+    //   url: `https://eth-goerli.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
+    //   accounts: [getString(process.env.GOERLI_KEY)],
+    // },
   },
   // etherscan: {
   //   apiKey: {
