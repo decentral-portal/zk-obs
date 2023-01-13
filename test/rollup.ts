@@ -4,6 +4,7 @@ import { OpType } from './Types';
 import { emptyHash } from './Config';
 import { BigNumber, ethers, Signer } from 'ethers';
 import { ERC20FreeMint, WETH9, ZkOBS } from '../typechain-types';
+import { expect } from 'chai';
 
 //! Change this for different test data
 import initStates from './demo/initStates.json';
@@ -87,18 +88,20 @@ describe('Rollup', function () {
         timestamp: Date.now(),
       };
       newBlocks.push(commitBlock);
-
+      console.log(newBlocks.length);
+      console.log('gg');
       const oriCommittedBlockNum = await zkOBS.committedBlockNum();
       const oriCommittedL1RequestNum = await zkOBS.committedL1RequestNum();
       await zkOBS.commitBlocks(lastCommittedBlock, newBlocks);
+      console.log('gg');
       const newCommittedBlockNum = await zkOBS.committedBlockNum();
-      const newTotalCommittedL1Requests = await zkOBS.committedL1RequestNum();
-      expect(newTotalCommittedBlocks - oriTotalCommittedBlocks).to.be.eq(
+      const newCommittedL1RequestNum = await zkOBS.committedL1RequestNum();
+      expect(newCommittedBlockNum - oriCommittedBlockNum).to.be.eq(
         newBlocks.length,
       );
-      expect(
-        newTotalCommittedL1Requests.sub(oriTotalCommittedL1Requests),
-      ).to.be.eq(1);
+      expect(newCommittedL1RequestNum.sub(oriCommittedL1RequestNum)).to.be.eq(
+        1,
+      );
     });
     it('Prove', async function () {});
     it('Execute', async function () {});
