@@ -12,7 +12,8 @@ const IS_PRE_TEST_DEPOSIT = process.env.IS_PRE_TEST_DEPOSIT === 'TRUE';
 const PRIV_HASH_ITERATIONS = 100;
 
 async function main() {
-  const { operator, user1, user2, zkUSDC, wETH, zkOBS } = await deploy();
+  const { operator, user1, user2, wETH, wBTC, USDT, USDC, DAI, zkOBS } =
+    await deploy();
   fs.writeFileSync(
     outputPath,
     `${JSON.stringify(
@@ -20,26 +21,32 @@ async function main() {
         operator: operator.address,
         user1: user1.address,
         user2: user2.address,
-        zkUSDC: zkUSDC.address,
         wETH: wETH.address,
+        wBTC: wBTC.address,
+        USDT: USDT.address,
+        USDC: USDC.address,
+        DAI: DAI.address,
         zkOBS: zkOBS.address,
       },
       null,
       2,
     )}\n`,
   );
-  await zkOBS.connect(operator).addToken(zkUSDC.address);
+  await zkOBS.connect(operator).addToken(wBTC.address);
+  await zkOBS.connect(operator).addToken(USDT.address);
+  await zkOBS.connect(operator).addToken(USDC.address);
+  await zkOBS.connect(operator).addToken(DAI.address);
 
   if (IS_PRE_TEST_DEPOSIT) {
     console.log('Pre test deposit');
     const [operator, ...accounts] = await ethers.getSigners();
-    await zkOBS.connect(operator).addToken(zkUSDC.address);
+    await zkOBS.connect(operator).addToken(USDC.address);
     const network = await ethers.provider.detectNetwork();
 
     for (let index = 0; index < accounts.length; index++) {
       const acc = accounts[index];
-      const mintAmt = await zkUSDC.MAX_MINT_AMOUNT();
-      await zkUSDC.connect(acc).mint(mintAmt);
+      const mintAmt = await USDC.MAX_MINT_AMOUNT();
+      await USDC.connect(acc).mint(mintAmt);
       console.log('Mint zkUSDC', {
         account: acc.address,
         amount: mintAmt,
@@ -89,14 +96,14 @@ async function main() {
       console.log('Deposit ETH', {
         amount: ethers.utils.parseEther('10'),
       });
-      await zkUSDC
+      await USDC
         .connect(acc)
         .approve(zkOBS.address, ethers.constants.MaxUint256);
       await zkOBS
         .connect(acc)
-        .depositERC20(zkUSDC.address, ethers.utils.parseUnits('6000', 6));
+        .depositERC20(USDC.address, ethers.utils.parseUnits('6000', 6));
       console.log('Deposit ERC20', {
-        zkUSDC: zkUSDC.address,
+        zkUSDC: USDC.address,
         amount: ethers.utils.parseUnits('6000', 6),
       });
     }

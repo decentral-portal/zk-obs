@@ -12,20 +12,45 @@ export async function deploy() {
   const [operator, user1, user2] = await ethers.getSigners();
 
   const ERC20FreeMint = await ethers.getContractFactory('ERC20FreeMint');
-  const decimals = BigNumber.from('6');
-  const zkUSDC: ERC20FreeMint = await ERC20FreeMint.connect(operator).deploy(
-    'ZK USDC',
-    'ZkUSDC',
-    decimals,
-  );
-  await zkUSDC.deployed();
-  console.log('Deployed zkUSDC:', zkUSDC.address);
 
   const WETH = await ethers.getContractFactory('WETH9');
   WETH.connect(operator);
   const wETH: WETH9 = await WETH.deploy();
   await wETH.deployed();
   console.log('Deployed wETH:', wETH.address);
+
+  const WBTC = await ethers.getContractFactory('WBTC');
+  WETH.connect(operator);
+  const wBTC: WBTC = await WBTC.deploy();
+  await wBTC.deployed();
+  console.log('Deployed wBTC:', wBTC.address);
+
+  let decimals = BigNumber.from('6');
+  const USDT: ERC20FreeMint = await ERC20FreeMint.connect(operator).deploy(
+    'Tether USD',
+    'USDT',
+    decimals,
+  );
+  await USDT.deployed();
+  console.log('Deployed USDT:', USDT.address);
+
+  decimals = BigNumber.from('6');
+  const USDC: ERC20FreeMint = await ERC20FreeMint.connect(operator).deploy(
+    'USD Coin',
+    'USDC',
+    decimals,
+  );
+  await USDC.deployed();
+  console.log('Deployed USDC:', USDC.address);
+
+  decimals = BigNumber.from('18');
+  const DAI: ERC20FreeMint = await ERC20FreeMint.connect(operator).deploy(
+    'DAI Stablecoin',
+    'DAI',
+    decimals,
+  );
+  await USDC.deployed();
+  console.log('Deployed DAI:', DAI.address);
 
   const verifierFactory = await ethers.getContractFactory('Verifier');
   verifierFactory.connect(operator);
@@ -54,7 +79,7 @@ export async function deploy() {
   await zkOBS.deployed();
   console.log('Deployed zkOBS:', zkOBS.address);
 
-  return { operator, user1, user2, zkUSDC, wETH, zkOBS };
+  return { operator, user1, user2, wETH, wBTC, USDT, USDC, DAI, zkOBS };
 }
 
 export function genTsAddr(x: BigNumber, y: BigNumber) {
