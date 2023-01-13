@@ -13,18 +13,6 @@ export async function deploy() {
 
   const ERC20FreeMint = await ethers.getContractFactory('ERC20FreeMint');
 
-  const WETH = await ethers.getContractFactory('WETH9');
-  WETH.connect(operator);
-  const wETH: WETH9 = await WETH.deploy();
-  await wETH.deployed();
-  console.log('Deployed wETH:', wETH.address);
-
-  const WBTC = await ethers.getContractFactory('WBTC');
-  WETH.connect(operator);
-  const wBTC: WBTC = await WBTC.deploy();
-  await wBTC.deployed();
-  console.log('Deployed wBTC:', wBTC.address);
-
   let decimals = BigNumber.from('6');
   const USDT: ERC20FreeMint = await ERC20FreeMint.connect(operator).deploy(
     'Tether USD',
@@ -34,23 +22,11 @@ export async function deploy() {
   await USDT.deployed();
   console.log('Deployed USDT:', USDT.address);
 
-  decimals = BigNumber.from('6');
-  const USDC: ERC20FreeMint = await ERC20FreeMint.connect(operator).deploy(
-    'USD Coin',
-    'USDC',
-    decimals,
-  );
-  await USDC.deployed();
-  console.log('Deployed USDC:', USDC.address);
-
-  decimals = BigNumber.from('18');
-  const DAI: ERC20FreeMint = await ERC20FreeMint.connect(operator).deploy(
-    'DAI Stablecoin',
-    'DAI',
-    decimals,
-  );
-  await USDC.deployed();
-  console.log('Deployed DAI:', DAI.address);
+  const WETH = await ethers.getContractFactory('WETH9');
+  WETH.connect(operator);
+  const wETH: WETH9 = await WETH.deploy();
+  await wETH.deployed();
+  console.log('Deployed wETH:', wETH.address);
 
   const verifierFactory = await ethers.getContractFactory('Verifier');
   verifierFactory.connect(operator);
@@ -78,6 +54,30 @@ export async function deploy() {
   );
   await zkOBS.deployed();
   console.log('Deployed zkOBS:', zkOBS.address);
+
+  const WBTC = await ethers.getContractFactory('WBTC');
+  WETH.connect(operator);
+  const wBTC: WBTC = await WBTC.deploy();
+  await wBTC.deployed();
+  console.log('Deployed wBTC:', wBTC.address);
+
+  decimals = BigNumber.from('6');
+  const USDC: ERC20FreeMint = await ERC20FreeMint.connect(operator).deploy(
+    'USD Coin',
+    'USDC',
+    decimals,
+  );
+  await USDC.deployed();
+  console.log('Deployed USDC:', USDC.address);
+
+  decimals = BigNumber.from('18');
+  const DAI: ERC20FreeMint = await ERC20FreeMint.connect(operator).deploy(
+    'DAI Stablecoin',
+    'DAI',
+    decimals,
+  );
+  await DAI.deployed();
+  console.log('Deployed DAI:', DAI.address);
 
   return { operator, user1, user2, wETH, wBTC, USDT, USDC, DAI, zkOBS };
 }
