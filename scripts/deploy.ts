@@ -1,6 +1,6 @@
 import fs from 'fs';
 import { ethers } from 'hardhat';
-import { TsRollupSigner } from 'zk-obs-sdk';
+import { TsRollupSigner } from 'term-structure-sdk';
 import { ERC20FreeMint, ZkOBS } from '../typechain-types';
 import { deploy } from '../test/utils';
 import { resolve } from 'path';
@@ -28,6 +28,7 @@ async function main() {
       2,
     )}\n`,
   );
+  await zkOBS.connect(operator).addToken(zkUSDC.address);
 
   if (IS_PRE_TEST_DEPOSIT) {
     console.log('Pre test deposit');
