@@ -100,6 +100,7 @@ export function initTestData(baseDir: string) {
   for (let index = 0; index < files.length; index++) {
     const file = files[index];
     if (file.isFile() && file.name.endsWith('-commitment.json')) {
+      const index = file.name.split('_')[0];
       const name = file.name.replace('-commitment.json', '');
       const commitmentPath = resolve(baseDir, file.name);
       const calldataPath = resolve(baseDir, `${name}-calldata-raw.json`);
@@ -110,6 +111,7 @@ export function initTestData(baseDir: string) {
       const callData = JSON.parse(fs.readFileSync(calldataPath, 'utf-8'));
       const inputs = JSON.parse(fs.readFileSync(inputPath, 'utf-8'));
       result.push({
+        index: index,
         path: resolve(baseDir, file.name),
         commitmentData,
         callData,
@@ -117,5 +119,5 @@ export function initTestData(baseDir: string) {
       });
     }
   }
-  return result;
+  return result.sort((a, b) => parseInt(a.index) - parseInt(b.index));
 }

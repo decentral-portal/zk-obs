@@ -13,15 +13,22 @@ library Operations {
         UNKNOWN,
         REGISTER,
         DEPOSIT,
+        TRANSFER,
         WITHDRAW,
-        SECONDLIMITORDER,
-        SECONDLIMITSTART,
-        SECONDLIMITEXCHANGE,
-        SECONDLIMITEND,
-        SECONDMARKETORDER,
-        SECONDEXCHANGE,
-        SECONDMARKETEND,
-        CANCEL
+        AUCTION_LEND,
+        AUCTION_BORROW,
+        CANCEL_ORDER,
+        SET_EPOCH,
+        AUCTION_START,
+        AUCTION_MATCH,
+        AUCTION_END,
+        SECOND_LIMIT_ORDER,
+        SECOND_LIMIT_START,
+        SECOND_LIMIT_EXCHANGE,
+        SECOND_LIMIT_END,
+        SECOND_MARKET_ORDER,
+        SECOND_MARKET_EXCHANGE,
+        SECOND_MARKET_END
     }
 
     // Byte length definition

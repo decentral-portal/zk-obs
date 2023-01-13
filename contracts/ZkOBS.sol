@@ -149,11 +149,7 @@ contract ZkOBS is Ownable {
         uint128 depositAmount = SafeCast.toUint128(balanceAfter - balanceBefore);
         require(depositAmount == amount, "Deposit amount inconsistent");
 
-        // register
-        if (accountIdOf[msg.sender] == 0) {
-            _register(msg.sender, tsPubX, tsPubY);
-        }
-        // deposit
+        _register(msg.sender, tsPubX, tsPubY);
         _deposit(msg.sender, tokenId, depositAmount);
     }
 
@@ -201,6 +197,11 @@ contract ZkOBS is Ownable {
         returns (bool isExisted)
     {
         L1Request memory req = l1RequestQueue[requestId];
+        console.log(uint256(req.opType));
+        console.log(uint256(Operations.OpType.DEPOSIT));
+        console.log("in checkRegisterL1Request()");
+        console.log(register.accountId);
+        console.logBytes20(register.l2Addr);
         require(req.opType == Operations.OpType.REGISTER, "OpType not matched");
         require(
             Operations.checkRegisterInL1RequestQueue(register, req.hashedPubData),
@@ -215,10 +216,16 @@ contract ZkOBS is Ownable {
         returns (bool isExisted)
     {
         L1Request memory req = l1RequestQueue[requestId];
+        console.log(uint256(req.opType));
+        console.log(uint256(Operations.OpType.DEPOSIT));
+        console.log("in checkDepositL1Request()");
+        console.log(deposit.accountId);
+        console.log(deposit.tokenId);
+        console.log(deposit.amount);
         require(req.opType == Operations.OpType.DEPOSIT, "OpType not matched");
         require(
             Operations.checkDepositInL1RequestQueue(deposit, req.hashedPubData),
-            "Deposit request not existed in priority queue"
+            "Deposit request not existed in L1 request queue"
         );
         return true;
     }
@@ -246,6 +253,10 @@ contract ZkOBS is Ownable {
     ) internal {
         uint32 accountId = accountIdOf[sender];
         Operations.Deposit memory op = Operations.Deposit({ accountId: accountId, tokenId: tokenId, amount: amount });
+        // console.log("in _deposit()");
+        // console.log(accountId);
+        // console.log(tokenId);
+        // console.log(amount);
         bytes memory pubData = Operations.writeDepositPubData(op);
         _addL1Request(sender, Operations.OpType.DEPOSIT, pubData);
         emit Deposit(sender, accountId, tokenId, amount);
@@ -350,7 +361,6 @@ contract ZkOBS is Ownable {
             bytes memory offsetCommitment
         )
     {
-        console.log("in collect rollup requests");
         bytes memory publicData = newBlock.publicData;
         uint64 uncommittedL1RequestNum = firstL1RequestId + committedL1RequestNum;
         processedL1RequestNum = 0;
@@ -364,14 +374,15 @@ contract ZkOBS is Ownable {
             uint256 chunkId = offset / CHUNK_BYTES;
             require(offsetCommitment[chunkId] == 0x00, "Offset should not be set before");
             offsetCommitment[chunkId] = bytes1(0x01);
-            console.log("offsetCommitment:");
-            console.logBytes(offsetCommitment);
             Operations.OpType opType = Operations.OpType(uint8(publicData[offset]));
             // console.log("opType:");
             // console.log(uint8(publicData[offset]));
             if (opType == Operations.OpType.REGISTER) {
                 bytes memory rollupData = Bytes.slice(publicData, offset, REGISTER_BYTES);
                 Operations.Register memory register = Operations.readRegisterPubdata(rollupData);
+                console.log("in collectRollupRequest()");
+                console.log(register.accountId);
+                console.logBytes20(register.l2Addr);
                 checkRegisterL1Request(register, uncommittedL1RequestNum + processedL1RequestNum);
                 ++processedL1RequestNum;
                 //checkDepositL1Request(deposit, uncommittedL1RequestNum + processedL1RequestNum);
@@ -387,7 +398,14 @@ contract ZkOBS is Ownable {
                 ++processedL1RequestNum;
             } else if (opType == Operations.OpType.WITHDRAW) {
                 bytes memory pubdata = Bytes.slice(publicData, offset, WITHDRAW_BYTES);
+                console.log("in collectRollupRequest");
+                console.log("ori hash:");
+                console.logBytes32(processableRollupTxHash);
+                console.log("pubdata:");
+                console.logBytes(pubdata);
                 processableRollupTxHash = keccak256(abi.encodePacked(processableRollupTxHash, pubdata));
+                console.log("new hash:");
+                console.logBytes32(processableRollupTxHash);
             }
         }
     }
@@ -436,16 +454,16 @@ contract ZkOBS is Ownable {
     function _proveOneBlock(StoredBlock memory committedBlock, Proof memory proof) internal view {
         IVerifier verifier = IVerifier(verifierAddr);
         require(verifier.verifyProof(proof.a, proof.b, proof.c, proof.commitment), "Invalid proof");
-        console.log("proof.commitment[0]:");
-        console.log(proof.commitment[0]);
-        console.log("proof.commitment[0] & INPUT_MASK:");
-        console.log(proof.commitment[0] & INPUT_MASK);
-        console.log("committedBlock.commitment:");
-        console.log(uint256(committedBlock.commitment));
-        console.log("committedBlock.commitment & INPUT_MASK:");
-        console.log(uint256(committedBlock.commitment) & INPUT_MASK);
-        console.log("INPUT_MASK");
-        console.log(INPUT_MASK);
+        // console.log("proof.commitment[0]:");
+        // console.log(proof.commitment[0]);
+        // console.log("proof.commitment[0] & INPUT_MASK:");
+        // console.log(proof.commitment[0] & INPUT_MASK);
+        // console.log("committedBlock.commitment:");
+        // console.log(uint256(committedBlock.commitment));
+        // console.log("committedBlock.commitment & INPUT_MASK:");
+        // console.log(uint256(committedBlock.commitment) & INPUT_MASK);
+        // console.log("INPUT_MASK");
+        // console.log(INPUT_MASK);
         require(
             proof.commitment[0] & INPUT_MASK == uint256(committedBlock.commitment) & INPUT_MASK,
             "commitment inconsistency"
