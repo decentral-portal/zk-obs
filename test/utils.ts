@@ -2,7 +2,7 @@ import { ethers } from 'hardhat';
 import { WETH9 } from '../typechain-types';
 import { ERC20FreeMint } from '../typechain-types/contracts/ERC20FreeMint';
 import { ZkOBS } from '../typechain-types/contracts/ZkOBS';
-import { BigNumber } from 'ethers';
+import { BigNumber, BytesLike } from 'ethers';
 import { poseidon } from '@big-whale-labs/poseidon';
 import fs from 'fs';
 import { resolve } from 'path';
@@ -120,4 +120,14 @@ export function initTestData(baseDir: string) {
     }
   }
   return result.sort((a, b) => parseInt(a.index) - parseInt(b.index));
+}
+
+export function getPubDataOffset(isCriticalChunk: BytesLike) {
+  let pubdataOffset = [];
+  for (let i = 0; i < isCriticalChunk.length; i++) {
+    if (isCriticalChunk[i] == '1') {
+      pubdataOffset.push((Math.floor(i / 2) - 1) * 12);
+    }
+  }
+  return pubdataOffset;
 }

@@ -1,5 +1,5 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
-import { deploy, genTsAddr, initTestData } from './utils';
+import { deploy, genTsAddr, initTestData, getPubDataOffset } from './utils';
 import { OpType } from './Types';
 import { emptyHash } from './Config';
 import { BigNumber, ethers, Signer } from 'ethers';
@@ -8,7 +8,6 @@ import { expect } from 'chai';
 
 //! Change this for different test data
 import initStates from './demo/initStates.json';
-import { ZkOBS } from '../backend/ts-contract-types/contracts/ZkOBS';
 const testDataPath = './test/demo';
 
 describe('Rollup', function () {
@@ -73,7 +72,9 @@ describe('Rollup', function () {
         newStateRoot: testData.commitmentData.newStateRoot,
         newTsRoot: testData.commitmentData.newTsRoot,
         publicData: testData.commitmentData.o_chunk,
-        publicDataOffsets: testData.commitmentData.pubdataOffset,
+        publicDataOffsets: getPubDataOffset(
+          testData.commitmentData.isCriticalChunk,
+        ),
         timestamp: Date.now(),
       };
       newBlocks.push(commitBlock);
@@ -84,23 +85,23 @@ describe('Rollup', function () {
         newStateRoot: testData.commitmentData.newStateRoot,
         newTsRoot: testData.commitmentData.newTsRoot,
         publicData: testData.commitmentData.o_chunk,
-        publicDataOffsets: testData.commitmentData.pubdataOffset,
+        publicDataOffsets: getPubDataOffset(
+          testData.commitmentData.isCriticalChunk,
+        ),
         timestamp: Date.now(),
       };
+
       newBlocks.push(commitBlock);
-      console.log(newBlocks.length);
-      console.log('gg');
       const oriCommittedBlockNum = await zkOBS.committedBlockNum();
       const oriCommittedL1RequestNum = await zkOBS.committedL1RequestNum();
       await zkOBS.commitBlocks(lastCommittedBlock, newBlocks);
-      console.log('gg');
       const newCommittedBlockNum = await zkOBS.committedBlockNum();
       const newCommittedL1RequestNum = await zkOBS.committedL1RequestNum();
       expect(newCommittedBlockNum - oriCommittedBlockNum).to.be.eq(
         newBlocks.length,
       );
       expect(newCommittedL1RequestNum.sub(oriCommittedL1RequestNum)).to.be.eq(
-        1,
+        2,
       );
     });
     it('Prove', async function () {});
