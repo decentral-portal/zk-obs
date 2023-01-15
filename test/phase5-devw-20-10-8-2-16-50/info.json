@@ -1,0 +1,123 @@
+{
+  "mainCircuitName": "phase5-devw-20-10-8-2-16-50",
+  "config": {
+    "order_tree_height": 20,
+    "account_tree_height": 10,
+    "token_tree_height": 8,
+    "nullifier_tree_height": 2,
+    "numOfReqs": 16,
+    "numOfChunks": 50
+  },
+  "mainSuffix": "20-10-8-2-16-50",
+  "outputPath": "/home/ec2-user/zk-circom/circuits_src/phase5-devw-20-10-8-2-16-50",
+  "circuitMainPath": "/home/ec2-user/zk-circom/build/phase5-devw-20-10-8-2-16-50/phase5-devw-20-10-8-2-16-50.circom",
+  "fileLogs": [
+    {
+      "circuitName": "phase5-devw-20-10-8-2-16-50",
+      "name": "0_noop-20-10-8-2-16-50",
+      "path": "/home/ec2-user/zk-circom/circuits_src/phase5-devw-20-10-8-2-16-50/0_noop-20-10-8-2-16-50-inputs.json"
+    },
+    {
+      "circuitName": "phase5-devw-20-10-8-2-16-50",
+      "name": "1_register-acc1-20-10-8-2-16-50",
+      "path": "/home/ec2-user/zk-circom/circuits_src/phase5-devw-20-10-8-2-16-50/1_register-acc1-20-10-8-2-16-50-inputs.json"
+    },
+    {
+      "circuitName": "phase5-devw-20-10-8-2-16-50",
+      "name": "2_deposit-acc1-usdt-20-10-8-2-16-50",
+      "path": "/home/ec2-user/zk-circom/circuits_src/phase5-devw-20-10-8-2-16-50/2_deposit-acc1-usdt-20-10-8-2-16-50-inputs.json"
+    },
+    {
+      "circuitName": "phase5-devw-20-10-8-2-16-50",
+      "name": "3_register-acc2-20-10-8-2-16-50",
+      "path": "/home/ec2-user/zk-circom/circuits_src/phase5-devw-20-10-8-2-16-50/3_register-acc2-20-10-8-2-16-50-inputs.json"
+    },
+    {
+      "circuitName": "phase5-devw-20-10-8-2-16-50",
+      "name": "4_deposit-acc2-eth-20-10-8-2-16-50",
+      "path": "/home/ec2-user/zk-circom/circuits_src/phase5-devw-20-10-8-2-16-50/4_deposit-acc2-eth-20-10-8-2-16-50-inputs.json"
+    },
+    {
+      "circuitName": "phase5-devw-20-10-8-2-16-50",
+      "name": "5_withdraw-acc1-usdt-20-10-8-2-16-50",
+      "path": "/home/ec2-user/zk-circom/circuits_src/phase5-devw-20-10-8-2-16-50/5_withdraw-acc1-usdt-20-10-8-2-16-50-inputs.json"
+    },
+    {
+      "circuitName": "phase5-devw-20-10-8-2-16-50",
+      "name": "6_auction-order-acc1-eth-20-10-8-2-16-50",
+      "path": "/home/ec2-user/zk-circom/circuits_src/phase5-devw-20-10-8-2-16-50/6_auction-order-acc1-eth-20-10-8-2-16-50-inputs.json"
+    },
+    {
+      "circuitName": "phase5-devw-20-10-8-2-16-50",
+      "name": "7_cancel-order-acc1-lend-20-10-8-2-16-50",
+      "path": "/home/ec2-user/zk-circom/circuits_src/phase5-devw-20-10-8-2-16-50/7_cancel-order-acc1-lend-20-10-8-2-16-50-inputs.json"
+    },
+    {
+      "circuitName": "phase5-devw-20-10-8-2-16-50",
+      "name": "8_auction-order-acc2-usdt-eth-20-10-8-2-16-50",
+      "path": "/home/ec2-user/zk-circom/circuits_src/phase5-devw-20-10-8-2-16-50/8_auction-order-acc2-usdt-eth-20-10-8-2-16-50-inputs.json"
+    },
+    {
+      "circuitName": "phase5-devw-20-10-8-2-16-50",
+      "name": "9_cancel-order-acc2-borrow-20-10-8-2-16-50",
+      "path": "/home/ec2-user/zk-circom/circuits_src/phase5-devw-20-10-8-2-16-50/9_cancel-order-acc2-borrow-20-10-8-2-16-50-inputs.json"
+    },
+    {
+      "circuitName": "phase5-devw-20-10-8-2-16-50",
+      "name": "10_auction-order-match-eth-20-10-8-2-16-50",
+      "path": "/home/ec2-user/zk-circom/circuits_src/phase5-devw-20-10-8-2-16-50/10_auction-order-match-eth-20-10-8-2-16-50-inputs.json"
+    },
+    {
+      "circuitName": "phase5-devw-20-10-8-2-16-50",
+      "name": "11_transfer-acc1-usdt-20-10-8-2-16-50",
+      "path": "/home/ec2-user/zk-circom/circuits_src/phase5-devw-20-10-8-2-16-50/11_transfer-acc1-usdt-20-10-8-2-16-50-inputs.json"
+    },
+    {
+      "circuitName": "phase5-devw-20-10-8-2-16-50",
+      "name": "12_transfer-acc2-eth-20-10-8-2-16-50",
+      "path": "/home/ec2-user/zk-circom/circuits_src/phase5-devw-20-10-8-2-16-50/12_transfer-acc2-eth-20-10-8-2-16-50-inputs.json"
+    }
+  ],
+  "metadata": {
+    "TsSystemAccountAddress": {
+      "BURN_ADDR": "0",
+      "MINT_ADDR": "0",
+      "WITHDRAW_ADDR": "0",
+      "AUCTION_ADDR": "0"
+    },
+    "TsTokenAddress": {
+      "Unknown": "0",
+      "WETH": "1",
+      "USDT": "2",
+      "TSLUSDT20231231": "3"
+    },
+    "TsDefaultValue": {
+      "NONCE_ZERO": "0",
+      "BIGINT_DEFAULT_VALUE": "0",
+      "STRING_DEFAULT_VALUE": "0",
+      "ADDRESS_DEFAULT_VALUE": "0x00"
+    },
+    "TsTxType": {
+      "UNKNOWN": "0",
+      "NOOP": "0",
+      "REGISTER": "1",
+      "DEPOSIT": "2",
+      "TRANSFER": "3",
+      "WITHDRAW": "4",
+      "AUCTION_LEND": "5",
+      "AUCTION_BORROW": "6",
+      "CANCEL_ORDER": "7",
+      "SET_EPOCH": "8",
+      "AUCTION_START": "9",
+      "AUCTION_MATCH": "10",
+      "AUCTION_END": "11",
+      "SECOND_LIMIT_ORDER": "12",
+      "SECOND_LIMIT_START": "13",
+      "SECOND_LIMIT_EXCHANGE": "14",
+      "SECOND_LIMIT_END": "15",
+      "SECOND_MARKET_ORDER": "16",
+      "SECOND_MARKET_EXCHANGE": "17",
+      "SECOND_MARKET_END": "18"
+    }
+  }
+}

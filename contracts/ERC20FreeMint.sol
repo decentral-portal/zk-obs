@@ -5,7 +5,7 @@ pragma solidity ^0.8.17;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract ERC20FreeMint is ERC20 {
-    uint256 public constant MAX_MINT_AMOUNT = 10**25;
+    uint256 internal constant MAX_MINT_AMOUNT = 10**25;
     uint8 private immutable _decimals;
 
     constructor(

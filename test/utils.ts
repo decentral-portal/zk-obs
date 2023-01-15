@@ -1,7 +1,6 @@
 import { ethers } from 'hardhat';
-import { WETH9 } from '../typechain-types';
-import { ERC20FreeMint } from '../typechain-types/contracts/ERC20FreeMint';
-import { ZkOBS } from '../typechain-types/contracts/ZkOBS';
+import { WETH9, WBTC, ERC20FreeMint } from '../typechain-types';
+import type { ZkOBS } from '../typechain-types/contracts/ZkOBS';
 import { BigNumber, BytesLike } from 'ethers';
 import { poseidon } from '@big-whale-labs/poseidon';
 import fs from 'fs';
@@ -13,7 +12,7 @@ const initStates = JSON.parse(
 const circomlibjs = require('circomlibjs');
 const { createCode, generateABI } = circomlibjs.poseidonContract;
 
-export async function deploy() {
+export async function deploy(genesisStateRoot: string) {
   const [operator, user1, user2] = await ethers.getSigners();
 
   const ERC20FreeMint = await ethers.getContractFactory('ERC20FreeMint');
@@ -48,7 +47,6 @@ export async function deploy() {
   await poseidom2Contract.deployed();
   console.log('Deployed poseidom:', poseidom2Contract.address);
 
-  const genesisStateRoot = initStates.stateRoot;
   const ZkOBS = await ethers.getContractFactory('ZkOBS');
 
   const zkOBS: ZkOBS = await ZkOBS.connect(operator).deploy(
@@ -130,4 +128,36 @@ export function getPubDataOffset(isCriticalChunk: BytesLike) {
     }
   }
   return pubdataOffset;
+}
+
+export function stateToCommitment({
+  oriStateRoot,
+  newStateRoot,
+  newTsRoot,
+  pubdata,
+}: {
+  oriStateRoot: string;
+  newStateRoot: string;
+  newTsRoot: string;
+  pubdata: string;
+}) {
+  const commitmentMsg = ethers.utils.solidityPack(
+    ['bytes32', 'bytes32', 'bytes32', 'bytes'],
+    [oriStateRoot, newStateRoot, newTsRoot, pubdata],
+  );
+  const commitmentHash = ethers.utils.sha256(commitmentMsg);
+
+  const commitment = toHex(
+    BigInt(
+      '0b' + BigInt(commitmentHash).toString(2).padStart(256, '0').slice(3),
+    ),
+  );
+
+  return commitmentHash;
+}
+
+export function toHex(n: string | BigInt, pad = 64) {
+  const num = typeof n === 'bigint' ? n : BigInt(n as string);
+  const rawHex = num.toString(16).padStart(pad, '0');
+  return '0x' + rawHex;
 }
