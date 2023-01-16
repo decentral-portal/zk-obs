@@ -6,6 +6,7 @@ import { deploy } from '../test/utils';
 import { resolve } from 'path';
 import { arrayify } from 'ethers/lib/utils';
 import initStates from '../test/phase5-devw-20-10-8-2-16-50/initStates.json';
+import { BigNumber } from 'ethers';
 const circomlibjs = require('circomlibjs');
 const { createCode, generateABI } = circomlibjs.poseidonContract;
 const outputPath = resolve(__dirname, './deploy.json');
@@ -41,12 +42,11 @@ async function main() {
   if (IS_PRE_TEST_DEPOSIT) {
     console.log('Pre test deposit');
     const [operator, ...accounts] = await ethers.getSigners();
-    await zkOBS.connect(operator).addToken(USDC.address);
     const network = await ethers.provider.detectNetwork();
 
     for (let index = 0; index < accounts.length; index++) {
       const acc = accounts[index];
-      const mintAmt = await USDC.MAX_MINT_AMOUNT();
+      const mintAmt = BigNumber.from('100000000000000000');
       await USDC.connect(acc).mint(mintAmt);
       console.log('Mint zkUSDC', {
         account: acc.address,
