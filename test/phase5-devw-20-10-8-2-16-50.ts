@@ -68,7 +68,7 @@ describe('Rollup', function () {
 
     // whitelist token
     // await zkOBS.connect(operator).addToken(wBTC.address);
-    await zkOBS.connect(operator).addToken(USDT.address);
+    await zkOBS.connect(operator).addToken(USDT.address, 6);
     // await zkOBS.connect(operator).addToken(USDC.address);
     // await zkOBS.connect(operator).addToken(DAI.address);
   });

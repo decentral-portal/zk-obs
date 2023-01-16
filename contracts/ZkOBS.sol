@@ -99,6 +99,7 @@ contract ZkOBS is Ownable {
     mapping(uint32 => bytes32) public storedBlockHashes;
     mapping(bytes22 => uint128) public pendingBalances;
     mapping(bytes12 => Loan) public loanOf;
+    mapping(uint16 => uint8) public decimalOf;
 
     uint32 public accountNum = 100;
     uint16 public tokenNum;
@@ -133,14 +134,16 @@ contract ZkOBS is Ownable {
         storedBlockHashes[0] = keccak256(abi.encode(storedBlock));
         tokenNum = RESERVED_TOKEN_NUM;
         tokenIdOf[wETHAddr] = tokenNum;
+        decimalOf[tokenNum] = 18;
         emit TokenWhitelisted(wETHAddr, tokenNum);
         ++tokenNum;
     }
 
-    function addToken(address tokenAddr) external onlyOwner {
+    function addToken(address tokenAddr, uint8 decimal) external onlyOwner {
         require(tokenIdOf[tokenAddr] == 0, "Token already registered");
         tokenIdOf[tokenAddr] = tokenNum;
         tokenAddrOf[tokenNum] = tokenAddr;
+        decimalOf[tokenNum] = decimal;
         emit TokenWhitelisted(tokenAddr, tokenNum);
         ++tokenNum;
     }
@@ -437,7 +440,7 @@ contract ZkOBS is Ownable {
                 } else {
                     revert("Unsupported operation type");
                 }
-                processableRollupTxHash = keccak256(abi.encodePacked(processableRollupTxHash, pubdata));
+                // processableRollupTxHash = keccak256(abi.encodePacked(processableRollupTxHash, pubdata));
             }
             // else if (opType == Operations.OpType.WITHDRAW) {
             //     bytes memory pubdata = Bytes.slice(publicData, offset, WITHDRAW_BYTES);
@@ -545,11 +548,10 @@ contract ZkOBS is Ownable {
                 _increasePendingBalance(withdrawReq.accountId, withdrawReq.tokenId, withdrawReq.amount);
             } else if (opType == Operations.OpType.FORCED_WITHDRAW) {
                 Operations.ForcedWithdraw memory forcedWithdrawReq = Operations.readForcedWithdrawPubdata(pubData);
-                _increasePendingBalance(
-                    forcedWithdrawReq.accountId,
-                    forcedWithdrawReq.tokenId,
-                    forcedWithdrawReq.amount
+                uint128 amount = SafeCast.toUint128(
+                    (forcedWithdrawReq.amount / (10**8)) * (10**decimalOf[forcedWithdrawReq.tokenId])
                 );
+                _increasePendingBalance(forcedWithdrawReq.accountId, forcedWithdrawReq.tokenId, amount);
             } else if (opType == Operations.OpType.AUCTION_END) {
                 Operations.AuctionEnd memory auctionEnd = Operations.readAuctionEndPubdata(pubData);
                 _updateLoan(auctionEnd);
@@ -604,8 +606,10 @@ contract ZkOBS is Ownable {
         loan.debtTokenId = auctionEnd.debtTokenId;
         loan.collateralTokenId = auctionEnd.collateralTokenId;
         loan.maturityTime = auctionEnd.maturityTime;
-        loan.debtAmt += auctionEnd.debtAmt;
-        loan.collateralAmt += auctionEnd.collateralAmt;
+        loan.debtAmt += SafeCast.toUint128((auctionEnd.debtAmt / (10**8)) * (10**decimalOf[auctionEnd.debtTokenId]));
+        loan.collateralAmt += SafeCast.toUint128(
+            (auctionEnd.collateralAmt / (10**8)) * (10**decimalOf[auctionEnd.collateralTokenId])
+        );
         loanOf[loanId] = loan;
 
         emit UpdateLoan(
