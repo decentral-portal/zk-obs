@@ -5,6 +5,7 @@ import { ERC20FreeMint, ZkOBS } from '../typechain-types';
 import { deploy } from '../test/utils';
 import { resolve } from 'path';
 import { arrayify } from 'ethers/lib/utils';
+import initStates from '../test/phase5-devw-20-10-8-2-16-50/initStates.json';
 const circomlibjs = require('circomlibjs');
 const { createCode, generateABI } = circomlibjs.poseidonContract;
 const outputPath = resolve(__dirname, './deploy.json');
@@ -13,7 +14,7 @@ const PRIV_HASH_ITERATIONS = 100;
 
 async function main() {
   const { operator, user1, user2, wETH, wBTC, USDT, USDC, DAI, zkOBS } =
-    await deploy();
+    await deploy(initStates.stateRoot);
   fs.writeFileSync(
     outputPath,
     `${JSON.stringify(
@@ -96,9 +97,10 @@ async function main() {
       console.log('Deposit ETH', {
         amount: ethers.utils.parseEther('10'),
       });
-      await USDC
-        .connect(acc)
-        .approve(zkOBS.address, ethers.constants.MaxUint256);
+      await USDC.connect(acc).approve(
+        zkOBS.address,
+        ethers.constants.MaxUint256,
+      );
       await zkOBS
         .connect(acc)
         .depositERC20(USDC.address, ethers.utils.parseUnits('6000', 6));
