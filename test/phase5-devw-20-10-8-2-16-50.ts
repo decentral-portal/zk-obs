@@ -769,7 +769,7 @@ describe('Rollup', function () {
           );
         }
       }
-
+      console.log({ pendingRollupTxHash });
       let storedBlock: ZkOBS.StoredBlockStruct = {
         blockNumber: commitBlock.blockNumber,
         l1RequestNum: 0,
@@ -782,6 +782,7 @@ describe('Rollup', function () {
 
       const oriCommittedBlockNum = await zkOBS.committedBlockNum();
       const oriCommittedL1RequestNum = await zkOBS.committedL1RequestNum();
+      console.log({ lastCommittedBlock, newBlocks });
       await zkOBS.commitBlocks(lastCommittedBlock, newBlocks);
       lastCommittedBlock = storedBlocks[storedBlocks.length - 1];
       const newCommittedBlockNum = await zkOBS.committedBlockNum();

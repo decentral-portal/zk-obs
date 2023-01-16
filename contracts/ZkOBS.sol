@@ -319,8 +319,6 @@ contract ZkOBS is Ownable {
     }
 
     function commitBlocks(StoredBlock memory lastCommittedBlock, CommitBlock[] memory newBlocks) external {
-        console.log("commitBlocks");
-        console.log(committedBlockNum);
         require(
             storedBlockHashes[committedBlockNum] == keccak256(abi.encode(lastCommittedBlock)),
             "Commited block inconsistency"
@@ -329,6 +327,19 @@ contract ZkOBS is Ownable {
         for (uint32 i = 0; i < newBlocks.length; ++i) {
             lastCommittedBlock = _commitOneBlock(lastCommittedBlock, newBlocks[i]);
             committedL1RequestNum += lastCommittedBlock.l1RequestNum;
+            console.log("[commit blocks]");
+            console.log("block number:");
+            console.log(lastCommittedBlock.blockNumber);
+            console.log("commitment:");
+            console.logBytes32(lastCommittedBlock.commitment);
+            console.log("l1 request num:");
+            console.log(lastCommittedBlock.l1RequestNum);
+            console.log("pending rollup tx hash:");
+            console.logBytes32(lastCommittedBlock.pendingRollupTxHash);
+            console.log("state root:");
+            console.logBytes32(lastCommittedBlock.stateRoot);
+            console.log("timestamp:");
+            console.log(lastCommittedBlock.timestamp);
             storedBlockHashes[lastCommittedBlock.blockNumber] = keccak256(abi.encode(lastCommittedBlock));
             emit BlockCommitted(lastCommittedBlock.blockNumber);
         }
@@ -440,7 +451,7 @@ contract ZkOBS is Ownable {
                 } else {
                     revert("Unsupported operation type");
                 }
-                // processableRollupTxHash = keccak256(abi.encodePacked(processableRollupTxHash, pubdata));
+                processableRollupTxHash = keccak256(abi.encodePacked(processableRollupTxHash, pubdata));
             }
             // else if (opType == Operations.OpType.WITHDRAW) {
             //     bytes memory pubdata = Bytes.slice(publicData, offset, WITHDRAW_BYTES);
