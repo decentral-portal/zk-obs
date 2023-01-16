@@ -236,6 +236,7 @@ contract ZkOBS is Ownable {
         returns (bool isExisted)
     {
         L1Request memory req = l1RequestQueue[requestId];
+        deposit.amount = SafeCast.toUint128((deposit.amount / (10**8)) * (10**decimalOf[deposit.tokenId]));
         require(req.opType == Operations.OpType.DEPOSIT, "OpType not matched");
         require(
             Operations.isDepositInL1RequestQueue(deposit, req.hashedPubData),
