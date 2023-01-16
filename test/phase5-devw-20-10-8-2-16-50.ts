@@ -1399,7 +1399,7 @@ describe('Rollup', function () {
     });
   });
 
-  describe.skip('Auction match', function () {
+  describe('Auction match', function () {
     const testCaseId = 10;
     const testData = data[testCaseId];
 
@@ -1426,33 +1426,69 @@ describe('Rollup', function () {
       let pubdata;
       let opType;
       let maturityTime;
+      let txOffset;
+      let interest;
       for (let i = 0; i < testData.inputs.reqData.length; i++) {
         opType = testData.inputs.reqData[i][0];
-        if (opType != OpType.AUCTION_END) {
-          accountId = testData.inputs.reqData[i][1];
-          collateralId = testData.inputs.reqData[i][2];
-          collateralAmt = testData.inputs.reqData[i][3];
-          debtId = testData.inputs.reqData[i][4];
-          debtAmt = testData.inputs.reqData[i][5];
-          maturityTime = testData.inputs.reqData[i][6];
+        // if (opType == OpType.AUCTION_START) {
+        //   txOffset = testData.inputs.reqData[i][1];
+        //   interest = testData.inputs.reqData[i][2];
+        //   pubdata = ethers.utils
+        //     .solidityPack(
+        //       ['uint8', 'uint32', 'uint40'],
+        //       [OpType.AUCTION_START, txOffset, interest],
+        //     )
+        //     .padEnd((1 * 12 * 8) / 4 + 2, '0');
+        // } else if (opType == OpType.AUCTION_MATCH) {
+        //   txOffset = testData.inputs.reqData[i][1];
+        //   pubdata = ethers.utils
+        //     .solidityPack(['uint8', 'uint32'], [OpType.AUCTION_START, txOffset])
+        //     .padEnd((1 * 12 * 8) / 4 + 2, '0');
+        // } else
+        if (opType == OpType.AUCTION_END) {
+          accountId = 101;
+          collateralId = 1;
+          collateralAmt = 10;
+          debtId = 2;
+          debtAmt = 10480;
+          maturityTime = 1704067199;
           pubdata = ethers.utils
             .solidityPack(
-              ['uint8', 'uint32', 'uint16', 'uint128'],
-              [OpType.WITHDRAW, accountId, tokenId, amount],
+              [
+                'uint8',
+                'uint32',
+                'uint16',
+                'uint128',
+                'uint16',
+                'uint128',
+                'uint32',
+              ],
+              [
+                OpType.AUCTION_END,
+                accountId,
+                collateralId,
+                collateralAmt,
+                debtId,
+                debtAmt,
+                maturityTime,
+              ],
             )
-            .padEnd((2 * 12 * 8) / 4 + 2, '0');
+            .padEnd((4 * 12 * 8) / 4 + 2, '0');
+          console.log({ pendingRollupTxHash });
+          console.log({ pubdata });
           pendingRollupTxHash = ethers.utils.keccak256(
             ethers.utils.solidityPack(
               ['bytes32', 'bytes'],
               [pendingRollupTxHash, pubdata],
             ),
           );
+          console.log({ pendingRollupTxHash });
         }
       }
       let storedBlock: ZkOBS.StoredBlockStruct = {
         blockNumber: commitBlock.blockNumber,
         l1RequestNum: 0,
-        pendingRollupTxHash: emptyHash,
+        pendingRollupTxHash: pendingRollupTxHash,
         commitment: commitmentHash,
         stateRoot: commitBlock.newStateRoot,
         timestamp: commitBlock.timestamp,
@@ -1513,7 +1549,21 @@ describe('Rollup', function () {
     it('Execute', async function () {
       let pendingBlocks: ZkOBS.ExecuteBlockStruct[] = [];
       let pendingRollupTxPubdata: any[] = [];
-
+      let pubdata = ethers.utils
+        .solidityPack(
+          [
+            'uint8',
+            'uint32',
+            'uint16',
+            'uint128',
+            'uint16',
+            'uint128',
+            'uint32',
+          ],
+          [OpType.AUCTION_END, 101, 1, 10, 2, 10480, 1704067199],
+        )
+        .padEnd((4 * 12 * 8) / 4 + 2, '0');
+      pendingRollupTxPubdata.push(pubdata);
       const executeBlock: ZkOBS.ExecuteBlockStruct = {
         storedBlock: lastCommittedBlock,
         pendingRollupTxPubdata: pendingRollupTxPubdata,

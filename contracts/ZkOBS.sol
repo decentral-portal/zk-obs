@@ -83,7 +83,7 @@ contract ZkOBS is Ownable {
     uint256 internal constant DEPOSIT_BYTES = 2 * CHUNK_BYTES;
     uint256 internal constant WITHDRAW_BYTES = 2 * CHUNK_BYTES;
     uint256 internal constant FORCED_WITHDRAW_BYTES = 2 * CHUNK_BYTES;
-    uint256 internal constant AUCTIONEND_BYTES = 4 * CHUNK_BYTES;
+    uint256 internal constant AUCTION_END_BYTES = 4 * CHUNK_BYTES;
     uint256 internal constant INPUT_MASK = (~uint256(0) >> 3);
     uint8 internal constant RESERVED_TOKEN_NUM = 1;
 
@@ -447,11 +447,17 @@ contract ZkOBS is Ownable {
                     checkForcedWithdrawL1Request(forcedWithdrawReq, uncommittedL1RequestNum + processedL1RequestNum);
                     ++processedL1RequestNum;
                 } else if (opType == Operations.OpType.AUCTION_END) {
-                    pubdata = Bytes.slice(publicData, offset, AUCTIONEND_BYTES);
+                    pubdata = Bytes.slice(publicData, offset, AUCTION_END_BYTES);
+                    console.log("[AUCTION END]");
+                    console.logBytes(pubdata);
                 } else {
                     revert("Unsupported operation type");
                 }
+                console.log("[ori hash]");
+                console.logBytes32(processableRollupTxHash);
                 processableRollupTxHash = keccak256(abi.encodePacked(processableRollupTxHash, pubdata));
+                console.log("[new hash]");
+                console.logBytes32(processableRollupTxHash);
             }
             // else if (opType == Operations.OpType.WITHDRAW) {
             //     bytes memory pubdata = Bytes.slice(publicData, offset, WITHDRAW_BYTES);

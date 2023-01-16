@@ -15,7 +15,6 @@ library Operations {
         DEPOSIT,
         TRANSFER,
         WITHDRAW,
-        FORCED_WITHDRAW,
         AUCTION_LEND,
         AUCTION_BORROW,
         CANCEL_ORDER,
@@ -29,7 +28,8 @@ library Operations {
         SECOND_LIMIT_END,
         SECOND_MARKET_ORDER,
         SECOND_MARKET_EXCHANGE,
-        SECOND_MARKET_END
+        SECOND_MARKET_END,
+        FORCED_WITHDRAW
     }
 
     // Byte length definition
