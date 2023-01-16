@@ -34,10 +34,10 @@ async function main() {
       2,
     )}\n`,
   );
-  await zkOBS.connect(operator).addToken(wBTC.address);
-  await zkOBS.connect(operator).addToken(USDT.address);
-  await zkOBS.connect(operator).addToken(USDC.address);
-  await zkOBS.connect(operator).addToken(DAI.address);
+  await zkOBS.connect(operator).addToken(wBTC.address, 8);
+  await zkOBS.connect(operator).addToken(USDT.address, 6);
+  await zkOBS.connect(operator).addToken(USDC.address, 6);
+  await zkOBS.connect(operator).addToken(DAI.address, 18);
 
   if (IS_PRE_TEST_DEPOSIT) {
     console.log('Pre test deposit');
