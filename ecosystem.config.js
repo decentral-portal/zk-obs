@@ -3,7 +3,7 @@ module.exports = {
     {
       name: 'hardhat',
       script: 'npx',
-      args: 'node --hostname 0.0.0.0',
+      args: 'hardhat node --hostname 0.0.0.0',
     },
   ],
 };
